@@ -1,0 +1,22 @@
+{
+  "category": "信息泄露",
+  "id": "PT_WEB_04",
+  "name": "端口扫描",
+  "description": "用 rustscan/masscan 与 nmap 检查已授权 TCP/UDP 范围内的开放端口，按业务基线核对暴露面。",
+  "level": "中",
+  "group": "none_auth",
+  "required": "约定 TCP 范围扫描及开放服务核对",
+  "conditional": "UDP 仅在授权且具备权限时纳入；1-65535 仅在全端口授权时扫描",
+  "steps": [
+    "取得用户或获准部署资料的开放端口基线，登记主机、协议、端口、速率及时间窗口",
+    "用 nmap 扫描批准范围；rustscan 或 masscan 可替代 TCP 发现阶段，不重复要求全部工具",
+    "用 nmap 复核开放端口服务，扫描已纳入的 UDP 范围",
+    "execute-python-script 对照开放清单，分别记录 open、closed、filtered 与未完成范围"
+  ],
+  "minimum_evidence": "授权范围、业务开放基线、扫描参数及原始端口/服务输出引用。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，约定范围扫描完成，已确认开放服务符合业务基线；未测范围不推断关闭",
+    "失败": "复核证实存在基线禁止的开放服务",
+    "中断": "未确认失败，但缺开放基线、必要扫描权限或范围未完成；filtered 仅记录观测状态。"
+  }
+}

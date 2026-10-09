@@ -1,0 +1,23 @@
+{
+  "category": "数据安全",
+  "id": "PT_WEB_AUTH_21",
+  "name": "敏感数据传输加密验证",
+  "description": "用 http-framework-test、nmap 与 execute-python-script 检查实际认证流程及敏感请求的加密、证书、认证 Cookie 属性和适用混合内容，分别记录 HTTP 入口与业务处理证据。",
+  "level": "高",
+  "group": "auth",
+  "required": "约定登录/敏感请求 TLS、证书、HTTP 入口与传输行为",
+  "conditional": "Cookie 架构须查安全属性；存在动态链路须观察；HTTP 业务处理须有效无秘密标记对照或获准实现证据",
+  "steps": [
+    "从用户或获准传输要求取得基线，登记登录/敏感接口、Cookie 机制与动态链路，用 http-framework-test 建立正常请求",
+    "用 nmap TLS 脚本与 execute-python-script 默认 SSLContext 核对证书/主机名，http-framework-test 不带真实秘密请求 HTTP 并关闭跳转",
+    "核对表单提交、Cookie Secure 及静态资源；存在动态链路时经已有浏览器观察请求与跳转，不以手工附加 Cookie 模拟自动携带",
+    "仅在明确授权/可恢复条件下以有效无秘密测试标记核对 HTTP 业务处理并恢复，或读取获准对应实现/配置；匿名跳转和无效凭证拒绝不足",
+    "分别核对 TLS、入口、Cookie、静态/动态及业务处理证据，标明未观察链路"
+  ],
+  "minimum_evidence": "传输基线/接口清单、正常请求、TLS/证书与 HTTP 响应、适用 Cookie/动态/业务及恢复引用。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，已观察登录/敏感链路及适用 Cookie 满足 TLS 基线，HTTP 安全拒绝/跳转，业务不接受明文有有效对照或实现依据",
+    "失败": "实测敏感明文传输、违反基线的证书/混合内容/Cookie 携带或敏感业务接受明文处理",
+    "中断": "未确认失败，但缺必要证书、动态链路或有效 HTTP 业务证据；匿名跳转不能单独支撑整项通过。"
+  }
+}

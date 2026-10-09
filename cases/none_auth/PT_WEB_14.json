@@ -1,0 +1,22 @@
+{
+  "category": "安全配置",
+  "id": "PT_WEB_14",
+  "name": "敏感文件/目录泄露",
+  "description": "用 ffuf、dirsearch、dirb、nikto、nuclei 与 http-framework-test 核对匿名是否能够读取不应公开的配置、备份或版本库内容。",
+  "level": "高",
+  "group": "none_auth",
+  "required": "约定敏感路径的匿名读取与内容确认",
+  "conditional": "字典按授权资源选择；robots.txt 仅提供线索，扫描器可选其一或补充",
+  "steps": [
+    "从用户或获准部署资料确定不应公开内容，execute-python-script 整理路径字典、请求上限和速率",
+    "用 ffuf、dirsearch 或 dirb 发现候选；nikto/nuclei 已安装 exposures 模板可补充",
+    "用 http-framework-test 获取命中与随机不存在路径，核对真实内容和认证边界",
+    "逐项确认配置、备份、版本库或内部文档敏感性，整理脱敏摘要与实际覆盖"
+  ],
+  "minimum_evidence": "敏感性依据、字典/范围、命中及不存在路径响应原文引用。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，批准路径检查完成，匿名不能取得禁止公开的敏感文件内容",
+    "失败": "实测匿名可读取禁止公开的敏感内容",
+    "中断": "未确认失败，但缺必要路径覆盖、内容证据或敏感性依据；统一页、公开文档及 robots.txt 不单独判失败。"
+  }
+}

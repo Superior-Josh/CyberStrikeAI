@@ -1,0 +1,22 @@
+{
+  "category": "会话安全",
+  "id": "PT_WEB_AUTH_04",
+  "name": "CSRF 跨站请求伪造",
+  "description": "用 http-framework-test 与必要的 execute-python-script 浏览器验证，检查实际认证机制下跨站请求是否可造成非预期状态变化。",
+  "level": "高",
+  "group": "auth",
+  "required": "正常状态变更、实际认证携带机制及跨站请求效果",
+  "conditional": "Token/Origin/Referer/SameSite 按真实机制选取；浏览器可发送性及 Cookie 携带不能由 CLI 伪造替代",
+  "steps": [
+    "确认专用可恢复对象及写授权，用 http-framework-test 完成正常操作，登记自动认证携带与适用 CSRF 机制",
+    "逐次独立改变缺失/错误 Token 或非可信来源，保持其他业务前提有效，保存响应",
+    "经 execute-python-script 使用已有浏览器验证跨站请求类型、Cookie 携带及效果；若仅有协议/实现替代证据须说明如何完整判读可发送性",
+    "用 http-framework-test 读取持久状态，恢复改动并核对结果"
+  ],
+  "minimum_evidence": "正常操作、机制依据、变体请求/响应、浏览器或充分替代证据、状态及恢复引用。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，浏览器可构造的非可信请求不能借身份完成禁止状态变更，有效机制可替代 Token，不限定 403/SameSite 值",
+    "失败": "具有浏览器可发送性与身份携带依据的跨站请求实际完成禁止状态变更",
+    "中断": "未确认失败，但缺写授权、正常操作、状态对照或关键跨站请求证据；仅 CLI 成功不等同 CSRF。"
+  }
+}

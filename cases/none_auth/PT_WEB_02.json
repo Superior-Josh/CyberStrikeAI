@@ -1,0 +1,22 @@
+{
+  "category": "信息泄露",
+  "id": "PT_WEB_02",
+  "name": "客户端敏感信息泄露（匿名）",
+  "description": "用 http-framework-test、katana 与 execute-python-script 检查匿名可取得页面、JS、接口及客户端存储中的敏感信息。",
+  "level": "中",
+  "group": "none_auth",
+  "required": "约定匿名页面、JS、接口的敏感内容检查",
+  "conditional": "已测流程签发 Cookie 时检查用途与安全属性；存在客户端存储时检查实际存储，动态值须有已有浏览器观察",
+  "steps": [
+    "从用户或获准资料确定公开范围、秘密字段及 Cookie 用途，列出必测资源；katana 可辅助发现",
+    "用 http-framework-test 的 download 保存资源，execute-python-script 检索并复核疑似凭证、个人数据及配置上下文",
+    "核对适用 Secure/HttpOnly/SameSite；解析存储调用并在已有浏览器环境核对实际值来源，防 CSRF Cookie 按用途评价",
+    "逐资源记录敏感性、实际值的脱敏摘要及来源，不包含认证后存储"
+  ],
+  "minimum_evidence": "资源清单、实际响应/下载文件、疑似内容上下文及适用 Cookie/存储观察引用。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，未暴露经确认秘密或非公开数据，适用 Cookie 和存储控制满足用途",
+    "失败": "匿名实测取得禁止公开的敏感内容，或适用 Cookie/存储控制实测违反基线",
+    "中断": "未确认失败，但必测资源、敏感性依据或已触发 Cookie/存储验证缺证据；公开标识和普通 API 地址不判泄露。"
+  }
+}
