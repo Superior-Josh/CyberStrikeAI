@@ -62,7 +62,7 @@ user_prompt: |
 
 ### 4.1 用例解析与接口
 
-执行来源为 `cases/` 下的 JSON 文件：`none_auth/` 18 项、`auth/` 26 项，共 44 项。首次从 `templates/web_pentest_cases.md` 等值迁移，Markdown 保留为参考快照；运行时不解析 Markdown，不生成 Python 测试函数。采用 JSON 以复用 Python 标准库，不新增 YAML 解析依赖。共同执行/判定、账号及分组要求存放在 `_context.json`，不复制到每个用例。
+执行来源为 `cases/` 下的 JSON 文件：`anonymous/` 18 项、`authenticated/` 26 项，共 44 项。首次从 `templates/web_pentest_cases.md` 等值迁移，Markdown 保留为参考快照；运行时不解析 Markdown，不生成 Python 测试函数。采用 JSON 以复用 Python 标准库，不新增 YAML 解析依赖。共同执行/判定、账号及分组要求存放在 `_context.json`，不复制到每个用例。
 
 工具提供三个简单操作：
 
@@ -76,7 +76,7 @@ user_prompt: |
 
 | 字段 | 内容 |
 | --- | --- |
-| `id`、`group` | 用例编号；`none_auth` 或 `auth` |
+| `id`、`group` | 用例编号；`anonymous` 或 `authenticated` |
 | `category`、`name`、`description`、`level` | 原表中的类别、名称、说明、等级 |
 | `required` | 必测内容原文 |
 | `conditional` | 条件性内容原文 |
@@ -147,7 +147,7 @@ reports/<测试名>/
 | `tools/banma_report.yaml`                  | 新增报告生成工具的参数配置                                          |
 | `tools/scripts/banma_report.py`            | 根据证据文件与模板生成 Markdown 报告并检查完整性和统计              |
 | `tools/scripts/tests/test_banma_pentest_run_cases.py` | 已实现用例读取和证据保存离线验证；报告验证待报告工具实现 |
-| `cases/none_auth/*.json`、`cases/auth/*.json` | 44 项用例配置，保留对应原文并拆分步骤字段 |
+| `cases/anonymous/*.json`、`cases/authenticated/*.json` | 44 项用例配置，保留对应原文并拆分步骤字段 |
 | `cases/_context.json` | 保存原共同执行/判定、账号与分组要求 |
 | `templates/web_pentest_cases.md` | 同步参考快照，工具运行时不读取 |
 | `templates/pentest_report_template.md`     | 同步第四章用例说明/步骤/期望结果，保持其他章节、固定字段与格式              |

@@ -1,0 +1,22 @@
+{
+  "category": "信息泄露",
+  "id": "PT_WEB_03",
+  "name": "指纹识别信息泄露",
+  "description": "用 httpx、nmap、nikto、nuclei 与 http-framework-test 核对响应头、服务 Banner 和错误页中的敏感版本及调试信息。",
+  "level": "中",
+  "group": "anonymous",
+  "required": "约定服务的正常响应、错误页及服务 Banner",
+  "conditional": "非 HTTP 服务仅在授权端口内检查；nuclei、nikto 作为补充，不要求全部扫描器运行",
+  "steps": [
+    "从用户或获准部署资料确定禁止披露的版本、诊断信息和必测服务",
+    "用 http-framework-test 获取正常及不存在路径响应；httpx 可辅助采集，nmap 核对批准服务 Banner",
+    "对指纹或疑似堆栈、内部路径逐项定位原始响应，execute-python-script 整理内容与基线对照",
+    "记录完成服务与未覆盖服务，避免仅依据扫描器推测版本"
+  ],
+  "minimum_evidence": "披露基线来源、服务清单、正常/错误响应、Banner 与命中原文引用。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，约定响应未披露基线禁止的信息",
+    "失败": "实际响应或 Banner 暴露明确禁止披露的版本、堆栈、配置或内部路径",
+    "中断": "未确认失败，但缺披露基线、必要服务响应或命中原文；一般框架识别不单独判失败。"
+  }
+}

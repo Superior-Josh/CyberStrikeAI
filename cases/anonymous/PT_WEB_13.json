@@ -1,0 +1,22 @@
+{
+  "category": "安全配置",
+  "id": "PT_WEB_13",
+  "name": "HTTP 安全头缺失检测",
+  "description": "用 httpx、http-framework-test、nuclei 与 execute-python-script 按页面用途和明确基线检查有效 HTTP 安全头。",
+  "level": "中",
+  "group": "anonymous",
+  "required": "约定页面类型的生效 CSP、嵌入限制、HSTS 及 MIME 防护",
+  "conditional": "各头按 HTML/API/错误响应用途适用；nuclei 仅补充发现",
+  "steps": [
+    "从用户或获准安全要求取得各页面适用基线，登记正常及错误页面",
+    "用 http-framework-test（或 httpx）保存实际完整响应头及页面类型",
+    "execute-python-script 核对 CSP 指令与 Report-Only、frame-ancestors 或适用 XFO、HSTS 和 MIME 防护，辨别冲突",
+    "逐页面复核缺失/无效控制，记录满足需求的等效策略及未覆盖响应"
+  ],
+  "minimum_evidence": "页面与适用基线、响应头原文、指令/冲突核对引用。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，所有约定适用头有效并符合基线；不强制固定 default-src 或同时具备 XFO 与 frame-ancestors",
+    "失败": "适用强制防护缺失或无效且违反明确基线，Report-Only 不能代替强制策略",
+    "中断": "未确认失败，但缺用途/基线、必要响应或策略无法判读。"
+  }
+}

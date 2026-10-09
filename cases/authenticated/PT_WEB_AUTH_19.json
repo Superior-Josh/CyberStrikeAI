@@ -1,0 +1,22 @@
+{
+  "category": "业务逻辑",
+  "id": "PT_WEB_AUTH_19",
+  "name": "API 限流与绕过",
+  "description": "用 http-framework-test 与 execute-python-script 按明确额度、维度和窗口检查 API 限流及有限绕过变体。",
+  "level": "中",
+  "group": "authenticated",
+  "required": "实际 API 的阈值限制、应共享额度的变体与跨窗口恢复",
+  "conditional": "UA/测试 Token 等标识变体仅按已确认计数维度选择；来源伪造/代理切换须额外授权",
+  "steps": [
+    "从用户或获准 API 策略取得额度、维度、窗口及恢复规则，登记总量/并发/副作用授权和停止条件",
+    "用 http-framework-test 建立正常请求，execute-python-script 用 urllib.request/concurrent.futures 在批准范围验证阈值",
+    "同窗口测试应共享额度的批准标识变体，核对拒绝效果与实际业务状态，达到停止条件停止提交",
+    "跨窗口观察恢复，按实际计数汇总，正常新身份或新窗口额度不当绕过"
+  ],
+  "minimum_evidence": "限流策略、正常/阈值/共享变体响应、请求计数/窗口时间及恢复引用。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，既定阈值、拒绝和恢复有效，应共享额度未因已测变体突破",
+    "失败": "有效计数窗口中实测突破既定阈值或共享额度，或恢复行为违反策略",
+    "中断": "未确认失败，但缺额度/维度/窗口、达到阈值的授权量或必要状态/恢复观察。"
+  }
+}

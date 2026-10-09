@@ -1,0 +1,23 @@
+{
+  "category": "OAuth2/SSO",
+  "id": "PT_WEB_AUTH_26",
+  "name": "OAuth2/SSO 集成漏洞",
+  "description": "用 http-framework-test 与 execute-python-script 验证 OAuth2/SSO 回调绑定、授权码和 PKCE 或其他适用防护及账号绑定。",
+  "level": "高",
+  "group": "authenticated",
+  "required": "有效 OAuth2/SSO 流程、会话/身份绑定、授权码及回调校验",
+  "conditional": "PKCE 按实际协议适用，OIDC 须复核 nonce；存在账号绑定/改绑时用专用可恢复账号验证",
+  "steps": [
+    "确认授权 IdP、账号及协议资料，登记 state/nonce/PKCE 适用机制和回调规则；http-framework-test 关闭跳转，execute-python-script 解析参数",
+    "建立正常有效流程，各 state/会话变体使用独立新流程与新授权码；已消费码重放单独测试，不伪造码",
+    "适用 PKCE 对照正确/错误/缺失 verifier 及降级，OIDC 核对 nonce 与真实身份，其他业务前提保持有效",
+    "测试批准回调变体；存在绑定/改绑时核对重新认证及实际身份并恢复，不禁止合法多账号映射",
+    "逐机制对照会话、码使用与最终身份，交互 IdP 无可用正常流程时记录缺口"
+  ],
+  "minimum_evidence": "协议/机制依据、正常与独立变体流程引用、授权码消费/重放、回调/身份及适用恢复证据。",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，适用机制有效约束会话和身份，授权码一次性且受客户端/回调等约束，绑定权限符合业务规则",
+    "失败": "有效流程中实测请求伪造、串号、码重用、违规回调或未经授权绑定",
+    "中断": "未确认失败，但缺正常 IdP 流程、适用机制依据、新码或必要身份/绑定对照。"
+  }
+}
