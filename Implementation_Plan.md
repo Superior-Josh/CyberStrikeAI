@@ -208,6 +208,10 @@ AI 按 YAML 判断子项；工具检查资料、引用和聚合一致性，不�
 
 角色提示词只规定流程并指向 `cases/`/模板，不复制完整用例：
 
+本轮执行效率优化由 `cases/_context.yaml` 规定限定DVWA部署目录和首次保存预检，由PT_WEB_05/PT_WEB_17规定扫描准备、原生输出与预算。组件扫描默认单批120秒、最多2个并发检查任务、每秒最多5请求、单请求10秒，请求总量依实际模板/载荷在执行前列明；SCA单次180秒。预算到期核对剩余覆盖、拆批或等效验证，不更改安全基线或将超时直接转为通过/中断。首次save按show既有契约核对必填字段、同子项引用和真实文件，不新增预检接口，不重复目标请求。
+
+参数名不变：nuclei沿用template/additional_args，nikto沿用additional_args，trivy沿用mode/output_format/additional_args。本机CLI帮助已核对nuclei的-rl/-c/-pc/-prc/-timeout/-retries/-duc、nikto的-maxtime/-timeout/-Pause及trivy的--scanners/--timeout/--output；nuclei的-timeout仅限单请求，批次时间由已有执行查询/取消能力管理。提示词和指导更新须另核对运行中加载及项目AI实际遵循情况；离线检查不证明加速、全量覆盖或目标边界强制执行。历史reports不改写。
+
 认证准备遵循 `cases/_context.yaml`：用户凭据可选，优先验证并复用；未提供或无效时只复用已有匿名用例的实际产物，不另设凭据获取流程，不重复已停止/已完成用例。正常认证与必要会话刷新是已取得凭据的使用，不能借此增加获取尝试；有效身份仍需满足各认证用例的账号/角色对照条件。
 
 1. 从用户消息取得授权和事实；只询问影响执行的信息，不要求用户生成技术文件。

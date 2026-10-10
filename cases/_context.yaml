@@ -8,7 +8,11 @@ execution_instructions: '执行主体是CyberStrikeAI项目AI。正常入口是�
 
   调用banma_pentest_run_cases的init/list/show，复用本轮run_dir/raw_dir；完整读取本项及共同/分组要求。两项辅助工具已实现，测试由现有已启用工具完成，保存和报告由辅助接口完成。
 
+  本机DVWA实现补证先检查已知部署目录（本机候选为/Users/banma-josh/project/dvwa_src），核对其与本轮目标的部署/版本关系后，只在已确认且获准的目录中直接读取已知文件或用rg --files定位；未找到时先读取获准部署映射，再搜索该映射指向的目录，不执行find /、全盘扫描、遍历归档/其他项目或无依据扩大搜索。已定位路径在本轮复用，但仍核对来源对应目标。
+
   每次真实操作前安排唯一原文文件，HTTP优先使用http-framework-test.capture_file；异步调用核对真实执行状态和完整输出来源。不得将AI摘要、指导或运行元数据当目标原文。
+
+  首次save前以本项show返回的save_contract核对payload_required及各对象必填字段、类型和唯一ID；沿item_results.item_id→observations.operation_id→actual_steps.item_ids逐条确认属于同一子项，observation_ids/evidence_ids均存在且原文支持该观察，不借用其他子项的完成状态。文件证据source_path使用实际取得的绝对路径，先通过已有工具一次核对存在、可读、非空、完整及来源；发现不存在、截断或只有预览时先取得真实完整输出，不猜文件名，不用摘要补原文。输入事实仅定位本轮test_info具体字段；恢复与环境中断另核对对应必填资料。核对可汇总完成，不为预检重复目标请求，预检不代替save校验或安全语义复核。
 
   逐项save实际子项、操作、观察、原文及三态，核对返回成功；最后经banma_report的save_info/build/check核对报告。保存错误先修正，不能充当目标中断。'
 common_requirements: '本轮采用本机DVWA靶机判定口径。唯一判定来源是本目录各用例及本共同要求；本项steps中的默认安全基线直接适用，不再将用户另行提供业务/部署策略作为统一前置条件。真实入口、账号角色、字段、阈值和资源归属由项目AI调用工具发现，实际行为不能自行当作允许策略。已有明确用户规则优先且记录出处，不篡改本轮规则迎合结果。
