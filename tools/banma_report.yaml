@@ -1,0 +1,66 @@
+name: banma_report
+command: python3
+args:
+  - -c
+  - |
+    import os, sys
+    from pathlib import Path
+    root = Path(os.environ.get("CYBERSTRIKE_ROOT", "/Users/banma-josh/project/CyberStrikeAI"))
+    python = root / "venv/bin/python"
+    os.execv(str(python), [str(python), str(root / "tools/scripts/banma_report.py"), *sys.argv[1:]])
+enabled: true
+short_description: "从已保存结果生成报告，不测试。save_info补已有资料，build输出report_path/artifact_status/gaps，check核对来源和统计。草稿不是最终报告，不补默认结果或人员/评分。"
+description: |
+  只读取本次证据、cases YAML和本地模板，保留章节/固定字段/附录。
+  未执行、引用缺失或必需资料不足输出草稿；已有失败保留，不伪造漏洞/审核/评分。
+  普通运行只需init返回的run_dir；build后使用report_path作为check的report_file。
+parameters:
+  - name: mode
+    type: string
+    required: true
+    options: [save_info, build, check]
+    flag: --mode
+    format: flag
+    description: "save_info保存已有资料，build生成，check检查；均不执行目标操作。"
+  - name: run_dir
+    type: string
+    required: true
+    flag: --run-dir
+    format: flag
+    description: "原样复用banma_pentest_run_cases init返回的本次目录。"
+  - name: payload
+    type: object
+    required: false
+    flag: --payload
+    format: flag
+    description: |
+      save_info必需对象，只允许test_info/target_profile/exploratory_sections/findings/conclusion。
+      test_info对象可含test_object,tester,reviewer,approver,document_version,ended_at,acsl_grade,acsl_basis,tool_versions:{工具名:实际版本},local_environment,remote_environment；只填已有来源事实，缺人员/评分不要伪造。
+      target_profile数组每项:{field:模板第二章字段名,value:事实,source_refs:[已有用例编号如PT_WEB_15、编号:证据ID、本次原文绝对路径或test_info]}。不要自行创造引用名，不传对象当引用。
+      exploratory_sections对象键5.1至5.9，值为行数组；每项:{columns:[按模板列顺序的实际内容],source_refs:[已有引用]}。
+      findings数组每项:{case_id:已保存失败用例,title,severity:严重/高危/中危/低危/信息,impact:实证影响,source_refs:[有效引用],recommendations:[具体建议],status:实际状态}。
+      conclusion:{value:有依据的解释,source_refs:[已有引用]}。统计由代码计算，不能提交手工计数或整份Markdown。
+  - name: cases_dir
+    type: string
+    required: false
+    flag: --cases-dir
+    format: flag
+    description: "默认项目cases，普通运行省略。"
+  - name: template_file
+    type: string
+    required: false
+    flag: --template-file
+    format: flag
+    description: "默认本地报告模板，普通运行省略。"
+  - name: output_name
+    type: string
+    required: false
+    flag: --output-name
+    format: flag
+    description: "build可选文件名，默认report.md；已存在生成新版本，不覆盖。"
+  - name: report_file
+    type: string
+    required: false
+    flag: --report-file
+    format: flag
+    description: "check必需，复用build返回的report_path。"

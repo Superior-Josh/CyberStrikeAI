@@ -4,6 +4,7 @@ args:
   - "-c"
   - |
     import argparse
+    import base64
     import json
     import os
     import re
@@ -983,6 +984,7 @@ args:
         parser.add_argument("--debug", dest="debug", action="store_true")
         parser.add_argument("--response-encoding", dest="response_encoding", default="")
         parser.add_argument("--download", dest="download", default="")
+        parser.add_argument("--capture-file", dest="capture_file", default="")
         parser.add_argument("--response-filter", dest="response_filter", default="")
         parser.add_argument("--response-filter-mode", dest="response_filter_mode", default="line")
         parser.add_argument("--response-filter-invert", dest="response_filter_invert", action="store_true")
@@ -1214,6 +1216,35 @@ args:
                         decoded_body, used_encoding, encoding_source = decode_body_bytes(bytes(body_buffer), response.headers, args.response_encoding)
 
                         print(f"\n===== Response #{run_index + 1} =====")
+                        if args.capture_file:
+                            capture_path = args.capture_file.format(i=run_index + 1) if "{i}" in args.capture_file else args.capture_file
+                            if repeat > 1 and "{i}" not in args.capture_file:
+                                base, extension = os.path.splitext(capture_path)
+                                capture_path = f"{base}-{run_index + 1}{extension}"
+                            capture = {
+                                "source": "http-framework-test native response capture",
+                                "captured_at_unix": time.time(),
+                                "method": response.request.method,
+                                "url": final_url,
+                                "input_url": encoded_url,
+                                "wire_request_target": wire_target.decode("utf-8", errors="replace"),
+                                "wire_request_target_base64": base64.b64encode(wire_target).decode("ascii"),
+                                "status_code": status_code,
+                                "http_version": http_version,
+                                "headers": list(response.headers.multi_items()),
+                                "body_base64": base64.b64encode(bytes(body_buffer)).decode("ascii"),
+                                "body_length": len(body_buffer),
+                            }
+                            try:
+                                if os.path.dirname(capture_path):
+                                    os.makedirs(os.path.dirname(capture_path), exist_ok=True)
+                                fd = os.open(capture_path, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o600)
+                                with os.fdopen(fd, "w", encoding="utf-8") as capture_output:
+                                    json.dump(capture, capture_output, ensure_ascii=False, indent=2)
+                                print(f"[saved native response capture to file: {capture_path}]")
+                            except OSError as exc:
+                                exit_code = 1
+                                print(f"[failed to save native response capture: {exc}]", file=sys.stderr)
                         download_target = (args.download or "").strip()
                         if download_target:
                             # 支持多次请求时通过 {i} 占位符区分文件名
@@ -1307,6 +1338,20 @@ args:
                 except httpx.HTTPError as exc:
                     exit_code = 1
                     elapsed = time.perf_counter() - start
+                    if args.capture_file:
+                        capture_path = args.capture_file.format(i=run_index + 1) if "{i}" in args.capture_file else args.capture_file
+                        if repeat > 1 and "{i}" not in args.capture_file:
+                            base, extension = os.path.splitext(capture_path)
+                            capture_path = f"{base}-{run_index + 1}{extension}"
+                        try:
+                            if os.path.dirname(capture_path):
+                                os.makedirs(os.path.dirname(capture_path), exist_ok=True)
+                            fd = os.open(capture_path, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o600)
+                            with os.fdopen(fd, "w", encoding="utf-8") as capture_output:
+                                json.dump({"source": "http-framework-test native request error", "captured_at_unix": time.time(), "url": encoded_url, "error_type": type(exc).__name__, "error": str(exc)}, capture_output, ensure_ascii=False, indent=2)
+                            print(f"[saved native request error to file: {capture_path}]")
+                        except OSError as save_error:
+                            print(f"[failed to save native request error: {save_error}]", file=sys.stderr)
                     print(f"\n===== Response #{run_index + 1} =====")
                     print(
                         f"Request failed after {elapsed:.6f}s: "
@@ -1535,6 +1580,11 @@ parameters:
       - "outputs/run-{i}.bin"：repeat>1 时按序号区分文件（{i} 将被替换为 1,2,...）
     required: false
     flag: "--download"
+  - name: "capture_file"
+    type: "string"
+    description: "直接保存本次真实响应JSON（状态、完整多值头、解压后正文base64及字节数），空正文仍有真实头；指定本次raw_dir下路径，重复请求用{i}。文件含原始敏感头，权限0600，不用AI复述替代原文。"
+    required: false
+    flag: "--capture-file"
   - name: "http2"
     type: "bool"
     description: "启用 HTTP/2（需安装 h2：pip install 'httpx[http2]'）。也可写在 httpx_options：http2=true"
