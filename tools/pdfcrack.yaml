@@ -1,0 +1,35 @@
+name: "pdfcrack"
+command: "pdfcrack"
+enabled: true
+short_description: "PDF 文档口令恢复工具，支持字典和暴力破解"
+description: "使用字典或暴力方式测试加密 PDF 文档口令。"
+parameters:
+  - name: "file"
+    type: "string"
+    description: "PDF 文件路径"
+    required: true
+    flag: "-f"
+    format: "flag"
+  - name: "wordlist"
+    type: "string"
+    description: "字典文件路径"
+    required: false
+    flag: "-w"
+    format: "flag"
+  - name: "charset"
+    type: "string"
+    description: "暴力破解字符集"
+    required: false
+    flag: "-c"
+    format: "flag"
+  - name: "min_length"
+    type: "int"
+    description: "最短口令长度"
+    required: false
+    flag: "-n"
+    format: "flag"
+  - name: "additional_args"
+    type: "string"
+    description: "额外的 pdfcrack 参数"
+    required: false
+    format: "positional"

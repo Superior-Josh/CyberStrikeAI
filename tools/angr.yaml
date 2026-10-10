@@ -42,7 +42,7 @@ description: |
     - `find_address`: 待寻找的地址（可为空）
     - `avoid_addresses`: 需要避开的地址列表
     - `analysis_type`: 自定义分析类型标记（默认symbolic）
-    - `additional_args`: 额外参数列表（通过 `additional_args` 传入）
+    - `additional_args`: 额外参数列表（通过 `tool_args` 传入）
   - 在脚本中自行控制分析流程，可调用 `print()` 输出结果。
 parameters:
   - name: "script_content"
@@ -79,16 +79,9 @@ parameters:
     default: "symbolic"
     position: 4
     format: "positional"
-  - name: "additional_args"
+  - name: "tool_args"
     type: "string"
-    description: |
-      额外参数，脚本中可通过 `additional_args` 列表访问。
-
-      **示例：**
-      - "--max-depth 8 --timeout 60"
-
-      **注意事项：**
-      - 参数会按照shell规则拆分
+    description: "传给包装器的完整扩展参数字符串，保留引号；由包装器按 shell 规则拆分"
     required: false
     default: ""
     position: 5

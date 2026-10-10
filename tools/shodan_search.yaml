@@ -358,6 +358,7 @@ parameters:
     required: false
     position: 3
     format: "positional"
+    default: ""
   - name: "minify"
     type: "bool"
     description: |
@@ -378,6 +379,7 @@ parameters:
     required: false
     position: 5
     format: "positional"
+    default: ""
   - name: "count_only"
     type: "bool"
     description: |

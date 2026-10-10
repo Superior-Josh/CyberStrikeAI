@@ -1,5 +1,6 @@
 name: "kube-bench"
 command: "kube-bench"
+args: ["run"]
 enabled: true
 short_description: "CIS Kubernetes基准检查工具"
 description: |
@@ -35,13 +36,13 @@ parameters:
     required: false
     flag: "--config-dir"
     format: "flag"
-  - name: "output_format"
-    type: "string"
-    description: "输出格式（json, yaml）"
+  - name: "json_output"
+    type: "bool"
+    description: "以 JSON 输出；false 时使用默认文本格式"
     required: false
-    flag: "--output"
+    flag: "--json"
     format: "flag"
-    default: "json"
+    default: true
   - name: "additional_args"
     type: "string"
     description: |

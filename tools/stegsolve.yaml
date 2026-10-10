@@ -1,0 +1,21 @@
+name: "stegsolve"
+command: "/usr/bin/java"
+args:
+  - "-jar"
+  - "/Users/banma-josh/.cyberstrike/tools/stegsolve/stegsolve.jar"
+enabled: true
+short_description: "图像隐写分析工具，支持多通道与位平面可视化"
+description: |
+  StegSolve 是用于图像隐写分析的 Java 桌面工具，支持通道查看、位平面分析、
+  帧浏览和图像组合。
+
+  **注意事项：**
+  - 图形界面工具，需要本地桌面会话。
+  - 仅用于已授权的安全测试和取证分析。
+parameters:
+  - name: "file"
+    type: "string"
+    description: "可选的初始图片文件路径"
+    required: false
+    position: 0
+    format: "positional"

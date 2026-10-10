@@ -1,0 +1,21 @@
+name: "cyberchef"
+command: "/usr/bin/open"
+args:
+  - "/Users/banma-josh/.cyberstrike/tools/cyberchef/CyberChef_v11.5.0.html"
+enabled: true
+short_description: "打开离线 CyberChef 数据处理工作台"
+description: |
+  打开本地离线 CyberChef 页面。CyberChef 是用于编码、解码、加密、哈希、
+  压缩、数据提取和格式转换的浏览器工作台。
+
+  **注意事项：**
+  - 需要在本地桌面浏览器中使用。
+parameters:
+  # 2026-10-06: 补一个可选参数，既保留“打开 CyberChef 工作台”的用法，
+  # 也避免执行器对空参数工具输出“未定义参数配置，返回空schema”告警。
+  - name: "file"
+    type: "string"
+    description: "可选：随 CyberChef 一并用默认应用打开的本地文件路径（例如待分析的数据文件）"
+    required: false
+    position: 1
+    format: "positional"

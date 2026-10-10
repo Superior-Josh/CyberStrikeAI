@@ -1,5 +1,5 @@
 name: "volatility3"
-command: "volatility3"
+command: "vol"
 enabled: true
 short_description: "Volatility3内存取证分析工具"
 description: |
@@ -27,11 +27,11 @@ parameters:
     type: "string"
     description: "要执行的Volatility3插件"
     required: true
-    position: 0
+    position: 1
     format: "positional"
-  - name: "output_file"
+  - name: "output_dir"
     type: "string"
-    description: "输出文件路径"
+    description: "导出文件目录，-o 不接受报告文件名"
     required: false
     flag: "-o"
     format: "flag"

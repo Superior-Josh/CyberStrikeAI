@@ -17,9 +17,10 @@ Each tool configuration file is a YAML file. The table below lists supported top
 | `short_description` | Optional | string | 20–50 character summary for tool lists and lower token usage; defaults to start of `description` if omitted. |
 | `args` | Optional | string[] | Fixed arguments prepended to the command line; often used for default scan modes. |
 | `parameters` | Optional | array | Runtime parameter list; see **Parameter Definition** below. |
-| `arg_mapping` | Optional | string | Parameter mapping mode (`auto`/`manual`/`template`); default `auto`; only set if needed. |
+| `arg_mapping` | Optional | string | Compatibility field; the current executor does not read it. |
+| `allowed_exit_codes` | Optional | int[] | Additional successful exit codes, based on the tool's actual semantics. |
 
-> If a field is wrong or a required field is missing, the loader skips that tool and logs a warning; other tools are unaffected.
+> The loader checks YAML parsing and nonempty `name`/`command`. Missing `enabled` defaults to false. Parameter types, unknown fields, duplicate names, paths and CLI compatibility need separate checks; required marks above are authoring requirements.
 
 ## Tool Descriptions
 
@@ -105,7 +106,7 @@ Used to pass extra CLI options not defined in the parameter list. The value is s
 
 #### `scan_type` (tool-specific)
 
-Some tools (e.g. `nmap`) support `scan_type` to override the default scan arguments.
+Use `scan_type` only for `nmap`; use ordinary parameter names such as `mode` or `operation` for other tools. The executor skips `action` during CLI argument construction.
 
 **Example (nmap):**
 ```yaml
@@ -376,10 +377,7 @@ Set `enabled: false` in the tool’s config, or remove/rename the file. Disabled
 
 ## Tool Configuration Validation
 
-On load, the system checks:
-
-- ✅ Required fields: `name`, `command`, `enabled`.
-- ✅ Parameter structure and types.
+`LoadToolFromFile` checks YAML parsing and nonempty `name`/`command`. Separately verify parameter/default types, enums, duplicates, positional ordering, generated argv, embedded script syntax and local CLI help.
 
 Invalid configs produce startup warnings but do not prevent the server from starting. Invalid tools are skipped; others still load.
 
@@ -410,14 +408,14 @@ A: Check:
 
 ### Q: How can I test a tool configuration?
 
-A: Use the config test utility:
+A: The config utility requires the main config path and mainly displays external MCP configuration; it does not validate tool argv or CLI compatibility:
 ```bash
-go run cmd/test-config/main.go
+go run cmd/test-config/main.go config.yaml
 ```
 
 ### Q: How is parameter order controlled?
 
-A: Use the `position` field for positional arguments. **Position 0** (e.g. gobuster’s `dir` subcommand) is placed right after the command, before any flag arguments, so CLIs that expect “subcommand + options” work. Other flags are added in the order they appear in `parameters`, then position 1, 2, …; `additional_args` is appended last.
+A: Use the `position` field for positional arguments. Put ordinary targets and files at position 1 or later, especially for Go CLIs that stop parsing options at the first positional argument. **Position 0** (e.g. gobuster’s `dir` subcommand) is placed right after the command, before any flag arguments, so CLIs that expect “subcommand + options” work. Other flags are added in the order they appear in `parameters`, then position 1, 2, …; `additional_args` is appended last.
 
 ## Tool Configuration Templates
 
@@ -496,3 +494,7 @@ parameters:
 - Main project README: see `README.md` in the project root.
 - Tool list: all YAML configs under `tools/`.
 - API: see the main README for API details.
+
+### Wrapper and special-tool parameters
+
+`additional_args` is split and appended to argv. Wrappers that read fixed argument positions use a complete `tool_args`, `python_args` or `pip_args` string and explicit empty defaults for optional slots. `exec` reads only `command`, `shell` and `workdir`; put command-specific options inside `command`. Help or fixture success does not establish a successful scan, and configuration maintenance does not automatically install dependencies, enable disabled tools or restart the service.

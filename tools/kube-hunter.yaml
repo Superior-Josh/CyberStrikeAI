@@ -30,11 +30,12 @@ parameters:
     flag: "--cidr"
     format: "flag"
   - name: "interface"
-    type: "string"
-    description: "网络接口扫描"
+    type: "bool"
+    description: "使用接口发现模式；--interface 是无值开关，不接受接口名"
     required: false
     flag: "--interface"
     format: "flag"
+    default: false
   - name: "active"
     type: "bool"
     description: "启用主动扫描（可能有风险）"

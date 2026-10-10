@@ -6,7 +6,6 @@ args:
     import shlex
     import subprocess
     import sys
-    import time
 
     interface = sys.argv[1] if len(sys.argv) > 1 else "eth0"
     analyze = sys.argv[2].lower() == "true" if len(sys.argv) > 2 else False
@@ -27,19 +26,31 @@ args:
 
     proc = subprocess.Popen(cmd)
     try:
-        if duration > 0:
-            time.sleep(duration)
-            proc.terminate()
-            proc.wait(timeout=10)
-        else:
+        exit_code = proc.wait(timeout=duration if duration > 0 else None)
+    except subprocess.TimeoutExpired:
+        proc.terminate()
+        try:
+            exit_code = proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
             proc.wait()
+            exit_code = 0
+        if exit_code == -15:
+            exit_code = 0
     except KeyboardInterrupt:
         proc.terminate()
-        proc.wait(timeout=10)
+        try:
+            proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
+        exit_code = 130
+    sys.exit(exit_code if exit_code >= 0 else 128 - exit_code)
 enabled: true
 short_description: "LLMNR/NBT-NS/MDNS投毒和凭据收集工具"
 description: |
   封装 Responder，支持自动在指定持续时间后停止进程，避免占用网络。
+  提前退出时保留真实退出码；到达持续时间后由包装器正常终止时返回 0。
 parameters:
   - name: "interface"
     type: "string"
@@ -76,9 +87,9 @@ parameters:
     default: 300
     position: 4
     format: "positional"
-  - name: "additional_args"
+  - name: "tool_args"
     type: "string"
-    description: "额外的Responder参数（直接追加）"
+    description: "传给包装器的完整扩展参数字符串，保留引号；由包装器按 shell 规则拆分"
     required: false
     default: ""
     position: 5

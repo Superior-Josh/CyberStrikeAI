@@ -1,0 +1,20 @@
+name: "docker-bench-security"
+command: "/bin/sh"
+args:
+  - "-c"
+  - "cd /Users/banma-josh/.cyberstrike/tools/docker-bench-security && exec ./docker-bench-security.sh \"$@\""
+  - "--"
+enabled: true
+short_description: "检查 Docker 守护进程和容器配置基线"
+description: |
+  运行 Docker Bench for Security，检查 Docker 主机的常见安全基线配置。
+
+  **注意事项：**
+  - 需要本机 Docker CLI 和可访问的 Docker daemon。
+  - 仅用于已授权的本机或测试环境审计。
+parameters:
+  - name: "additional_args"
+    type: "string"
+    description: "额外的 docker-bench-security 参数"
+    required: false
+    format: "positional"

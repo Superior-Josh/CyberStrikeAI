@@ -1,0 +1,33 @@
+name: "dirb"
+command: "dirb"
+enabled: true
+short_description: "Web目录和文件枚举工具，使用字典进行内容发现"
+description: |
+  DIRB 是 Web 内容扫描工具，通过字典枚举网站中的目录和文件。
+
+  **使用场景：**
+  - Web 应用目录发现
+  - 敏感文件探测
+  - 渗透测试信息收集
+
+  **注意事项：**
+  - 仅用于已授权的安全测试。
+parameters:
+  - name: "url"
+    type: "string"
+    description: "目标 URL"
+    required: true
+    position: 0
+    format: "positional"
+  - name: "wordlist"
+    type: "string"
+    description: "字典文件路径；默认使用随 DIRB 下载的 common.txt"
+    required: false
+    default: "/Users/banma-josh/.cyberstrike/tools/dirb/wordlists/common.txt"
+    position: 1
+    format: "positional"
+  - name: "additional_args"
+    type: "string"
+    description: "额外的 DIRB 参数，多个参数以空格分隔"
+    required: false
+    format: "positional"

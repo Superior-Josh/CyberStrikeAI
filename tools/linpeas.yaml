@@ -26,9 +26,9 @@ description: |
   - 执行时间可能较长
   - 输出信息量大，建议保存到文件
 parameters:
-  - name: "output"
+  - name: "checks"
     type: "string"
-    description: "输出文件路径（可选）"
+    description: "仅执行指定检查类别，逗号分隔；-o 不表示输出文件，保存输出请使用 exec 重定向"
     required: false
     flag: "-o"
     format: "flag"
@@ -36,7 +36,7 @@ parameters:
     type: "bool"
     description: "快速模式，跳过耗时检查"
     required: false
-    flag: "-fast"
+    flag: "-s"
     format: "flag"
   - name: "additional_args"
     type: "string"

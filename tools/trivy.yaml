@@ -17,7 +17,7 @@ description: |
   - 漏洞检测
   - 安全审计
 parameters:
-  - name: "scan_type"
+  - name: "mode"
     type: "string"
     description: "扫描类型（image, fs, repo, config）"
     required: false

@@ -21,16 +21,15 @@ parameters:
     type: "string"
     description: "云提供商（aws, azure, gcp, aliyun, oci）"
     required: false
-    flag: "--provider"
-    format: "flag"
+    format: "positional"
     default: "aws"
+    position: 0
   - name: "profile"
     type: "string"
-    description: "AWS配置文件"
+    description: "可选 AWS profile，仅在 provider=aws 时设置"
     required: false
     flag: "--profile"
     format: "flag"
-    default: "default"
   - name: "report_dir"
     type: "string"
     description: "报告保存目录"

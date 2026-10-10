@@ -34,13 +34,13 @@ parameters:
     type: "string"
     description: "配置文件"
     required: false
-    flag: "-c"
+    flag: "--config"
     format: "flag"
   - name: "threads"
     type: "int"
-    description: "线程数"
+    description: "并发级别；单个签名内部线程通过 additional_args 的 --threads 设置"
     required: false
-    flag: "-t"
+    flag: "--concurrency"
     format: "flag"
     default: 20
   - name: "timeout"

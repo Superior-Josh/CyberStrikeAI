@@ -3,7 +3,7 @@ command: "graphqlmap"
 enabled: true
 short_description: "GraphQL安全扫描和自省工具"
 description: |
-  高级GraphQL安全扫描和自省工具，用于检测GraphQL API中的安全问题。
+  调用 GraphQLMap 交互式安全测试工具。当前 CLI 不提供 --introspection、--depth 或 --mutations；自动 HTTP 对照测试使用 http-framework-test 或 exec。
 
   **主要功能：**
   - GraphQL自省
@@ -23,27 +23,6 @@ parameters:
     required: true
     flag: "-u"
     format: "flag"
-  - name: "introspection"
-    type: "bool"
-    description: "测试自省查询"
-    required: false
-    default: true
-    flag: "--introspection"
-    format: "flag"
-  - name: "query_depth"
-    type: "int"
-    description: "要测试的最大查询深度"
-    required: false
-    default: 10
-    flag: "--depth"
-    format: "flag"
-  - name: "test_mutations"
-    type: "bool"
-    description: "测试突变操作"
-    required: false
-    default: true
-    flag: "--mutations"
-    format: "flag"
   - name: "additional_args"
     type: "string"
     description: |
@@ -58,3 +37,16 @@ parameters:
       - 此参数会直接追加到命令末尾
     required: false
     format: "positional"
+  - name: "method"
+    type: "string"
+    description: "HTTP 方法"
+    required: false
+    flag: "--method"
+    format: "flag"
+    default: "POST"
+  - name: "headers"
+    type: "object"
+    description: "请求头字典，由执行器序列化为 JSON"
+    required: false
+    flag: "--headers"
+    format: "flag"

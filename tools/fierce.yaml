@@ -21,13 +21,13 @@ parameters:
     type: "string"
     description: "目标域名"
     required: true
-    flag: "-dns"
+    flag: "--domain"
     format: "flag"
   - name: "dns_server"
     type: "string"
     description: "要使用的DNS服务器"
     required: false
-    flag: "-dnsserver"
+    flag: "--dns-servers"
     format: "flag"
   - name: "additional_args"
     type: "string"

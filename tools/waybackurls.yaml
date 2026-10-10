@@ -1,5 +1,12 @@
 name: "waybackurls"
-command: "waybackurls"
+command: "/bin/sh"
+args:
+  - "-c"
+  - |
+    domain="$1"
+    shift
+    exec waybackurls "$@" "$domain"
+  - "--"
 enabled: true
 short_description: "从Wayback Machine获取历史URL"
 description: |

@@ -1,5 +1,6 @@
 name: "checksec"
 command: "checksec"
+args: ["file"]
 enabled: true
 short_description: "二进制安全特性检查工具"
 description: |
@@ -21,7 +22,7 @@ parameters:
     type: "string"
     description: "要检查的二进制文件路径"
     required: true
-    position: 0
+    position: 1
     format: "positional"
   - name: "additional_args"
     type: "string"

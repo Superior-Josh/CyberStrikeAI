@@ -97,18 +97,9 @@ parameters:
     default: "enumdomusers;enumdomgroups;querydominfo"
     position: 4
     format: "positional"
-  - name: "additional_args"
+  - name: "tool_args"
     type: "string"
-    description: |
-      额外的rpcclient参数。用于传递未在参数列表中定义的rpcclient选项。
-
-      **示例值：**
-      - 根据工具特性添加常用参数示例
-
-      **注意事项：**
-      - 多个参数用空格分隔
-      - 确保参数格式正确，避免命令注入
-      - 此参数会直接追加到命令末尾
+    description: "传给包装器的完整扩展参数字符串，保留引号；由包装器按 shell 规则拆分"
     required: false
     default: ""
     position: 5

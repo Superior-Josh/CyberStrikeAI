@@ -21,8 +21,8 @@ parameters:
     type: "string"
     description: "二进制文件路径"
     required: true
-    position: 0
-    format: "positional"
+    format: "flag"
+    flag: "--bin"
   - name: "libc"
     type: "string"
     description: "libc文件路径"
@@ -35,13 +35,12 @@ parameters:
     required: false
     flag: "--ld"
     format: "flag"
-  - name: "template_type"
+  - name: "template_path"
     type: "string"
-    description: "模板类型（python, c）"
+    description: "可选的自定义 solve.py 模板文件路径"
     required: false
-    flag: "--template"
+    flag: "--template-path"
     format: "flag"
-    default: "python"
   - name: "additional_args"
     type: "string"
     description: |

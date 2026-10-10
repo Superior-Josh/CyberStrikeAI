@@ -8,6 +8,8 @@ short_description: "系统命令执行工具，用于执行Shell命令和系统�
 description: |
   系统命令执行工具，用于执行Shell命令和系统操作。
 
+  执行器仅识别 command、shell、workdir；其他选项直接写入 command。
+
   **主要功能：**
   - 执行任意Shell命令
   - 支持bash、sh等shell
@@ -94,17 +96,3 @@ parameters:
       - 确保目录存在且有访问权限
       - 相对路径相对于程序运行目录
     required: false
-  - name: "additional_args"
-    type: "string"
-    description: |
-      额外的exec参数。用于传递未在参数列表中定义的exec选项。
-
-      **示例值：**
-      - 根据工具特性添加常用参数示例
-
-      **注意事项：**
-      - 多个参数用空格分隔
-      - 确保参数格式正确，避免命令注入
-      - 此参数会直接追加到命令末尾
-    required: false
-    format: "positional"

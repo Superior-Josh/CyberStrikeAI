@@ -971,7 +971,6 @@ args:
         parser.add_argument("--additional-args", dest="additional_args", default="")
         parser.add_argument("--http2", dest="http2", action="store_true")
         parser.add_argument("--no-http2", dest="http2", action="store_false")
-        parser.add_argument("--action", default="")
         parser.add_argument("--include-headers", dest="include_headers", action="store_true")
         parser.add_argument("--no-include-headers", dest="include_headers", action="store_false")
         parser.add_argument("--auto-encode-url", dest="auto_encode_url", action="store_true")
@@ -1568,12 +1567,6 @@ parameters:
     required: false
     default: 0
     flag: "--response-context-lines"
-  - name: "action"
-    type: "string"
-    description: "保留字段：标识调用意图（request, spider等），脚本内部不使用"
-    required: false
-    default: "request"
-    flag: "--action"
   - name: "download"
     type: "string"
     description: |

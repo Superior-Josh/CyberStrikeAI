@@ -17,7 +17,7 @@ description: |
   - 取证分析
   - CTF挑战
 parameters:
-  - name: "action"
+  - name: "operation"
     type: "string"
     description: "操作类型（extract, embed, info）"
     required: true

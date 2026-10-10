@@ -36,7 +36,7 @@ args:
                 pass
 
         # 传统位置参数方式（向后兼容）
-        # 参数位置：query=1, page=2, pagesize=3, fields=4, sub_type=5
+        # 参数位置：query=1, page=2, pagesize=3, fields=4, sub_type=5, facets=6, ignore_cache=7
         config = {}
         if len(sys.argv) > 1:
             config['query'] = str(sys.argv[1])
@@ -54,6 +54,10 @@ args:
             config['fields'] = str(sys.argv[4])
         if len(sys.argv) > 5:
             config['sub_type'] = str(sys.argv[5])
+        if len(sys.argv) > 6:
+            config['facets'] = str(sys.argv[6])
+        if len(sys.argv) > 7:
+            config['ignore_cache'] = sys.argv[7].lower() in ('true', '1', 'yes')
         return config
 
     try:
@@ -356,6 +360,7 @@ parameters:
     required: false
     position: 6
     format: "positional"
+    default: ""
   - name: "ignore_cache"
     type: "bool"
     description: |

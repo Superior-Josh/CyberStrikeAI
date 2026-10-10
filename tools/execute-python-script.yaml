@@ -50,11 +50,7 @@ args:
     # shellcheck disable=SC1090
     source "$ENV_DIR/bin/activate"
 
-    if [ -n "$ADDITIONAL_ARGS" ]; then
-      python3 $ADDITIONAL_ARGS -c "$SCRIPT_CONTENT"
-    else
-      python3 -c "$SCRIPT_CONTENT"
-    fi
+    exec python3 -c 'import os, shlex, sys; os.execv(sys.executable, [sys.executable, *shlex.split(sys.argv[2]), "-c", sys.argv[1]])' "$SCRIPT_CONTENT" "$ADDITIONAL_ARGS"
   - "_"
 enabled: true
 short_description: "在指定虚拟环境中编写并执行Python脚本"
@@ -91,18 +87,10 @@ parameters:
     default: "default"
     position: 1
     format: "positional"
-  - name: "additional_args"
+  - name: "python_args"
     type: "string"
-    description: |
-      额外的execute-python-script参数。用于传递未在参数列表中定义的execute-python-script选项。
-
-      **示例值：**
-      - 根据工具特性添加常用参数示例
-
-      **注意事项：**
-      - 多个参数用空格分隔
-      - 确保参数格式正确，避免命令注入
-      - 此参数会直接追加到命令末尾
+    description: "完整解释器选项字符串"
     required: false
     format: "positional"
     default: ""
+    position: 2

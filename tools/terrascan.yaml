@@ -1,5 +1,6 @@
 name: "terrascan"
 command: "terrascan"
+args: ["scan"]
 enabled: true
 short_description: "基础设施即代码安全扫描工具"
 description: |
@@ -17,13 +18,13 @@ description: |
   - 安全策略检查
   - 合规性检查
 parameters:
-  - name: "scan_type"
+  - name: "iac_type"
     type: "string"
-    description: "扫描类型（all, terraform, k8s等）"
+    description: "IaC 类型，如 terraform、k8s；按安装版本 help 选择"
     required: false
-    flag: "--scan-type"
+    flag: "--iac-type"
     format: "flag"
-    default: "all"
+    default: "terraform"
   - name: "iac_dir"
     type: "string"
     description: "IaC目录"

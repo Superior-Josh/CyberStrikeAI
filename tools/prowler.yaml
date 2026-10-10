@@ -26,16 +26,15 @@ parameters:
     format: "positional"
   - name: "profile"
     type: "string"
-    description: "AWS配置文件"
+    description: "可选 AWS profile，仅在 provider=aws 时设置"
     required: false
     flag: "-p"
     format: "flag"
-    default: "default"
   - name: "region"
     type: "string"
     description: "要扫描的特定区域"
     required: false
-    flag: "-r"
+    flag: "-f"
     format: "flag"
   - name: "checks"
     type: "string"

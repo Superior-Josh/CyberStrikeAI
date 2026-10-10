@@ -54,6 +54,7 @@ parameters:
     required: false
     position: 1
     format: "positional"
+    default: ""
   - name: "wait_time"
     type: "int"
     description: |

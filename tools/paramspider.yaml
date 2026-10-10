@@ -23,25 +23,6 @@ parameters:
     required: true
     flag: "-d"
     format: "flag"
-  - name: "level"
-    type: "int"
-    description: "挖掘深度级别"
-    required: false
-    flag: "-l"
-    format: "flag"
-    default: 2
-  - name: "exclude"
-    type: "string"
-    description: "要排除的文件扩展名"
-    required: false
-    flag: "-e"
-    format: "flag"
-  - name: "output"
-    type: "string"
-    description: "输出文件路径"
-    required: false
-    flag: "-o"
-    format: "flag"
   - name: "additional_args"
     type: "string"
     description: |
@@ -56,3 +37,9 @@ parameters:
       - 此参数会直接追加到命令末尾
     required: false
     format: "positional"
+  - name: "proxy"
+    type: "string"
+    description: "可选 HTTP 代理"
+    required: false
+    flag: "--proxy"
+    format: "flag"

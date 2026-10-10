@@ -78,3 +78,6 @@ Thumbs.db
 desktop.ini
 .idea/
 .vscode/
+
+# reports
+reports/*

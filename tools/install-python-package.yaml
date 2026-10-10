@@ -50,11 +50,7 @@ args:
     # shellcheck disable=SC1090
     source "$ENV_DIR/bin/activate"
 
-    if [ -n "$ADDITIONAL_ARGS" ]; then
-      pip install "$PACKAGE" $ADDITIONAL_ARGS
-    else
-      pip install "$PACKAGE"
-    fi
+    exec python3 -c 'import os, shlex, sys; os.execv(sys.executable, [sys.executable, "-m", "pip", "install", *shlex.split(sys.argv[2]), sys.argv[1]])' "$PACKAGE" "$ADDITIONAL_ARGS"
   - "_"
 enabled: true
 short_description: "在指定虚拟环境中创建/激活并安装Python依赖"
@@ -84,18 +80,10 @@ parameters:
     default: "default"
     position: 1
     format: "positional"
-  - name: "additional_args"
+  - name: "pip_args"
     type: "string"
-    description: |
-      额外的install-python-package参数。用于传递未在参数列表中定义的install-python-package选项。
-
-      **示例值：**
-      - 根据工具特性添加常用参数示例
-
-      **注意事项：**
-      - 多个参数用空格分隔
-      - 确保参数格式正确，避免命令注入
-      - 此参数会直接追加到命令末尾
+    description: "完整 pip install 选项字符串"
     required: false
     format: "positional"
     default: ""
+    position: 2

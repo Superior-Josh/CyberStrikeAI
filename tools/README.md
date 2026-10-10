@@ -8,18 +8,19 @@
 
 每个工具配置文件是一个 YAML 文件。下表列出了当前支持的顶层字段及其必填情况，建议逐项核对后再提交：
 
-| 字段 | 必填 | 类型 | 说明 |
-|------|------|------|------|
-| `name` | ✅ | string | 工具唯一标识，建议使用小写字母、数字、短横线组合。 |
-| `command` | ✅ | string | 实际执行的命令或脚本名称，需位于系统 PATH 或写入绝对路径。 |
-| `enabled` | ✅ | bool | 是否注册到 MCP；设为 `false` 时该工具会被忽略。 |
-| `description` | ✅ | string | 详细描述，支持多行 Markdown，供 AI 深度理解及 `resources/read` 查询。 |
-| `short_description` | 可选 | string | 20-50 字摘要，用于工具列表、减少 token 消耗；缺失时会自动截取 `description` 开头。 |
-| `args` | 可选 | string[] | 固定参数，按顺序 prepend 到命令行，常用于定义默认扫描模式。 |
-| `parameters` | 可选 | array | 运行时可配置参数列表，详见「参数定义」章节。 |
-| `arg_mapping` | 可选 | string | 参数映射模式（`auto`/`manual`/`template`），默认 `auto`；除非有特殊需求，无需填写。 |
+| 字段                  | 必填 | 类型     | 说明                                                                                        |
+| --------------------- | ---- | -------- | ------------------------------------------------------------------------------------------- |
+| `name`              | ✅   | string   | 工具唯一标识，建议使用小写字母、数字、短横线组合。                                          |
+| `command`           | ✅   | string   | 实际执行的命令或脚本名称，需位于系统 PATH 或写入绝对路径。                                  |
+| `enabled`           | ✅   | bool     | 是否注册到 MCP；设为`false` 时该工具会被忽略。                                            |
+| `description`       | ✅   | string   | 详细描述，支持多行 Markdown，供 AI 深度理解及`resources/read` 查询。                      |
+| `short_description` | 可选 | string   | 20-50 字摘要，用于工具列表、减少 token 消耗；缺失时会自动截取`description` 开头。         |
+| `args`              | 可选 | string[] | 固定参数，按顺序 prepend 到命令行，常用于定义默认扫描模式。                                 |
+| `parameters`        | 可选 | array    | 运行时可配置参数列表，详见「参数定义」章节。                                                |
+| `arg_mapping`       | 可选 | string   | 兼容字段；当前执行器未读取，不改变参数构造方式。 |
+| `allowed_exit_codes` | 可选 | int[] | 允许工具成功返回的非零退出码；仅根据工具实际语义设置。 |
 
-> 若某字段填写错误或漏填必填项，系统会在加载时跳过该工具并在日志中输出警告，但不会影响其他工具。
+> 当前加载器验证 YAML 能否解析以及 `name`、`command` 是否非空；缺省 `enabled` 为 false。它不会完整校验参数类型、重复名称、未知字段、路径存在性或 CLI 兼容性，需额外核对。表中的必填标记是配置维护要求。
 
 ## 工具描述
 
@@ -39,6 +40,7 @@
 4. **示例**：使用示例（可选）
 
 **重要说明**：
+
 - 工具列表发送给大模型时，使用 `short_description`（如果存在）
 - 如果没有 `short_description`，系统会自动从 `description` 中提取第一行或前100个字符
 - 详细描述可以通过 MCP 的 `resources/read` 接口获取（URI: `tool://tool_name`）
@@ -50,7 +52,7 @@
 每个参数可以包含以下字段：
 
 - `name`: 参数名称
-- `type`: 参数类型（string, int, bool, array）
+- `type`: 参数类型（string, int/integer, bool, array, object, float/double）；默认值必须符合类型。执行器将数值类型映射为 JSON Schema `number`。
 - `description`: 参数详细描述（支持多行）
 - `required`: 是否必需（true/false）
 - `default`: 默认值
@@ -63,15 +65,16 @@
 ### 参数格式说明
 
 - **`flag`**: 标志参数，格式为 `--flag value` 或 `-f value`
+
   - 示例：`flag: "-u"` → `-u http://example.com`
-  
 - **`positional`**: 位置参数，按顺序添加到命令中
+
   - 示例：`position: 0` → 作为第一个位置参数
-  
 - **`combined`**: 组合格式，格式为 `--flag=value`
+
   - 示例：`flag: "--level"`, `format: "combined"` → `--level=3`
-  
 - **`template`**: 模板格式，使用自定义模板字符串
+
   - 示例：`template: "{flag} {value}"` → 自定义格式
 
 ### 特殊参数
@@ -81,11 +84,13 @@
 `additional_args` 是一个特殊的参数，用于传递未在参数列表中定义的额外命令行选项。这个参数会被解析并按空格分割成多个参数。
 
 **使用场景：**
+
 - 传递工具的高级选项
 - 传递未在配置中定义的参数
 - 传递复杂的参数组合
 
 **示例：**
+
 ```yaml
 - name: "additional_args"
   type: "string"
@@ -95,19 +100,22 @@
 ```
 
 **使用示例：**
+
 - `additional_args: "--script vuln -O"` → 会被解析为 `["--script", "vuln", "-O"]`
 - `additional_args: "-T4 --max-retries 3"` → 会被解析为 `["-T4", "--max-retries", "3"]`
 
 **注意事项：**
+
 - 参数会被按空格分割，但保留引号内的内容
 - 确保参数格式正确，避免命令注入风险
 - 此参数会追加到命令末尾
 
 #### `scan_type` 参数（特定工具）
 
-某些工具（如 `nmap`）支持 `scan_type` 参数，用于覆盖默认的扫描类型参数。
+`scan_type` 仅用于 nmap 的扫描选项覆盖；其他工具使用 `mode` 或 `operation` 等普通参数名。执行器构造 CLI 时会跳过 `action`，不能用它传递通用子命令。
 
 **示例（nmap）：**
+
 ```yaml
 - name: "scan_type"
   type: "string"
@@ -117,10 +125,12 @@
 ```
 
 **使用示例：**
+
 - `scan_type: "-sV -sC"` → 版本检测和脚本扫描
 - `scan_type: "-A"` → 全面扫描
 
 **注意事项：**
+
 - 如果指定了 `scan_type`，会替换工具配置中的默认扫描类型参数
 - 多个选项用空格分隔
 
@@ -134,12 +144,14 @@
 4. **注意事项**：使用时需要注意的事项（权限要求、性能影响、安全警告等）
 
 **描述格式建议：**
+
 - 使用 Markdown 格式增强可读性
 - 使用 `**粗体**` 突出重要信息
 - 使用列表展示多个示例或选项
 - 使用代码块展示复杂格式
 
 **示例：**
+
 ```yaml
 description: |
   目标IP地址或域名。可以是单个IP、IP范围、CIDR格式或域名。
@@ -160,11 +172,13 @@ description: |
 ### 布尔类型 (bool)
 
 布尔类型参数有特殊处理：
+
 - `true`: 只添加标志，不添加值（如 `--flag`）
 - `false`: 不添加任何参数
 - 支持多种输入格式：`true`/`false`、`1`/`0`、`"true"`/`"false"`
 
 **示例：**
+
 ```yaml
 - name: "verbose"
   type: "bool"
@@ -184,6 +198,7 @@ description: |
 用于数值参数，如端口号、级别等。
 
 **示例：**
+
 ```yaml
 - name: "level"
   type: "int"
@@ -199,6 +214,7 @@ description: |
 数组会自动转换为逗号分隔的字符串。
 
 **示例：**
+
 ```yaml
 - name: "ports"
   type: "array"
@@ -302,11 +318,11 @@ parameters:
     type: "string"
     description: |
       目标参数详细描述。
-      
+
       **示例值：**
       - "value1"
       - "value2"
-      
+
       **注意事项：**
       - 格式要求
       - 使用限制
@@ -336,36 +352,37 @@ parameters:
     format: "positional"
 ```
 
-保存文件后，重启服务即可自动加载新工具。
+保存文件后需由现有配置重载入口或用户安排的重启加载，并核对运行中的工具 schema；维护配置不自动重启服务。
 
 ### 工具配置最佳实践
 
 1. **参数设计**
+
    - 将常用参数单独定义，便于AI理解和使用
    - 使用 `additional_args` 提供灵活性，支持高级用法
    - 为参数提供清晰的描述和示例
-
 2. **描述优化**
+
    - 使用 `short_description` 减少token消耗
    - `description` 要详细，帮助AI理解工具用途
    - 使用Markdown格式增强可读性
-
 3. **默认值设置**
+
    - 为常用参数设置合理的默认值
    - 布尔类型默认值通常设为 `false`
    - 数值类型根据工具特性设置
-
 4. **参数验证**
+
    - 在描述中明确参数格式要求
    - 提供多个示例值
    - 说明参数的限制和注意事项
-
 5. **安全性**
+
    - 对于危险操作，在描述中添加警告
    - 说明权限要求
    - 提醒仅在授权环境中使用
-
 6. **单次执行时长与超时（最佳实践）**
+
    - 若某工具经常执行很久（如超过 10～30 分钟仍显示「执行中」），属于异常长时间挂起，建议：
      - 在 **config.yaml** 的 `agent.tool_timeout_minutes` 中设置单次工具最大执行时长（默认 10 分钟），超时后会自动终止并释放资源；
      - 需要更长扫描时再适当调大该值（如 20、30），不建议设为 0（不限制）；
@@ -380,11 +397,7 @@ parameters:
 
 ## 工具配置验证
 
-系统在加载工具配置时会进行基本验证：
-
-- ✅ 检查必需字段（`name`, `command`, `enabled`）
-- ✅ 验证参数定义格式
-- ✅ 检查参数类型是否支持
+当前 `LoadToolFromFile` 检查 YAML 解析及 `name`、`command` 非空。完整维护还需自行验证参数类型和默认值、枚举、重复名称、位置顺序、实际 argv、内嵌脚本语法与本机 CLI 帮助。
 
 如果配置有误，系统会在启动日志中显示警告信息，但不会阻止服务器启动。错误的工具配置会被跳过，其他工具仍可正常使用。
 
@@ -401,6 +414,7 @@ A: 某些工具（如 `nmap`）支持 `scan_type` 参数来覆盖默认的扫描
 ### Q: 工具执行超过 30 分钟一直显示「执行中」怎么办？
 
 A: 属于异常长时间挂起，建议：
+
 1. 在 **config.yaml** 中配置 `agent.tool_timeout_minutes`（默认 10），单次工具超过该分钟数会自动终止；
 2. 在监控页对该任务使用「停止任务」立即中断；
 3. 若该工具确实需要更长时间，可适当增大 `tool_timeout_minutes`，但不建议设为 0。
@@ -408,6 +422,7 @@ A: 属于异常长时间挂起，建议：
 ### Q: 工具执行失败怎么办？
 
 A: 检查以下几点：
+
 1. 工具是否已安装并在系统PATH中
 2. 工具配置是否正确
 3. 参数格式是否符合要求
@@ -415,14 +430,15 @@ A: 检查以下几点：
 
 ### Q: 如何测试工具配置？
 
-A: 可以使用 `cmd/test-config/main.go` 工具测试配置加载：
+A: `cmd/test-config/main.go` 需要主配置路径，主要展示外部 MCP 配置，不验证工具实际 argv 或 CLI：
+
 ```bash
-go run cmd/test-config/main.go
+go run cmd/test-config/main.go config.yaml
 ```
 
 ### Q: 参数顺序如何控制？
 
-A: 使用 `position` 字段控制位置参数的顺序。**位置 0 的参数（如 gobuster 的 `dir` 子命令）会紧跟在命令名后、所有标志参数之前**，以便兼容需要“子命令 + 选项”形式的 CLI。其余标志参数按在 `parameters` 列表中的顺序添加，再按 position 1、2… 添加其余位置参数。`additional_args` 会追加到命令末尾。
+A: 使用 `position` 字段控制位置参数的顺序。普通目标或文件参数应放在 position 1 及以后，尤其是遇到第一个位置参数就停止解析选项的 Go CLI。**位置 0 的参数（如 gobuster 的 `dir` 子命令）会紧跟在命令名后、所有标志参数之前**，以便兼容需要“子命令 + 选项”形式的 CLI。其余标志参数按在 `parameters` 列表中的顺序添加，再按 position 1、2… 添加其余位置参数。`additional_args` 会追加到命令末尾。
 
 ## 工具配置模板
 
@@ -501,4 +517,3 @@ parameters:
 - 主项目 README: 查看 `README.md` 了解完整的项目文档
 - 工具列表: 查看 `tools/` 目录下的所有工具配置文件
 - API文档: 查看主 README 中的 API 接口说明
-

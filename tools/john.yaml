@@ -21,21 +21,20 @@ parameters:
     type: "string"
     description: "包含哈希的文件"
     required: true
-    position: 0
+    position: 1
     format: "positional"
   - name: "wordlist"
     type: "string"
     description: "字典文件"
     required: false
-    default: "/usr/share/wordlists/rockyou.txt"
     flag: "--wordlist"
-    format: "flag"
+    format: "combined"
   - name: "format_type"
     type: "string"
     description: "哈希格式类型"
     required: false
     flag: "--format"
-    format: "flag"
+    format: "combined"
   - name: "additional_args"
     type: "string"
     description: "额外的John参数"

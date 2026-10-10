@@ -26,10 +26,9 @@ parameters:
   - name: "wordlist"
     type: "string"
     description: "参数字典"
-    required: false
+    required: true
     flag: "--wordlist"
     format: "flag"
-    default: "/usr/share/wordlists/x8/params.txt"
   - name: "method"
     type: "string"
     description: "HTTP方法"

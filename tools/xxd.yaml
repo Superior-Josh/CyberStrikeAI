@@ -21,7 +21,7 @@ parameters:
     type: "string"
     description: "要转储的文件路径"
     required: true
-    position: 0
+    position: 1
     format: "positional"
   - name: "offset"
     type: "string"

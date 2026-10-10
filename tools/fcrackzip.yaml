@@ -1,0 +1,49 @@
+name: "fcrackzip"
+command: "fcrackzip"
+enabled: true
+short_description: "ZIP 压缩包口令恢复工具，支持字典和暴力破解"
+description: "使用字典或暴力方式测试 ZIP 压缩包口令。"
+parameters:
+  - name: "file"
+    type: "string"
+    description: "ZIP 文件路径"
+    required: true
+    position: 1
+    format: "positional"
+  - name: "wordlist"
+    type: "string"
+    description: "字典文件路径，使用时同时设置 dictionary=true"
+    required: false
+    format: "flag"
+    flag: "-p"
+  - name: "charset"
+    type: "string"
+    description: "暴力字符集，例如 a1"
+    required: false
+    flag: "-c"
+    format: "flag"
+  - name: "length_range"
+    type: "string"
+    description: "口令长度范围，例如 1-8"
+    required: false
+    flag: "-l"
+    format: "flag"
+  - name: "use_unzip"
+    type: "bool"
+    description: "使用 unzip 过滤错误口令"
+    required: false
+    flag: "-u"
+    format: "flag"
+    default: true
+  - name: "additional_args"
+    type: "string"
+    description: "额外的 fcrackzip 参数"
+    required: false
+    format: "positional"
+  - name: "dictionary"
+    type: "bool"
+    description: "字典攻击模式；需提供 wordlist"
+    required: false
+    flag: "-D"
+    format: "flag"
+    default: false

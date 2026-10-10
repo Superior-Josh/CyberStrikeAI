@@ -1,0 +1,55 @@
+name: "httpx"
+command: "/usr/local/bin/httpx"
+enabled: true
+short_description: "ProjectDiscovery HTTP 探测和指纹识别工具"
+description: |
+  httpx 用于批量探测 HTTP/HTTPS 服务，可获取状态码、标题、技术栈、TLS 和响应信息。
+
+  **使用场景：**
+  - Web 资产存活探测
+  - HTTP 服务指纹识别
+  - 标题和技术栈收集
+  - 批量 URL 验证
+
+  **注意事项：**
+  - 仅用于已授权的安全测试。
+  - 使用已核对的 ProjectDiscovery 可执行文件，避免项目 venv 中同名 Python httpx CLI 覆盖。
+parameters:
+  - name: "target"
+    type: "string"
+    description: "目标 URL、主机或域名"
+    required: true
+    flag: "-u"
+    format: "flag"
+  - name: "status_code"
+    type: "bool"
+    description: "显示 HTTP 状态码"
+    required: false
+    flag: "-sc"
+    format: "flag"
+    default: true
+  - name: "title"
+    type: "bool"
+    description: "显示页面标题"
+    required: false
+    flag: "-title"
+    format: "flag"
+    default: true
+  - name: "tech_detect"
+    type: "bool"
+    description: "启用技术栈识别"
+    required: false
+    flag: "-td"
+    format: "flag"
+    default: true
+  - name: "ports"
+    type: "string"
+    description: "要探测的端口列表"
+    required: false
+    flag: "-ports"
+    format: "flag"
+  - name: "additional_args"
+    type: "string"
+    description: "额外的 httpx 参数"
+    required: false
+    format: "positional"

@@ -21,27 +21,28 @@ parameters:
     type: "string"
     description: "Falco配置文件"
     required: false
-    flag: "--config"
+    flag: "-c"
     format: "flag"
-    default: "/etc/falco/falco.yaml"
   - name: "rules_file"
     type: "string"
     description: "自定义规则文件"
     required: false
-    flag: "--rules"
+    flag: "-r"
     format: "flag"
   - name: "json_output"
-    type: "bool"
-    description: "以JSON格式输出（等同于 -o json_output=true）"
+    type: "string"
+    description: "Falco json_output 配置值，以 -o json_output=true/false 传递"
     required: false
-    flag: "-o json_output=true"
-    format: "flag"
-    default: true
+    flag: "-o"
+    format: "template"
+    default: "true"
+    template: "{flag} json_output={value}"
+    options: ["true", "false"]
   - name: "duration"
     type: "int"
     description: "监控持续时间（秒）"
     required: false
-    flag: "--duration"
+    flag: "-M"
     format: "flag"
     default: 60
   - name: "additional_args"

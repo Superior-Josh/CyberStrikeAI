@@ -1,0 +1,59 @@
+name: "hash-identifier"
+command: "/bin/sh"
+# hash-identifier 原本是交互式脚本：它只接受 argv[1] 作为哈希，输出结果后仍会进入
+# input() 循环读取下一个哈希；在非交互环境下会抛 EOFError 并以退出码 1 结束，
+# 同时还会打印 SyntaxWarning。只在识别输出完整且 stderr 含预期 EOFError 时
+# 将退出码 1 归一为 0；缺少命令或其他运行错误保留 stderr 和退出码。
+args:
+  - "-c"
+  - |
+    err_file="$(mktemp)" || exit 1
+    trap 'rm -f "$err_file"' EXIT
+    out="$(hash-identifier "$1" </dev/null 2>"$err_file")"
+    status=$?
+    printf '%s\n' "$out" | sed -e '/^ *#/d' -e '/^-\{10,\}$/d' -e '/^ *HASH:[[:space:]]*$/d'
+    if [ "$status" -eq 1 ] && grep -q 'EOFError' "$err_file" && printf '%s\n' "$out" | grep -Eq 'Possible Hashs:|Not Found\.'; then
+      exit 0
+    fi
+    if [ "$status" -ne 0 ]; then
+      cat "$err_file" >&2
+    fi
+    exit "$status"
+  - "--"
+enabled: true
+short_description: "根据哈希格式特征，识别可能使用的哈希算法与类型"
+description: |
+  Hash Identifier 可根据哈希字符串长度和格式推断常见哈希算法。
+
+  **主要功能：**
+  - 按长度、字符集和格式特征匹配候选哈希算法
+  - 输出"最可能"和"次可能"两组候选算法，便于后续选择 john/hashcat 的 -m/--format
+
+  **使用场景：**
+  - CTF 与取证的哈希识别
+  - 拿到未知哈希后决定破解方式
+
+  **示例：**
+  - `hash = "5f4dcc3b5aa765d61d8327deb882cf99"` → 最可能为 MD5
+  - `hash = "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8"` → 最可能为 SHA-1
+
+  **注意事项：**
+  - 识别结果仅作为候选，不等同于破解或确认。
+  - 脚本为交互式设计；固定入参，仅归一已有识别结果后的 EOFError，其他错误如实返回。
+parameters:
+  - name: "hash"
+    type: "string"
+    description: |
+      要识别的哈希字符串（纯十六进制或带 `$` 分隔的 Unix crypt 格式均可）。
+
+      **示例值：**
+      - "5f4dcc3b5aa765d61d8327deb882cf99"（MD5）
+      - "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8"（SHA-1）
+      - "$6$rounds=5000$salt$..."（SHA-512 crypt）
+
+      **注意事项：**
+      - 必需参数，只传哈希本身，不要传 `hash:` 前缀或引号
+      - 结果只是候选清单，实际算法需结合业务/长度进一步确认
+    required: true
+    position: 0
+    format: "positional"

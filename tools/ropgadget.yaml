@@ -21,8 +21,8 @@ parameters:
     type: "string"
     description: "要分析的二进制文件路径"
     required: true
-    position: 0
-    format: "positional"
+    format: "flag"
+    flag: "--binary"
   - name: "additional_args"
     type: "string"
     description: |

@@ -21,7 +21,7 @@ parameters:
     type: "string"
     description: "包含哈希的文件"
     required: true
-    position: 0
+    position: 1
     format: "positional"
   - name: "hash_type"
     type: "string"
@@ -40,14 +40,13 @@ parameters:
     type: "string"
     description: "字典文件"
     required: false
-    default: "/usr/share/wordlists/rockyou.txt"
-    position: 1
+    position: 2
     format: "positional"
   - name: "mask"
     type: "string"
     description: "掩码（用于掩码攻击）"
     required: false
-    position: 2
+    position: 3
     format: "positional"
   - name: "additional_args"
     type: "string"

@@ -21,7 +21,7 @@ parameters:
     type: "string"
     description: "目标IP地址或范围"
     required: true
-    position: 0
+    position: 1
     format: "positional"
   - name: "verbose"
     type: "bool"
@@ -32,11 +32,11 @@ parameters:
     default: false
   - name: "timeout"
     type: "int"
-    description: "超时时间（秒）"
+    description: "响应等待超时（毫秒，-t）；默认 2000 毫秒"
     required: false
     flag: "-t"
     format: "flag"
-    default: 2
+    default: 2000
   - name: "additional_args"
     type: "string"
     description: |
