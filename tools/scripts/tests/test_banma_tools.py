@@ -73,6 +73,18 @@ class CaseTests(unittest.TestCase):
         with self.assertRaises(tool.ToolError):
             tool.run_path(str(tool.ROOT))
 
+    def test_save_requires_case_specific_guidance(self):
+        with self.assertRaises(tool.ToolError) as raised:
+            tool.dispatch("save", str(ROOT / "cases"), str(self.run), "PT_WEB_04", self.payload())
+        self.assertEqual(raised.exception.field, "case_id")
+        self.assertIn("show", str(raised.exception))
+        tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_01")
+        with self.assertRaises(tool.ToolError):
+            tool.dispatch("save", str(ROOT / "cases"), str(self.run), "PT_WEB_04", self.payload())
+        tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_04")
+        saved = tool.dispatch("save", str(ROOT / "cases"), str(self.run), "PT_WEB_04", self.payload())
+        self.assertEqual(saved["result"], "通过")
+
     def test_native_evidence_and_json_permissions(self):
         saved = self.save(self.payload())
         record = tool.read_json(Path(saved["saved_path"]))
