@@ -8,11 +8,13 @@ group: anonymous
 required: 约定匿名页面、JS、接口的敏感内容检查
 conditional: 已测流程签发 Cookie 时检查用途与安全属性；存在客户端存储时检查实际存储，动态值须有已有浏览器观察
 steps:
+  - 执行准备：项目 AI 完整读取 PT_WEB_02 与共同/分组要求，在当前对话列出必测子项和触发依据；核对授权、正常对照、实际工具 schema 与原文输出方式，复用指导工具返回的本次目录，不要求用户运行命令或填写结果
   - 从用户或获准资料确定公开范围、秘密字段及 Cookie 用途，列出必测资源；katana 可辅助发现
   - 用 http-framework-test 的 download 保存资源，execute-python-script 检索并复核疑似凭证、个人数据及配置上下文
-  - 核对适用 Secure/HttpOnly/SameSite；解析存储调用并在已有浏览器环境核对实际值来源，防 CSRF Cookie 按用途评价
+  - 项目 AI 用已有浏览器能力或原始响应核对适用 Cookie 的用途与 Secure/HttpOnly/SameSite；存在实际客户端存储时经 execute-python-script 驱动已有浏览器记录存储值来源，静态存储调用代码不能证明运行时值
   - 逐资源记录敏感性、实际值的脱敏摘要及来源，不包含认证后存储
-minimum_evidence: 资源清单、实际响应/下载文件、疑似内容上下文及适用 Cookie/存储观察引用。
+  - 判定与保存：项目 AI 逐子项对照本项 expected_results，关联实际操作、观察及 minimum_evidence 所需的真实文件；按共同要求保留失败和覆盖缺口，调用重写后的指导工具 save 保存 PT_WEB_02，核对返回路径与成功状态；保存错误先修正，不把计划或预览写成已完成原文
+minimum_evidence: 资源清单、实际响应/下载文件、疑似内容上下文及适用 Cookie/存储观察引用。 项目 AI 在实际调用中取得上述原文，保存或引用本次 evidence/raw/ 下的文件，并保留来源/步骤对应；已完成的目标操作、必要恢复与声明为完成的子项均须有相应真实引用，元数据/AI 摘要不能冒充原文。
 expected_results:
   通过: 必测及已触发条件项完成，未暴露经确认秘密或非公开数据，适用 Cookie 和存储控制满足用途
   失败: 匿名实测取得禁止公开的敏感内容，或适用 Cookie/存储控制实测违反基线
