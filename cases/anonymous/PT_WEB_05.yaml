@@ -1,0 +1,19 @@
+---
+category: 信息泄露
+id: PT_WEB_05
+name: 主机与 Web 组件已知漏洞检查
+description: 用 nmap、nuclei、nikto、jaeles 与必要的 metasploit 检查授权服务的已知漏洞，复核适用前提和实际效果。
+level: 高
+group: anonymous
+required: 约定服务和适用漏洞模板检查、命中复核
+conditional: metasploit 仅在授权且检查模块行为明确时使用；其他扫描器按覆盖选择替代或补充
+steps:
+  - 登记服务、版本依据及本轮模板清单，核对已安装模板动作、权限和非破坏性要求
+  - 按覆盖选择 nuclei、nmap 非破坏性漏洞脚本或 nikto/jaeles 已有签名执行，保存原始输出
+  - 用 http-framework-test 或匹配工具复核每项命中的适用版本及实际行为，排除仅版本猜测
+  - execute-python-script 对照计划覆盖与完成情况，列出命中确认或待复核状态
+minimum_evidence: 服务与模板清单、版本依据、扫描输出及各命中行为复核引用。
+expected_results:
+  通过: 必测及已触发条件项完成，约定检查完成且无已确认适用漏洞，命中均有支持或排除依据；不声称覆盖全部 CVE
+  失败: 版本与适用条件及实际行为证实漏洞
+  中断: 未确认失败，但缺必要模板、约定覆盖未完成或命中无法复核；无告警不能单独证明安全。

@@ -1,0 +1,19 @@
+---
+category: 权限控制
+id: PT_WEB_AUTH_03
+name: Token 篡改（JWT 专项）
+description: 用 jwt-analyzer、john/hashcat、http-framework-test 与 execute-python-script 验证 JWT 算法、签名、声明规则及有限弱密钥候选。
+level: 高
+group: authenticated
+required: JWT 正常权限、无有效签名/算法变体及适用声明校验
+conditional: HMAC 弱密钥仅在获准有限字典中核对；声明按实际用途与策略适用，正确重签 Token 不一律要求拒绝
+steps:
+  - 用 execute-python-script 解码头/声明，从用户或获准认证资料取得算法、用途与时效规则；用 http-framework-test 建立正常权限对照
+  - 用 jwt-analyzer 当前帮助支持选项或 execute-python-script 构造签名、算法与声明变体，每次只改变被测因素
+  - HMAC 场景按授权选择 john 或 hashcat 核对候选，记录候选范围；确认弱密钥后单独构造重签样例
+  - 用 http-framework-test 重放正常与变体，读取实际身份/权限；区分有效签名、无效签名与违反声明规则
+minimum_evidence: 算法/声明规则、脱敏 Token 结构与会话引用、正常/变体权限响应及适用候选输出引用。
+expected_results:
+  通过: 必测及已触发条件项完成，无有效签名或违反既定规则的 JWT 被限制，约定弱密钥候选未确认可用；有限未命中不证明密钥强度
+  失败: 无有效签名/违规声明 Token 获得权限，或确认违反密钥要求的弱密钥
+  中断: 未确认失败，但非 JWT 架构、缺正常 Token、声明规则或必要权限对照。

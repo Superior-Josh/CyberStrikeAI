@@ -1,0 +1,19 @@
+---
+category: 基础设施
+id: PT_WEB_12
+name: TLS 与传输安全配置
+description: 用 nmap、execute-python-script 的 ssl 能力与 http-framework-test 检查授权 TLS 服务、证书和明文入口。
+level: 高
+group: anonymous
+required: 约定 TLS 服务的协议、套件、证书及明文入口
+conditional: HSTS 按业务适用基线检查；页面资源仅覆盖约定匿名链路，不扩展认证后流量
+steps:
+  - 从用户、获准部署资料或明确适用标准取得 TLS/证书/HSTS 基线，登记端口与链路
+  - 用 nmap 的 ssl-enum-ciphers/ssl-cert 检查协议及套件，execute-python-script 默认 SSLContext 校验证书链、主机名及有效期
+  - 用 http-framework-test 不带认证秘密/敏感正文请求 HTTP，关闭跳转，保存拒绝或 HTTPS Location 及适用 HSTS
+  - 核对约定页面的敏感提交地址与资源协议，记录未观察链路，不声称实际中间人攻击
+minimum_evidence: 基线来源、端口/链路清单、TLS 输出、证书校验及 HTTP/HTTPS 响应引用。
+expected_results:
+  通过: 必测及已触发条件项完成，已测 TLS 和适用 HSTS 满足基线，HTTP 安全拒绝或跳转，已观察匿名链路无敏感明文
+  失败: 实测禁止协议/套件、证书不合基线或已观察敏感明文传输
+  中断: 未确认失败，但缺明确基线、必要 TLS/证书证据或约定链路观察。

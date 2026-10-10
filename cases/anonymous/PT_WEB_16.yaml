@@ -1,0 +1,19 @@
+---
+category: 安全配置
+id: PT_WEB_16
+name: CORS 配置（匿名接口）
+description: 用 http-framework-test、nuclei 与 execute-python-script 检查匿名响应的 CORS 策略，不使用认证凭证。
+level: 中
+group: anonymous
+required: 匿名接口正常响应及批准/非批准 Origin 对照
+conditional: 非简单请求增加预检；需验证浏览器读取且头部证据不足时使用已有浏览器；不测试认证态读取
+steps:
+  - 从用户或获准接口资料取得公开数据范围、来源规则与请求类型，建立匿名正常响应
+  - 用 http-framework-test 不带认证凭证分别发送批准和非批准 Origin；适用 OPTIONS 带请求方法/头
+  - execute-python-script 核对实际与预检 ACAO、ACAC、方法、头及适用 Vary；nuclei 仅辅助
+  - 必要时在已有浏览器验证匿名读取，把策略偏离与实际暴露分开记录
+minimum_evidence: 公开范围/来源规则、正常及 Origin/预检响应、必要浏览器读取引用。
+expected_results:
+  通过: 必测及已触发条件项完成，实际与预检策略符合匿名公开范围，已测禁止跨域读取被有效限制
+  失败: 生效策略违反明确来源要求，或实测向禁止来源开放不应共享的数据
+  中断: 未确认失败，但缺公开/来源规则、必要预检或浏览器判读；公开资源通配符合法，ACAO=* 与凭证不直接证明可读。

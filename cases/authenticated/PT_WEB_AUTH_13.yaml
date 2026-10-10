@@ -1,0 +1,19 @@
+---
+category: 注入
+id: PT_WEB_AUTH_13
+name: XXE 攻击
+description: 用 http-framework-test、execute-python-script 与授权 dnslog 检查 XML 是否非预期展开外部实体或读取外部资源。
+level: 高
+group: authenticated
+required: 正常 XML 解析及外部实体展开/禁止资源访问对照
+conditional: 文件目标仅用授权已知测试资源；带外观察须批准可用 dnslog 通道；内部受控 DTD 不一律禁止
+steps:
+  - 用 http-framework-test 确认认证、Content-Type、真实解析路径和正常 XML 响应，登记变体/目标
+  - execute-python-script 构造正常与外部实体标记 XML，通过 http-framework-test 提交
+  - 已选带外方法确认正向探测，使用独立唯一标记及观察窗口；读取目标只用授权测试资源
+  - 复核实体展开、禁止内容或关联外连，排除未解析和仅业务合法请求
+minimum_evidence: 正常 XML/解析依据、变体 XML 与响应、适用测试文件内容或带外对照引用。
+expected_results:
+  通过: 必测及已触发条件项完成，正常 XML 有效，已测变体未非预期展开外部实体或访问禁止资源
+  失败: 实际展开外部实体并产生禁止读取或关联外连等非预期效果
+  中断: 未确认失败，但缺有效 XML 解析、正常对照或必要资源/带外观察。

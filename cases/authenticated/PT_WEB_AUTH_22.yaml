@@ -1,0 +1,19 @@
+---
+category: 数据安全
+id: PT_WEB_AUTH_22
+name: 密码存储与敏感数据脱敏验证
+description: 用 http-framework-test、execute-python-script 与获准的 exec 文件读取，分别验证角色所需数据披露和密码存储依据。
+level: 高
+group: authenticated
+required: 约定角色的数据必要披露/脱敏及真实密码存储依据
+conditional: 实现/存储资料仅在获准可读时取得；无法取得密码依据须中断该必要部分，不覆盖其他数据存储保护
+steps:
+  - 从用户或获准业务/安全资料取得敏感字段、角色必要权限、脱敏和密码存储要求
+  - 用 http-framework-test 采集本人及约定角色正常响应，execute-python-script 解析 json/re 并脱敏整理字段差异
+  - 用获准 exec 文件读取取得真实密码存储资料，execute-python-script 核对实际算法、参数及加盐与基线
+  - 分别记录数据披露与密码存储结果，不从显示掩码或 API 无密码字段反推存储安全
+minimum_evidence: 字段/角色及存储基线、各角色响应引用、真实算法/参数/加盐依据，不在摘要保存秘密。
+expected_results:
+  通过: 必测及已触发条件项完成，约定角色只获取允许必要字段且脱敏符合规则，实际密码算法/参数/加盐满足基线
+  失败: 实测禁止数据披露或真实密码存储违反基线
+  中断: 未确认失败，但缺角色/脱敏规则、必要响应或实际密码存储依据。

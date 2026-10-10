@@ -4,13 +4,13 @@
 
 为 CyberStrikeAI 添加“斑马安全渗透测试”角色和两个辅助工具：`banma_pentest_run_cases` 解析本地固定用例、指导 AI 执行并保存证据文件；`banma_report` 根据证据文件和本地报告模板生成报告。实际测试调用项目现有工具完成。
 
-用例执行来源为 `cases/anonymous/`、`cases/authenticated/` 下每项 JSON 配置，共同与分组要求为 `cases/_context.json`；报告格式来源为 `templates/pentest_report_template.md`。`templates/web_pentest_cases.md` 保留为同步参考快照，工具运行时不解析 Markdown，不在角色或工具 YAML 中复制另一套用例和判定标准。
+唯一用例来源为 [cases/](cases/)：`anonymous/`、`authenticated/` 下每项 YAML 配置及 `_context.yaml` 中的共同/分组要求；同步关系为 [cases/](cases/) → [templates/pentest_report_template.md](templates/pentest_report_template.md)。`templates/web_pentest_cases.md` 已弃用，仅保留历史内容，不再读取、同步或作为验证依据。不在角色或工具 YAML 中复制另一套用例和判定标准。
 
 ## 实现范围
 
 - 通过 `roles/` 下的角色 YAML 接入，新增两个工具的 YAML 配置及职责单一的 Python 脚本，复用现有扫描器、任务流程和对话记录。具体方案以 `Implementation_Plan.md` 为准。
 - 角色提示词只说明用例与模板路径、执行流程、必要的结果要求，不复制完整用例内容。
-- `banma_pentest_run_cases` 提供 list/show/save：解析 `cases/` JSON 用例、返回配置原文指导、保存实际结果及证据引用，不代替 AI 调用现有工具执行测试，不另建登录系统。
+- `banma_pentest_run_cases` 提供 list/show/save：解析 `cases/` YAML 用例、返回配置原文指导、保存实际结果及证据引用，不代替 AI 调用现有工具执行测试，不另建登录系统。
 - `banma_report` 读取已保存的证据和模板，填充报告并核对编号、引用及统计；不执行测试，不编造观察，不新增判定标准。
 - 不为这个角色另建通用测试引擎、规则配置体系、专用证据框架或任务生命周期系统，不默认改动 Go 平台主流程。
 - 只有实际验证发现现有功能无法完成目标时，才做对应的最小局部修复，并说明原因。
@@ -36,7 +36,8 @@
 
 ## 开发与验证
 
-- 用例以 `cases/` 配置为执行依据；内容修改时同步维护 `templates/web_pentest_cases.md` 参考快照及 `templates/pentest_report_template.md` 第四章对应字段，逐项核对一致性；名称变更同步章节标题与结果汇总表，其他字段保持原样。
+- 修改 `cases/` 用例配置后，直接同步 `templates/pentest_report_template.md` 第四章对应字段，逐项核对一致性；名称变更同步章节标题与结果汇总表，其他字段保持原样。验证只以用例 YAML 与报告模板为依据，不依赖已弃用的用例 Markdown。
+- 用例 YAML 使用 PyYAML 的安全加载器，拒绝重复键、别名及不安全标签；工具优先使用项目 `venv` Python，依赖在 `requirements.txt` 中声明，不依赖 Ruby/Psych。
 - 用例分组名为“匿名”（`anonymous`）与“认证”（`authenticated`），保留原用例编号；配置的 `required`、`conditional`、`steps`（有序字符串数组）、`minimum_evidence` 分别承载必测、条件性、实际测试步骤和最小证据；`expected_results` 保留通过/失败/中断原文。适用范围与基线来源在执行前确定，不以缺条件视为未触发；`show` 返回共同/分组要求及完整配置，不生成另一套断言。
 - 每次对话都维护 `AGENTS.md`，将本轮新增或变更的项目约定同步到对应章节，避免重复记录，不写入密码、Cookie 或 Token 等敏感信息。
 - 每次修改文件后，完成对应检查，暂存并提交本次修改，再推送到 GitHub；仅提交本次任务范围内的文件，不混入已有无关修改。提交或推送失败时明确说明原因，不宣称已同步。
