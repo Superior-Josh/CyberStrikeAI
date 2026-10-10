@@ -29,6 +29,7 @@ def valid_end_time(run, value):
 
 def source_refs(values, records, run):
     known = {"test_info", *records}
+    known.update("test_info." + field for field in helper.read_json(run / "evidence/test_info.json")["test_info"])
     for cid, record in records.items():
         for e in record.get("evidence", []):
             known.add(cid + ":" + e["evidence_id"])
@@ -72,7 +73,7 @@ def save_info(run, payload):
     if path.exists():
         helper.write_json(run / "evidence/versions" / ("report-info-" + uuid.uuid4().hex + ".json"), helper.read_json(path))
     helper.write_json(path, helper.redact(old), replace=path.exists())
-    return {"saved_path": str(path), "next_action": "调用mode=build；只补已有资料，不追加目标测试"}
+    return {"saved_path": str(path), "current_time_utc": datetime.now(timezone.utc).isoformat(), "next_action": "需要记录结束时间时以本返回current_time_utc调用save_info填写ended_at；再mode=build，只补已有资料，不追加目标测试"}
 
 
 def inputs(run, definitions, context):
@@ -90,6 +91,11 @@ def inputs(run, definitions, context):
         valid = valid and all("execution_id" not in op or helper.valid_execution_id(op["execution_id"]) for op in record.get("actual_steps", []))
         for item in record.get("evidence", []):
             if item.get("source_type") == "输入事实":
+                try:
+                    value = helper.input_fact(run, item.get("source_ref"))
+                    valid = valid and "fact_value" in item and item["fact_value"] == value
+                except helper.ToolError:
+                    valid = False
                 continue
             p = Path(item.get("saved_path", ""))
             valid = valid and p.is_file() and p.resolve().is_relative_to(run.resolve()) and helper.digest(p.read_bytes()) == item.get("sha256")
@@ -196,7 +202,7 @@ def render(run, definitions, context, template):
                 detail = "原文引用待核验：保留原记录结果，但不能据此作新的安全结论。\n" + detail
             detail += "\n".join(s["tool_name"] + ": " + s["method_summary"] for s in record["actual_steps"])
             detail += "\n观察：" + "；".join(o["summary"] for o in record["observations"])
-            detail += "\n证据：" + "；".join(e.get("saved_path", e["source_ref"]) for e in record["evidence"])
+            detail += "\n证据：" + "；".join(e.get("saved_path", e["source_ref"]) + ("=" + json.dumps(e["fact_value"], ensure_ascii=False) if "fact_value" in e else "") for e in record["evidence"])
             detail += "\n覆盖：" + "；".join(record["coverage_limitations"]) + "\n恢复：" + record["recovery"]["status"]
             if status == "中断":
                 detail += "\n中断：" + record["interruption_kind"] + "，" + record["interruption_reason"]
@@ -212,7 +218,8 @@ def render(run, definitions, context, template):
         result = re.sub(r"^\| " + name + r" \| 【0】.*$", lambda _: row, result, flags=re.M)
     a = sum(r.get("interruption_kind") == "条件缺失" for r in records.values())
     b = sum(r.get("interruption_kind") == "证据不足" for r in records.values())
-    result = re.sub(r"^【中断中条件缺失.*$", f"中断主原因：条件缺失 {a}、证据不足 {b}；未执行/待核验 {total['未执行']}，不计失败。", result, flags=re.M)
+    environment = sum(r.get("interruption_kind") == "环境问题" for r in records.values())
+    result = re.sub(r"^【中断中(?:条件缺失|环境问题).*$", f"中断主原因：环境问题 {environment}、历史条件缺失 {a}、历史证据不足 {b}；未执行/待核验 {total['未执行']}，不计失败。", result, flags=re.M)
     for i in range(1, 10):
         pattern = r"(### 5\." + str(i) + r" [^\n]+\n)(.*?)(?=\n### |\n## )"
         match = re.search(pattern, result, re.S)

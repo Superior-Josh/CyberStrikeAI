@@ -35,7 +35,7 @@ parameters:
     format: flag
     description: |
       save_info必需对象，只允许test_info/target_profile/exploratory_sections/findings/conclusion。
-      test_info对象可含test_object,tester,reviewer,approver,document_version,ended_at,acsl_grade,acsl_basis,tool_versions:{工具名:实际版本},local_environment,remote_environment；只填已有来源事实，缺人员/评分不要伪造。
+      test_info对象可含test_object,tester,reviewer,approver,document_version,ended_at,acsl_grade,acsl_basis,tool_versions:{工具名:实际版本},local_environment,remote_environment；只填已有来源事实，缺人员/评分不要伪造。save_info返回current_time_utc，目标操作结束后用该值再次save_info填写ended_at，不猜日期。
       target_profile数组每项:{field:模板第二章字段名,value:事实,source_refs:[已有用例编号如PT_WEB_15、编号:证据ID、本次原文绝对路径或test_info]}。不要自行创造引用名，不传对象当引用。
       exploratory_sections对象键5.1至5.9，值为行数组；每项:{columns:[按模板列顺序的实际内容],source_refs:[已有引用]}。
       findings数组每项:{case_id:已保存失败用例,title,severity:严重/高危/中危/低危/信息,impact:实证影响,source_refs:[有效引用],recommendations:[具体建议],status:实际状态}。

@@ -25,7 +25,7 @@ class CaseTests(unittest.TestCase):
         self.addCleanup(setattr, tool, "ROOT", self.original_root)
         tool.ROOT = Path(self.temp.name)
         self.context, self.cases = tool.catalog(ROOT / "cases")
-        self.created = tool.init_run(self.cases, self.context, {"test_name": "offline-fixture", "test_info": {"targets": ["OFFLINE-NO-TARGET"], "source": "offline fixture"}})
+        self.created = tool.init_run(self.cases, self.context, {"test_name": "offline-fixture", "test_info": {"targets": ["OFFLINE-NO-TARGET"], "source": "offline fixture", "write_authorized": False}})
         self.run = Path(self.created["run_dir"])
         self.source = tool.ROOT / "native.txt"
         self.source.write_text("OFFLINE FIXTURE ONLY\nNORMAL/VARIANT\n")
@@ -41,7 +41,7 @@ class CaseTests(unittest.TestCase):
             "recovery": {"status": "未涉及", "evidence_ids": [], "actual_actions": [], "remaining_changes": []},
         }
         if result == "中断":
-            value.update(interruption_reason="fixture prerequisite missing", interruption_kind="条件缺失")
+            value.update(interruption_reason="offline fixture environment unavailable", interruption_kind="环境问题")
         return value
 
     def save(self, payload):
@@ -56,7 +56,13 @@ class CaseTests(unittest.TestCase):
         self.assertIn("item_ids", contract["actual_step_required"])
         self.assertIn("evidence_ids", contract["observation_required"])
         self.assertEqual(set(contract["result_values"]), tool.RESULTS)
-        self.assertIn("证据不足", contract["interruption_kind_values"])
+        self.assertEqual(contract["interruption_kind_values"], ["环境问题"])
+        self.assertIs(guide["execution_scope"]["write_authorized"], False)
+        self.assertIn("current_time_utc", guide)
+        persisted = tool.read_json(Path(guide["guidance_path"]))
+        self.assertEqual(persisted["case"], guide["case"])
+        self.assertEqual(persisted["context"], guide["context"])
+        self.assertEqual(Path(guide["guidance_path"]).stat().st_mode & 0o777, 0o600)
 
     def test_scope_and_duplicate_yaml(self):
         path = tool.ROOT / "invalid.yaml"
@@ -94,6 +100,14 @@ class CaseTests(unittest.TestCase):
         with self.assertRaises(tool.ToolError):
             self.save(value)
 
+    def test_failed_subitem_cannot_be_hidden_as_unselected(self):
+        value = self.payload()
+        value["scope_items"].append({**value["scope_items"][0], "item_id": "S2", "must_complete": False})
+        value["item_results"].append({**value["item_results"][0], "item_id": "S2", "result": "失败"})
+        with self.assertRaises(tool.ToolError) as raised:
+            self.save(value)
+        self.assertEqual(raised.exception.field, "scope_items.must_complete")
+
     def test_completed_evidence_required(self):
         value = self.payload()
         value["actual_steps"][0]["tool_status"] = "running"
@@ -102,13 +116,15 @@ class CaseTests(unittest.TestCase):
 
     def test_summary_credentials_filtered_without_changing_native_bytes(self):
         value = self.payload()
-        value["observations"][0]["summary"] = "admin/password123 admin/letmein PHPSESSID=fixture-secret"
+        value["observations"][0]["summary"] = "默认凭据admin/password123登录失败；另有admin/letmein 会话PHPSESSID=fixture-secret;令牌user_token=fixture-csrf"
         original = self.source.read_bytes()
         saved = self.save(value)
         record = tool.read_json(Path(saved["saved_path"]))
         self.assertNotIn("admin/password", record["observations"][0]["summary"])
         self.assertNotIn("letmein", record["observations"][0]["summary"])
+        self.assertIn("登录失败", record["observations"][0]["summary"])
         self.assertNotIn("fixture-secret", record["observations"][0]["summary"])
+        self.assertNotIn("fixture-csrf", record["observations"][0]["summary"])
         self.assertEqual(Path(record["evidence"][0]["saved_path"]).read_bytes(), original)
 
     def test_invented_execution_id_is_rejected(self):
@@ -133,12 +149,112 @@ class CaseTests(unittest.TestCase):
         self.assertFalse((self.run / "evidence/report_info.json").exists())
 
     def test_condition_missing_has_input_fact_not_fake_output(self):
+        # Legacy snapshots retain their original contract; new runs do not accept it.
+        snapshot_path = self.run / "evidence/test_info.json"
+        snapshot = tool.read_json(snapshot_path)
+        snapshot["context"].pop("result_contract")
+        tool.write_json(snapshot_path, snapshot, replace=True)
+        value = self.payload("中断")
+        value["interruption_kind"] = "条件缺失"
+        value["actual_steps"] = []
+        value["observations"] = []
+        value["item_results"][0].update(observation_ids=[], evidence_ids=["E1"])
+        value["evidence"] = [{"evidence_id": "E1", "source_type": "输入事实", "source_ref": "test_info.source", "coverage": "offline fixture only"}]
+        reason = value.pop("interruption_reason")
+        with self.assertRaises(tool.ToolError) as raised:
+            self.save(value)
+        self.assertEqual(raised.exception.field, "payload.interruption_reason")
+        self.assertIn("顶层", str(raised.exception))
+        value["interruption_reason"] = reason
+        self.assertEqual(self.save(value)["result"], "中断")
+        record = tool.read_json(self.run / "evidence/PT_WEB_01.json")
+        self.assertEqual(record["evidence"][0]["fact_value"], "offline fixture")
+
+    def test_environment_interruption_requires_actual_evidence(self):
+        value = self.payload("中断")
+        value["actual_steps"][0]["tool_status"] = "failed"
+        self.assertEqual(self.save(value)["result"], "中断")
+        built = self.build()
+        self.assertIn("环境问题 1", Path(built["report_path"]).read_text())
+        value["interruption_kind"] = "条件缺失"
+        with self.assertRaises(tool.ToolError):
+            self.save(value)
+        value["interruption_kind"] = "环境问题"
+        value["actual_steps"] = []
+        value["observations"] = []
+        value["item_results"][0].update(observation_ids=[], evidence_ids=[])
+        with self.assertRaises(tool.ToolError):
+            self.save(value)
+
+    def test_absent_attack_surface_pass_needs_completed_discovery(self):
+        value = self.payload()
+        value["scope_items"][0].update(applicability_reason="OFFLINE attack surface discovery", planned_checks=["OFFLINE resource and route inventory"])
+        value["item_results"][0]["reason"] = "OFFLINE confirmed mechanism not in use"
+        value["judgment_reason"] = "OFFLINE only: attack surface not applicable"
+        self.assertEqual(self.save(value)["result"], "通过")
+        value["actual_steps"] = []
+        value["observations"] = []
+        value["item_results"][0].update(observation_ids=[], evidence_ids=[])
+        with self.assertRaises(tool.ToolError):
+            self.save(value)
+
+    def test_input_fact_must_identify_recorded_field(self):
         value = self.payload("中断")
         value["actual_steps"] = []
         value["observations"] = []
         value["item_results"][0].update(observation_ids=[], evidence_ids=["E1"])
-        value["evidence"] = [{"evidence_id": "E1", "source_type": "输入事实", "source_ref": "offline user fixture", "coverage": "no account provided"}]
-        self.assertEqual(self.save(value)["result"], "中断")
+        for ref in ("test_info", "test_info.target_has_no_mfa"):
+            value["evidence"] = [{"evidence_id": "E1", "source_type": "输入事实", "source_ref": ref, "coverage": "unverified target inference"}]
+            with self.assertRaises(tool.ToolError):
+                self.save(value)
+
+    def test_derived_guidance_and_results_are_not_target_evidence(self):
+        guide = tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_01")
+        for source in (self.run / "evidence/test_info.json", Path(guide["guidance_path"])):
+            value = self.payload()
+            value["evidence"][0]["source_path"] = str(source)
+            with self.assertRaises(tool.ToolError) as raised:
+                self.save(value)
+            self.assertEqual(raised.exception.code, "INCOMPLETE_SOURCE")
+
+    def test_pass_cannot_borrow_unrelated_observation(self):
+        value = self.payload()
+        value["scope_items"].append({**value["scope_items"][0], "item_id": "S2"})
+        value["actual_steps"].append({**value["actual_steps"][0], "operation_id": "O2", "item_ids": ["S2"], "tool_status": "failed"})
+        value["observations"][0]["operation_id"] = "O2"
+        value["item_results"].append({**value["item_results"][0], "item_id": "S2", "result": "中断"})
+        value.update(result="中断", interruption_reason="fixture", interruption_kind="证据不足")
+        with self.assertRaises(tool.ToolError):
+            self.save(value)
+
+    def test_selected_case_scope_is_enforced_for_guidance(self):
+        created = tool.init_run(self.cases, self.context, {"test_name": "selected", "test_info": {"targets": ["fixture"], "case_ids": ["PT_WEB_01"]}})
+        listing = tool.dispatch("list", str(ROOT / "cases"), created["run_dir"])
+        self.assertEqual(listing["pending"], ["PT_WEB_01"])
+        self.assertEqual(len(listing["unselected"]), 43)
+        with self.assertRaises(tool.ToolError):
+            tool.dispatch("show", str(ROOT / "cases"), created["run_dir"], "PT_WEB_02")
+
+    def test_same_item_cannot_join_unrelated_native_files(self):
+        value = self.payload()
+        other = tool.ROOT / "other-native.txt"
+        other.write_text("OTHER OFFLINE OPERATION")
+        value["evidence"].append({**value["evidence"][0], "evidence_id": "E2", "source_path": str(other)})
+        value["item_results"][0]["evidence_ids"] = ["E2"]
+        with self.assertRaises(tool.ToolError):
+            self.save(value)
+
+    def test_fact_value_comes_from_init_including_false(self):
+        value = self.payload()
+        value["evidence"].append({"evidence_id": "E2", "source_type": "输入事实", "source_ref": "test_info.write_authorized", "coverage": "read only", "fact_value": True})
+        self.save(value)
+        record = tool.read_json(self.run / "evidence/PT_WEB_01.json")
+        self.assertIs(record["evidence"][1]["fact_value"], False)
+        record["evidence"][1]["fact_value"] = True
+        tool.write_json(self.run / "evidence/PT_WEB_01.json", record, replace=True)
+        built = self.build()
+        self.assertEqual(built["artifact_status"], "草稿")
+        self.assertTrue(any("待核验" in gap for gap in built["gaps"]))
 
     def test_result_versions_and_failure_preservation(self):
         self.save(self.payload("失败"))

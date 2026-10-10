@@ -258,7 +258,7 @@ func (h *AgentHandler) EinoSingleAgentLoopStream(c *gin.Context) {
 			roleTools,
 			progressCallback,
 			chatReasoningToClientIntent(req.Reasoning),
-			h.agentSessionContextBlock(conversationID),
+			h.agentRoleSessionContextBlock(conversationID, req.Role),
 		)
 		_ = resolvedAIChannelID
 
@@ -511,7 +511,7 @@ func (h *AgentHandler) EinoSingleAgentLoop(c *gin.Context) {
 			prep.RoleTools,
 			progressCallback,
 			chatReasoningToClientIntent(req.Reasoning),
-			h.agentSessionContextBlock(prep.ConversationID),
+			h.agentRoleSessionContextBlock(prep.ConversationID, req.Role),
 		)
 		if runErr != nil {
 			if shouldPersistEinoAgentTraceAfterRunError(baseCtx) {

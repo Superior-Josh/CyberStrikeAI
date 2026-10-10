@@ -1229,6 +1229,8 @@ args:
                                 "input_url": encoded_url,
                                 "wire_request_target": wire_target.decode("utf-8", errors="replace"),
                                 "wire_request_target_base64": base64.b64encode(wire_target).decode("ascii"),
+                                "request_headers": list(response.request.headers.multi_items()),
+                                "request_body_base64": base64.b64encode(response.request.content).decode("ascii"),
                                 "status_code": status_code,
                                 "http_version": http_version,
                                 "headers": list(response.headers.multi_items()),
@@ -1582,7 +1584,7 @@ parameters:
     flag: "--download"
   - name: "capture_file"
     type: "string"
-    description: "直接保存本次真实响应JSON（状态、完整多值头、解压后正文base64及字节数），空正文仍有真实头；指定本次raw_dir下路径，重复请求用{i}。文件含原始敏感头，权限0600，不用AI复述替代原文。"
+    description: "同次原生保存真实请求头/请求体base64及响应状态、多值头、正文base64/字节数；空正文仍有真实头。使用本次raw_dir唯一路径，repeat用{i}；含原始密码/Cookie/Token，权限0600，禁止输出到摘要/报告或AI补写原文。"
     required: false
     flag: "--capture-file"
   - name: "http2"

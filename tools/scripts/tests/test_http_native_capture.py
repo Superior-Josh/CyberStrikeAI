@@ -15,6 +15,13 @@ ROOT = Path(__file__).resolve().parents[3]
 
 
 class Handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        body = self.rfile.read(int(self.headers.get("Content-Length", "0")))
+        self.send_response(200)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         if self.path == "/close":
             self.close_connection = True
@@ -31,6 +38,20 @@ class Handler(BaseHTTPRequestHandler):
 
 
 class NativeCaptureTest(unittest.TestCase):
+    def test_actual_post_body_matches_server_observation(self):
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.addCleanup(server.server_close)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.shutdown)
+        config = yaml.safe_load((ROOT / "tools/http-framework-test.yaml").read_text())
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "post.json"
+            result = subprocess.run([sys.executable, *config["args"], "--url", f"http://127.0.0.1:{server.server_port}/fixture", "--method", "POST", "--data", "field=fixture%20value", "--capture-file", str(path)], capture_output=True, text=True, timeout=20)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            data = json.loads(path.read_text())
+            self.assertEqual(base64.b64decode(data["request_body_base64"]), base64.b64decode(data["body_base64"]))
+            self.assertEqual(data["method"], "POST")
+
     def test_native_request_failure_preserves_error_and_nonzero_exit(self):
         server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.addCleanup(server.server_close)
@@ -57,7 +78,7 @@ class NativeCaptureTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "native.json"
             url = f"http://127.0.0.1:{server.server_port}/non-root?test=1"
-            completed = subprocess.run([sys.executable, *config["args"], "--url", url, "--capture-file", str(path), "--repeat", "2"], capture_output=True, text=True, timeout=20)
+            completed = subprocess.run([sys.executable, *config["args"], "--url", url, "--capture-file", str(path), "--cookies", "fixture_capture=probe", "--repeat", "2"], capture_output=True, text=True, timeout=20)
             self.assertEqual(completed.returncode, 0, completed.stderr)
             self.assertFalse(path.exists())
             for index in (1, 2):
@@ -67,6 +88,8 @@ class NativeCaptureTest(unittest.TestCase):
                 self.assertEqual(data["url"], url)
                 self.assertEqual(data["input_url"], url)
                 self.assertEqual(data["wire_request_target"], "/non-root?test=1")
+                self.assertEqual(base64.b64decode(data["request_body_base64"]), b"")
+                self.assertTrue(any("fixture_capture=probe" in [part.strip() for part in v.split(";")] for k, v in data["request_headers"] if k.lower() == "cookie"))
                 self.assertEqual(base64.b64decode(data["body_base64"]), b"")
                 self.assertEqual(data["body_length"], 0)
                 self.assertEqual([v for k, v in data["headers"] if k.lower() == "set-cookie"], ["fixture_one=one", "fixture_two=two"])
