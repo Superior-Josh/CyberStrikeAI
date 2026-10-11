@@ -135,19 +135,22 @@ func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.T
 	body, _ := url.ParseQuery(toString(args["data"]))
 	if u != nil && u.Query().Has("password") {
 		body.Set("password", u.Query().Get("password"))
+		body.Set("username", u.Query().Get("username"))
 	}
 	if !body.Has("password") {
 		var object map[string]interface{}
 		if json.Unmarshal([]byte(toString(args["data"])), &object) == nil {
-			if password, ok := object["password"].(string); ok {
-				body.Set("password", password)
+			for _, key := range []string{"username", "password"} {
+				if value, ok := object[key].(string); ok {
+					body.Set(key, value)
+				}
 			}
 		}
 	}
 	if !body.Has("password") {
 		return nil
 	}
-	if body.Get("password") == r.input.Password && r.input.Password != "" {
+	if body.Get("password") == r.input.Password && r.input.Password != "" && body.Get("username") == r.input.Username && r.input.Username != "" {
 		return nil
 	}
 	r.budget.mu.Lock()

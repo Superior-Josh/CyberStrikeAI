@@ -52,6 +52,18 @@ class CaseTests(unittest.TestCase):
     def check_completion(self):
         return tool.completion_check(str(self.run), str(ROOT / "cases"))
 
+    def test_load_machine_budget_rejects_conflict_with_original_steps(self):
+        directory = tool.ROOT / "machine-cases"
+        import shutil
+        shutil.copytree(ROOT / "cases", directory)
+        path = directory / "anonymous/PT_WEB_11.yaml"
+        value = tool.yaml.safe_load(path.read_text())
+        value["load_budget"]["baseline_requests"] = 4
+        path.write_text(tool.yaml.safe_dump(value, allow_unicode=True, sort_keys=False))
+        with self.assertRaises(tool.ToolError) as raised:
+            tool.catalog(directory)
+        self.assertEqual(raised.exception.code, "CASE_CONFIG_ERROR")
+
     def test_execution_order_preserves_scope_and_report_order(self):
         numbered = list(self.cases)
         order = self.context["execution_order"]

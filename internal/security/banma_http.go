@@ -81,6 +81,7 @@ func (e *Executor) executeBanmaHTTP(ctx context.Context, args map[string]interfa
 	}
 	peer := ""
 	req = req.WithContext(httptrace.WithClientTrace(req.Context(), &httptrace.ClientTrace{GotConn: func(info httptrace.GotConnInfo) { peer = info.Conn.RemoteAddr().String() }}))
+	requestStarted := time.Now()
 	response, callErr := client.Do(req)
 	capture := map[string]interface{}{"source": "http-framework-test native response capture", "tcp_peer": peer, "captured_at_unix": float64(time.Now().UnixNano()) / 1e9, "method": method, "url": target, "input_url": target, "wire_request_target": req.URL.RequestURI(), "request_headers": requestHeaders, "request_body_base64": base64.StdEncoding.EncodeToString([]byte(body)), "headers": [][]string{}, "body_base64": "", "body_length": 0}
 	if response != nil {
@@ -101,6 +102,9 @@ func (e *Executor) executeBanmaHTTP(ctx context.Context, args map[string]interfa
 		capture["body_base64"] = base64.StdEncoding.EncodeToString(raw)
 		capture["body_length"] = len(raw)
 	}
+	capture["request_started_at_unix"] = float64(requestStarted.UnixNano()) / 1e9
+	capture["request_ended_at_unix"] = float64(time.Now().UnixNano()) / 1e9
+	capture["elapsed_seconds"] = time.Since(requestStarted).Seconds()
 	if callErr != nil {
 		capture["error"] = callErr.Error()
 	}

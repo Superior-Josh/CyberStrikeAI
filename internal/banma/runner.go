@@ -92,7 +92,9 @@ func (r *Runner) call(ctx context.Context, name string, args map[string]interfac
 	}
 	e, err := r.Call(ctx, name, args)
 	if e != nil {
+		r.budget.mu.Lock()
 		r.IDs = append(r.IDs, e.ID)
+		r.budget.mu.Unlock()
 	}
 	return e, err
 }
@@ -312,6 +314,10 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 				}
 			}
 		}
+		var authenticatedSession map[string]interface{}
+		if guideErr == nil && strings.Contains(cid, "_AUTH_") {
+			authenticatedSession, guideErr = r.prepareAuthenticatedSession(ctx, cid, input)
+		}
 		var d Decision
 		method := "code"
 		if guideErr == nil {
@@ -324,7 +330,7 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 					guideErr = fmt.Errorf("Eino handoff unavailable")
 				} else {
 					// Secrets stay in the running context; never persist them in run metadata.
-					material := map[string]interface{}{"guidance": guide, "existing_operations": r.captures, "username": input.Username, "password": input.Password}
+					material := map[string]interface{}{"guidance": guide, "existing_operations": r.captures, "username": input.Username, "password": input.Password, "authenticated_session": authenticatedSession}
 					var records []*mcp.ToolExecution
 					r.budget.mu.Lock()
 					r.budget.Handoff = true
@@ -456,10 +462,16 @@ func (r *Runner) persist(s Summary) error {
 	}
 	return os.Rename(tmp, p)
 }
-func (r *Runner) request(ctx context.Context, cid, target, method string, headers interface{}, body string) (*mcp.ToolExecution, error) {
+func (r *Runner) request(ctx context.Context, cid, target, method string, headers interface{}, body string, timeoutSeconds ...int) (*mcp.ToolExecution, error) {
+	r.budget.mu.Lock()
 	r.sequence++
 	path := filepath.Join(r.RunDir, "evidence", "raw", cid, fmt.Sprintf("http-%06d.json", r.sequence))
-	args := map[string]interface{}{"url": target, "method": method, "follow_redirects": false, "capture_file": path, "timeout": "10"}
+	r.budget.mu.Unlock()
+	timeout := 10
+	if len(timeoutSeconds) > 0 {
+		timeout = timeoutSeconds[0]
+	}
+	args := map[string]interface{}{"url": target, "method": method, "follow_redirects": false, "capture_file": path, "timeout": fmt.Sprint(timeout)}
 	if headers != nil {
 		args["headers"] = headers
 	}
@@ -468,7 +480,9 @@ func (r *Runner) request(ctx context.Context, cid, target, method string, header
 	}
 	e, err := r.call(ctx, "http-framework-test", args)
 	if e != nil {
+		r.budget.mu.Lock()
 		r.captures = append(r.captures, e)
+		r.budget.mu.Unlock()
 	}
 	if err != nil {
 		return e, fmt.Errorf("HTTP execution unavailable")
@@ -488,6 +502,10 @@ func (r *Runner) request(ctx context.Context, cid, target, method string, header
 }
 
 type Capture struct {
+	Started        float64    `json:"request_started_at_unix"`
+	Ended          float64    `json:"request_ended_at_unix"`
+	Elapsed        float64    `json:"elapsed_seconds"`
+	Error          string     `json:"error"`
 	Method         string     `json:"method"`
 	RequestHeaders [][]string `json:"request_headers"`
 	RequestBody    string     `json:"request_body_base64"`
@@ -521,6 +539,9 @@ var pathDisclosure = regexp.MustCompile(`(?i)(?:/var/www/|/home/[a-z0-9_.-]+/|[a
 func (r *Runner) executeCode(ctx context.Context, cid string, in Input, g map[string]interface{}) (Decision, bool, error) {
 	if cid == "PT_WEB_01" {
 		return r.login(ctx, in, g)
+	}
+	if cid == "PT_WEB_11" {
+		return r.controlledLoad(ctx, in, g)
 	}
 	if cid == "PT_WEB_13" {
 		return r.securityHeaders(ctx, in, g)
