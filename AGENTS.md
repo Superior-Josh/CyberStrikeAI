@@ -52,7 +52,7 @@
 
 与CyberStrikeAI交互使用 https://127.0.0.1:8080 和用户提供凭据，不打开浏览器；接口以GET /api/openapi/spec及运行schema为准，先查 /api/roles、/api/agent-loop/tasks，避免重复任务。
 
-斑马角色的流式/JSON入口接代码控制器，结构化banma输入含targets、可选case_ids/username/password、write_authorized和forbidden_actions；明确的自然语言ip:port/账密可解析，复杂限制不得猜测。未传case_ids默认44项。report_run_dir用于同会话报告修复，review_case_id只读重新判定该轮已关联操作，不追加目标请求。普通追问不启动旧目标任务。
+斑马角色的流式/JSON入口接代码控制器，结构化banma输入含targets、可选case_ids/username/password、write_authorized和forbidden_actions；明确的自然语言ip:port/账密可解析，复杂限制不得猜测。未传case_ids默认44项。resume_run_dir仅在用户明确续跑时用于同会话异常退出轮次，保持冻结清单和授权，跳过已尝试项；操作前持久化attempted，未知写入不重放，旧候选预算不可恢复时关闭剩余提交。本机nmap历史已尝试则不重试。report_run_dir用于同会话报告修复，review_case_id只读重新判定该轮已关联操作，不追加目标请求。普通追问不启动旧目标任务。
 
 SSE被接受、断开或会话ID返回不代表完成，核对任务、执行记录、结果和报告。取消整轮使用POST /api/agent-loop/cancel，continueAfter=false，确认工具也停止；不混淆单工具取消。
 

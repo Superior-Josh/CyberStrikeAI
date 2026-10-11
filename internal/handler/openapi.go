@@ -6610,6 +6610,7 @@ func (h *OpenAPIHandler) GetOpenAPISpec(c *gin.Context) {
 	}
 
 	banmaSchema := map[string]interface{}{"type": "object", "description": "斑马代码执行输入；不提供case_ids默认完整44项。凭据仅用于本轮，不写入用例或报告。", "required": []string{"targets"}, "properties": map[string]interface{}{
+		"resume_run_dir":    map[string]interface{}{"type": "string", "description": "用户明确续跑同会话异常退出轮次；保持冻结授权和清单，跳过已尝试项，不重放未知写入，旧预算不可恢复时关闭口令尝试"},
 		"review_case_id":    map[string]interface{}{"type": "string", "description": "仅重新判定指定用例的同轮已有采集记录，需report_run_dir；不追加目标操作"},
 		"report_run_dir":    map[string]interface{}{"type": "string", "description": "同一会话仅修复已初始化目录的报告，不执行目标请求"},
 		"targets":           map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}},

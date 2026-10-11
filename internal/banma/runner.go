@@ -17,6 +17,7 @@ import (
 )
 
 type Input struct {
+	ResumeRunDir    string   `json:"resume_run_dir,omitempty"`
 	ReviewCase      string   `json:"review_case_id,omitempty"`
 	ReportRunDir    string   `json:"report_run_dir,omitempty"`
 	Targets         []string `json:"targets"`
@@ -55,6 +56,7 @@ type Runner struct {
 	currentCase string
 }
 type Summary struct {
+	Attempted        []string               `json:"attempted"`
 	PartialSaved     []string               `json:"partial_saved"`
 	CaseExecutionIDs map[string][]string    `json:"case_execution_ids"`
 	RunDir           string                 `json:"run_dir"`
@@ -207,16 +209,29 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			return sum, fmt.Errorf("invalid target")
 		}
 	}
-	info := map[string]interface{}{"targets": input.Targets, "write_authorized": input.WriteAuthorized, "forbidden_actions": input.Forbidden, "execution_mode": "code_eino"}
-	if len(input.CaseIDs) > 0 {
-		info["case_ids"] = input.CaseIDs
+	if input.ResumeRunDir != "" {
+		if r.History == nil {
+			return sum, fmt.Errorf("resume history unavailable")
+		}
+		r.RunDir = input.ResumeRunDir
+		if _, err := r.History(ctx, r.RunDir, ""); err != nil {
+			return sum, err
+		}
+		if err := r.restoreRun(input, &sum); err != nil {
+			return sum, err
+		}
+	} else {
+		info := map[string]interface{}{"targets": input.Targets, "write_authorized": input.WriteAuthorized, "forbidden_actions": input.Forbidden, "execution_mode": "code_eino"}
+		if len(input.CaseIDs) > 0 {
+			info["case_ids"] = input.CaseIDs
+		}
+		init, err := r.helper(ctx, "init", "", map[string]interface{}{"test_name": "banma-" + time.Now().UTC().Format("20060102T150405.000000000"), "test_info": info})
+		if err != nil {
+			return sum, err
+		}
+		r.RunDir, _ = init["run_dir"].(string)
+		sum.RunDir = r.RunDir
 	}
-	init, err := r.helper(ctx, "init", "", map[string]interface{}{"test_name": "banma-" + time.Now().UTC().Format("20060102T150405.000000000"), "test_info": info})
-	if err != nil {
-		return sum, err
-	}
-	r.RunDir, _ = init["run_dir"].(string)
-	sum.RunDir = r.RunDir
 	list, err := r.helper(ctx, "list", "", nil)
 	if err != nil {
 		return sum, err
@@ -231,6 +246,15 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			sum.Pending = append(sum.Pending, order[n:]...)
 			r.persist(sum)
 			return sum, ctx.Err()
+		}
+		if input.ResumeRunDir != "" && contains(sum.Attempted, cid) {
+			continue
+		}
+		sum.Attempted = append(sum.Attempted, cid)
+		// Persist before any target operation so a lost process never silently
+		// replays an unknown write on continuation.
+		if err := r.persist(sum); err != nil {
+			return sum, err
 		}
 		r.currentCase = cid
 		r.emit("执行 "+cid, map[string]interface{}{"case_id": cid, "position": n + 1, "total": len(order), "saved": len(sum.Saved)})

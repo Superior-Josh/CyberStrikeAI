@@ -29,7 +29,7 @@ func banmaInput(req *ChatRequest) (*banma.Input, error) {
 		return nil, nil
 	}
 	if req.Banma != nil {
-		if len(req.Banma.Targets) == 0 && req.Banma.ReportRunDir == "" {
+		if len(req.Banma.Targets) == 0 && req.Banma.ReportRunDir == "" && req.Banma.ResumeRunDir == "" {
 			return nil, fmt.Errorf("banma.targets required")
 		}
 		return req.Banma, nil
