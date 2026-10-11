@@ -38,6 +38,7 @@ type Check struct {
 	Evidence []int  `json:"evidence"`
 }
 type Decision struct {
+	Method           string   `json:"-"`
 	Checks           []Check  `json:"checks"`
 	Gaps             []string `json:"gaps"`
 	Recovery         string   `json:"recovery"`
@@ -172,7 +173,19 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			r.budget.mu.Lock()
 			r.budget.Handoff = true
 			r.budget.mu.Unlock()
-			decision, _, er := r.Handoff(mcp.WithoutBanmaController(ctx), material)
+			decision := Decision{}
+			reviewPartial := false
+			reviewMethod := "eino"
+			er = r.reviewScope(guide)
+			if er == nil {
+				var computed bool
+				decision, computed, er = PlaintextCredentialDecision(guide, r.captures, input.Username, input.Password)
+				if computed {
+					reviewMethod = "code"
+				} else if er == nil {
+					decision, _, er = r.Handoff(mcp.WithoutBanmaController(ctx), material)
+				}
+			}
 			r.budget.mu.Lock()
 			r.budget.Handoff = false
 			r.budget.mu.Unlock()
@@ -180,7 +193,15 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 				var payload map[string]interface{}
 				payload, er = r.payload(decision, guide)
 				if er == nil {
-					_, er = r.helper(mcp.WithBanmaJudgment(ctx, "eino"), "save", input.ReviewCase, payload)
+					_, er = r.helper(mcp.WithBanmaJudgment(ctx, reviewMethod), "save", input.ReviewCase, payload)
+					if er == nil && payload["coverage_complete"] == false {
+						reviewPartial = true
+						if !contains(sum.PartialSaved, input.ReviewCase) {
+							sum.PartialSaved = append(sum.PartialSaved, input.ReviewCase)
+						}
+						limits, _ := payload["coverage_limitations"].([]string)
+						sum.Gaps[input.ReviewCase] = strings.Join(limits, "; ")
+					}
 				}
 			}
 			if er != nil {
@@ -195,7 +216,7 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 					_ = r.persist(sum)
 					return sum, ctx.Err()
 				}
-			} else {
+			} else if !reviewPartial {
 				delete(sum.Gaps, input.ReviewCase)
 			}
 			list, er = r.helper(ctx, "list", "", nil)
@@ -309,6 +330,9 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 					r.budget.Handoff = true
 					r.budget.mu.Unlock()
 					d, records, guideErr = r.Handoff(mcp.WithoutBanmaController(ctx), material)
+					if d.Method == "code" {
+						method = "code"
+					}
 					r.budget.mu.Lock()
 					r.budget.Handoff = false
 					r.budget.mu.Unlock()
@@ -323,10 +347,12 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 				}
 			}
 		}
+		partialGaps := d.Gaps
 		if guideErr == nil {
 			var payload map[string]interface{}
 			payload, guideErr = r.payload(d, guide)
 			if guideErr == nil {
+				partialGaps, _ = payload["coverage_limitations"].([]string)
 				_, guideErr = r.helper(mcp.WithBanmaJudgment(ctx, method), "save", cid, payload)
 			}
 		}
@@ -339,10 +365,10 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			sum.Pending = append(sum.Pending, cid)
 			sum.Gaps[cid] = redactError(guideErr, input)
 			r.emit(cid+"保留缺口", map[string]interface{}{"case_id": cid, "reason": sum.Gaps[cid]})
-		} else if len(d.Gaps) > 0 {
+		} else if len(partialGaps) > 0 {
 			sum.PartialSaved = append(sum.PartialSaved, cid)
 			sum.Pending = append(sum.Pending, cid)
-			sum.Gaps[cid] = strings.Join(d.Gaps, "; ")
+			sum.Gaps[cid] = strings.Join(partialGaps, "; ")
 			r.emit(cid+"已保留失败，覆盖仍有缺口", map[string]interface{}{"case_id": cid})
 		} else {
 			sum.Saved = append(sum.Saved, cid)
@@ -448,17 +474,28 @@ func (r *Runner) request(ctx context.Context, cid, target, method string, header
 		return e, fmt.Errorf("HTTP execution unavailable")
 	}
 	if e == nil || e.Status != "completed" || e.Result == nil || e.Result.IsError {
+		if e != nil && e.Result != nil {
+			var failure map[string]interface{}
+			if json.Unmarshal([]byte(mcp.ToolResultPlainText(e.Result)), &failure) == nil {
+				if reason, ok := failure["reason"].(string); ok && reason != "" {
+					return e, fmt.Errorf("HTTP operation blocked: %s", reason)
+				}
+			}
+		}
 		return e, fmt.Errorf("HTTP execution not completed")
 	}
 	return e, nil
 }
 
 type Capture struct {
-	Status  int        `json:"status_code"`
-	Headers [][]string `json:"headers"`
-	Body    string     `json:"body_base64"`
-	URL     string     `json:"url"`
-	Time    float64    `json:"captured_at_unix"`
+	Method         string     `json:"method"`
+	RequestHeaders [][]string `json:"request_headers"`
+	RequestBody    string     `json:"request_body_base64"`
+	Status         int        `json:"status_code"`
+	Headers        [][]string `json:"headers"`
+	Body           string     `json:"body_base64"`
+	URL            string     `json:"url"`
+	Time           float64    `json:"captured_at_unix"`
 }
 
 func ReadCapture(e *mcp.ToolExecution) (Capture, error) {

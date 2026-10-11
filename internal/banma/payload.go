@@ -2,6 +2,7 @@ package banma
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -101,7 +102,19 @@ func (r *Runner) payload(d Decision, g map[string]interface{}) (map[string]inter
 		judgments = append(judgments, map[string]interface{}{"item_id": sid, "result": check.Result, "reason": check.Reason, "observation_ids": obs, "evidence_ids": ev})
 	}
 	if len(seen) != len(refs) {
-		return nil, fmt.Errorf("handoff did not cover every required/conditional/step reference")
+		if !hasFailure {
+			return nil, fmt.Errorf("handoff did not cover every required/conditional/step reference")
+		}
+		missing := []string{}
+		for ref := range refs {
+			if !seen[ref] {
+				missing = append(missing, ref)
+			}
+		}
+		sort.Strings(missing)
+		for _, ref := range missing {
+			limitations = append(limitations, "尚未形成有效结论："+ref)
+		}
 	}
 	for _, idx := range d.RecoveryEvidence {
 		if len(memberships[idx]) == 0 {
@@ -121,9 +134,13 @@ func (r *Runner) payload(d Decision, g map[string]interface{}) (map[string]inter
 		recoveryEv = append(recoveryEv, eids[idx]...)
 	}
 	if d.Recovery == "" {
-		return nil, fmt.Errorf("missing recovery state")
+		if !hasFailure {
+			return nil, fmt.Errorf("missing recovery state")
+		}
+		d.Recovery = "待确认"
+		limitations = append(limitations, "恢复状态尚未形成有效结论")
 	}
-	payload := map[string]interface{}{"scope_items": scopes, "actual_steps": operations, "observations": observations, "evidence": evidence, "item_results": judgments, "result": result, "judgment_reason": "逐条依据用例原文及本项真实观察聚合；失败优先", "coverage_limitations": limitations, "coverage_complete": len(d.Gaps) == 0, "recovery": map[string]interface{}{"status": d.Recovery, "evidence_ids": recoveryEv}, "judgment_method": "code_or_eino"}
+	payload := map[string]interface{}{"scope_items": scopes, "actual_steps": operations, "observations": observations, "evidence": evidence, "item_results": judgments, "result": result, "judgment_reason": "逐条依据用例原文及本项真实观察聚合；失败优先", "coverage_limitations": limitations, "coverage_complete": len(limitations) == 0, "recovery": map[string]interface{}{"status": d.Recovery, "evidence_ids": recoveryEv}, "judgment_method": "code_or_eino"}
 	if result == "失败" {
 		level, _ := c["level"].(string)
 		severity := map[string]string{"严重": "严重", "高": "高危", "中": "中危", "低": "低危", "信息": "信息"}[level]

@@ -117,19 +117,25 @@ func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.T
 		}
 	}
 	if name == "http-framework-test" {
+		if err := r.checkPayloadDestinations(u, toString(args["data"])); err != nil {
+			return deny(err.Error())
+		}
 		u, err := url.Parse(toString(args["url"]))
 		method := strings.ToUpper(toString(args["method"]))
 		if err == nil && u != nil && strings.Contains(strings.ToLower(u.Path), "security.php") && (method != "GET" && method != "HEAD" || u.Query().Has("security") || u.Query().Has("seclev_submit")) {
 			return deny("禁止修改DVWA安全等级，不因允许业务写入而豁免")
 		}
 	}
-	if name != "http-framework-test" || !strings.EqualFold(toString(args["method"]), "POST") {
+	if name != "http-framework-test" {
 		return nil
 	}
 	if repeat, ok := args["repeat"].(float64); ok && repeat > 1 {
 		return deny("重复候选及窗口必须由代码逐次执行，不能批次绕过共享计数")
 	}
 	body, _ := url.ParseQuery(toString(args["data"]))
+	if u != nil && u.Query().Has("password") {
+		body.Set("password", u.Query().Get("password"))
+	}
 	if !body.Has("password") {
 		var object map[string]interface{}
 		if json.Unmarshal([]byte(toString(args["data"])), &object) == nil {

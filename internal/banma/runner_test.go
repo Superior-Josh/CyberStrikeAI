@@ -196,3 +196,71 @@ func TestPayloadDoesNotIncludeUnreferencedCaptureSources(t *testing.T) {
 		t.Fatal("recovery source lost its operation binding", err)
 	}
 }
+
+func TestReadOnlyReviewGapWithdrawsOldPassWithoutTargetRequest(t *testing.T) {
+	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, "evidence"), 0700)
+	b, _ := json.Marshal(Summary{Saved: []string{"PT_WEB_02"}, Status: "blocked"})
+	os.WriteFile(filepath.Join(dir, "evidence/run-state.json"), b, 0600)
+	pending := false
+	r := &Runner{History: func(context.Context, string, string) ([]*mcp.ToolExecution, error) { return nil, nil }, Handoff: func(context.Context, map[string]interface{}) (Decision, []*mcp.ToolExecution, error) {
+		return Decision{Gaps: []string{"OFFLINE missing semantic effect"}}, nil, nil
+	}}
+	r.Call = func(_ context.Context, name string, args map[string]interface{}) (*mcp.ToolExecution, error) {
+		if name != "banma_pentest_run_cases" && name != "banma_report" {
+			t.Fatal("review sent target request")
+		}
+		switch args["mode"] {
+		case "list":
+			saved, missing := []interface{}{"PT_WEB_02"}, []interface{}{}
+			if pending {
+				saved, missing = missing, saved
+			}
+			return fixtureExecution(name, map[string]interface{}{"saved": saved, "pending": missing}), nil
+		case "show":
+			return fixtureExecution(name, map[string]interface{}{"existing_result_path": filepath.Join(dir, "evidence/PT_WEB_02.json"), "case": map[string]interface{}{"id": "PT_WEB_02", "steps": []interface{}{"dynamic effect"}}}), nil
+		case "mark_pending":
+			pending = true
+			return fixtureExecution(name, map[string]interface{}{"verification_pending": true}), nil
+		case "build", "check":
+			return fixtureExecution(name, map[string]interface{}{"artifact_status": "草稿", "report_path": "offline.md"}), nil
+		}
+		return nil, fmt.Errorf("unexpected review mutation")
+	}
+	sum, err := r.Run(context.Background(), Input{ReportRunDir: dir, ReviewCase: "PT_WEB_02"})
+	if err != nil || !pending || len(sum.Saved) != 0 || !contains(sum.Pending, "PT_WEB_02") {
+		t.Fatalf("old pass retained: %+v %v", sum, err)
+	}
+}
+
+func TestClosedLoginBudgetDoesNotSendFreshRequests(t *testing.T) {
+	r := &Runner{budget: Budget{Stopped: true}}
+	r.Call = func(context.Context, string, map[string]interface{}) (*mcp.ToolExecution, error) {
+		t.Fatal("closed budget sent request")
+		return nil, nil
+	}
+	_, supported, err := r.login(context.Background(), Input{Targets: []string{"http://127.0.0.1:4280"}, Username: "fixture", Password: "fixture"}, nil)
+	if !supported || err == nil {
+		t.Fatal("closed budget not reported as real coverage gap")
+	}
+}
+
+func TestConfirmedFailureSurvivesMissingChecksAndRecovery(t *testing.T) {
+	r := &Runner{captures: []*mcp.ToolExecution{fixtureExecution("offline-fixture", map[string]string{"output": "OFFLINE actual control failure"})}}
+	guide := map[string]interface{}{"case": map[string]interface{}{"id": "PT_WEB_03", "steps": []interface{}{"one", "two"}}}
+	p, err := r.payload(Decision{Checks: []Check{{Ref: "steps[0]", Result: "失败", Reason: "OFFLINE confirmed failure", Evidence: []int{0}}}}, guide)
+	if err != nil || p["result"] != "失败" || p["coverage_complete"] != false {
+		t.Fatalf("confirmed failure lost or completed: %v %+v", err, p)
+	}
+	if len(p["item_results"].([]interface{})) != 1 || p["recovery"].(map[string]interface{})["status"] != "待确认" {
+		t.Fatal("invented missing check verdict/recovery")
+	}
+}
+
+func TestGETPasswordCandidateCannotBypassSharedBudget(t *testing.T) {
+	r := &Runner{input: Input{Targets: []string{"http://127.0.0.1:4280"}, Password: "known"}, budget: Budget{Max: 1, Window: time.Minute, CodeLoop: true}}
+	a := map[string]interface{}{"url": "http://127.0.0.1:4280/vulnerabilities/brute/?username=fixture&password=wrong", "method": "GET"}
+	if r.checkOperation("http-framework-test", a) != nil || r.checkOperation("http-framework-test", a) == nil {
+		t.Fatal("query candidate bypassed count")
+	}
+}

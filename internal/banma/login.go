@@ -72,6 +72,12 @@ func (r *Runner) login(ctx context.Context, in Input, g map[string]interface{}) 
 	if len(in.Targets) != 1 || in.Username == "" || in.Password == "" {
 		return Decision{}, false, nil
 	}
+	r.budget.mu.Lock()
+	closed := r.budget.Stopped || r.budget.Max > 0 && r.budget.Attempts >= r.budget.Max
+	r.budget.mu.Unlock()
+	if closed {
+		return Decision{}, true, fmt.Errorf("共享口令候选预算已关闭或耗尽，保留既有原文待核验，不新增候选")
+	}
 	// This concrete login binding is intentionally small; other forms go to Eino.
 	target := strings.TrimRight(in.Targets[0], "/") + "/login.php"
 	e, err := r.request(ctx, "PT_WEB_01", target, "GET", nil, "")

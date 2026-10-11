@@ -57,7 +57,7 @@ func EvidenceView(record *mcp.ToolExecution, password string) []map[string]inter
 		// made CSRF controls and injection variants impossible to judge.
 		if body, err := base64.StdEncoding.DecodeString(toString(v["request_body_base64"])); err == nil && len(body) > 0 {
 			if form, err := url.ParseQuery(string(body)); err == nil && strings.Contains(string(body), "=") {
-				v["request_form"], v["request_csrf_fingerprints"] = safeRequestForm(form)
+				v["request_form"], v["request_token_fingerprints"] = safeRequestForm(form)
 			} else {
 				var object interface{}
 				if json.Unmarshal(body, &object) == nil {
@@ -69,7 +69,7 @@ func EvidenceView(record *mcp.ToolExecution, password string) []map[string]inter
 			if u, err := url.Parse(toString(v[urlKey])); err == nil && u.RawQuery != "" {
 				form, fingerprints := safeRequestForm(u.Query())
 				v["request_query"] = form
-				v["query_csrf_fingerprints"] = fingerprints
+				v["query_token_fingerprints"] = fingerprints
 				q := url.Values{}
 				for key, values := range form {
 					for _, value := range values {
@@ -80,6 +80,7 @@ func EvidenceView(record *mcp.ToolExecution, password string) []map[string]inter
 				v[urlKey] = u.String()
 			}
 		}
+		delete(v, "wire_request_target_base64")
 		delete(v, "request_body_base64")
 		delete(v, "body_base64")
 		attrs := []map[string]interface{}{}
@@ -129,8 +130,10 @@ func safeRequestForm(form url.Values) (map[string][]string, map[string][]string)
 			continue
 		}
 		for i, value := range values {
-			h := sha256.Sum256([]byte(value))
-			fingerprints[key] = append(fingerprints[key], hex.EncodeToString(h[:]))
+			if strings.Contains(strings.ToLower(key), "token") || strings.Contains(strings.ToLower(key), "csrf") {
+				h := sha256.Sum256([]byte(value))
+				fingerprints[key] = append(fingerprints[key], hex.EncodeToString(h[:]))
+			}
 			safe[key][i] = "[REDACTED]"
 		}
 	}

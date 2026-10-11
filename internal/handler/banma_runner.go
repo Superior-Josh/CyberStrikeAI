@@ -262,7 +262,7 @@ func (h *AgentHandler) banmaHandoff(ctx context.Context, cfg *config.Config, cid
 	records := []*mcp.ToolExecution{}
 	executionSummary := "只读复用本轮实际采集记录，不追加目标操作"
 	if material["review_only"] != true {
-		out, err := multiagent.RunEinoSingleChatModelAgent(ctx, cfg, &cfg.MultiAgent, h.agent, h.db, h.logger, cid, h.conversationProjectID(cid), prompt, nil, tools, progress, nil, "")
+		out, err := multiagent.RunEinoSingleChatModelAgent(multiagent.WithStructuredEinoInput(ctx), cfg, &cfg.MultiAgent, h.agent, h.db, h.logger, cid, h.conversationProjectID(cid), prompt, nil, tools, progress, nil, "")
 		if err != nil {
 			return decision, nil, err
 		}
@@ -281,6 +281,11 @@ func (h *AgentHandler) banmaHandoff(ctx context.Context, cfg *config.Config, cid
 		executionSummary = out.Response
 	}
 	all := append(append([]*mcp.ToolExecution{}, existing...), records...)
+	if guidance, ok := material["guidance"].(map[string]interface{}); ok {
+		if computed, supported, err := banma.PlaintextCredentialDecision(guidance, all, toStringBanma(material["username"]), toStringBanma(material["password"])); supported || err != nil {
+			return computed, records, err
+		}
+	}
 	registry := []map[string]interface{}{}
 	for i, e := range all {
 		if e == nil || e.Result == nil {
@@ -288,6 +293,18 @@ func (h *AgentHandler) banmaHandoff(ctx context.Context, cfg *config.Config, cid
 		}
 		view := banma.EvidenceView(e, toStringBanma(material["password"]))
 		entry := map[string]interface{}{"index": i, "tool": e.ToolName, "status": e.Status, "native_files": e.Result.NativeFiles}
+		if e.ToolName == "http-framework-test" {
+			parameters := map[string]interface{}{}
+			for _, key := range []string{"method", "repeat", "delay", "timeout", "follow_redirects"} {
+				if value, ok := e.Arguments[key]; ok {
+					parameters[key] = value
+				}
+			}
+			entry["actual_invocation_parameters"] = parameters
+			if e.Arguments["repeat"] != nil {
+				entry["repeat_execution_semantics"] = "本项目HTTP CLI的repeat按逐次串行循环执行，不代表并发连接"
+			}
+		}
 		if len(view) > 0 {
 			entry["native_http_view"] = view
 		} else {
