@@ -52,6 +52,56 @@ class CaseTests(unittest.TestCase):
     def check_completion(self):
         return tool.completion_check(str(self.run), str(ROOT / "cases"))
 
+    def test_execution_order_preserves_scope_and_report_order(self):
+        numbered = list(self.cases)
+        order = self.context["execution_order"]
+        self.assertEqual(len(order), 44)
+        self.assertEqual(set(order), set(numbered))
+        self.assertEqual(numbered[0], "PT_WEB_01")
+        self.assertEqual(numbered[18], "PT_WEB_AUTH_01")
+        self.assertEqual(order[0], "PT_WEB_04")
+        self.assertEqual(order[-1], "PT_WEB_11")
+        for before, after in [("PT_WEB_08", "PT_WEB_06"),
+                              ("PT_WEB_09", "PT_WEB_06"),
+                              ("PT_WEB_AUTH_18", "PT_WEB_AUTH_07"),
+                              ("PT_WEB_AUTH_23", "PT_WEB_01")]:
+            self.assertLess(order.index(before), order.index(after))
+        self.assertEqual(self.created["execution_order"], order)
+        listing = tool.dispatch("list", str(ROOT / "cases"), str(self.run))
+        self.assertEqual(listing["selected_case_ids"], numbered)
+        self.assertEqual(listing["pending"], order)
+        self.assertEqual([c["id"] for c in listing["cases"]], order)
+        checked = self.check_completion()
+        self.assertEqual(checked["catalog_case_ids"], numbered)
+        self.assertEqual(checked["selected_case_ids"], numbered)
+        self.assertEqual(checked["pending_case_ids"], order)
+        selected = ["PT_WEB_11", "PT_WEB_01", "PT_WEB_04"]
+        created = tool.init_run(self.cases, self.context, {
+            "test_name": "offline-subset-order",
+            "test_info": {"targets": ["OFFLINE-NO-TARGET"], "case_ids": selected},
+        })
+        listing = tool.dispatch("list", str(ROOT / "cases"), created["run_dir"])
+        self.assertEqual(listing["selected_case_ids"], selected)
+        self.assertEqual(listing["pending"], ["PT_WEB_04", "PT_WEB_01", "PT_WEB_11"])
+        tool.dispatch("show", str(ROOT / "cases"), created["run_dir"], "PT_WEB_04")
+        tool.save_result(Path(created["run_dir"]), "PT_WEB_04", self.cases["PT_WEB_04"], self.payload())
+        checked = tool.completion_check(created["run_dir"], str(ROOT / "cases"))
+        self.assertEqual(checked["selected_case_ids"], selected)
+        self.assertEqual(checked["pending_case_ids"], ["PT_WEB_01", "PT_WEB_11"])
+        built = self.build()
+        content = Path(built["report_path"]).read_text()
+        headings = [line.split()[2] for line in content.splitlines()
+                    if line.startswith("#### ") and " PT_WEB_" in line]
+        self.assertEqual(headings, numbered)
+
+    def test_execution_order_rejects_missing_duplicate_and_unknown_ids(self):
+        order = self.context["execution_order"]
+        for invalid in [order[:-1], order + [order[0]], order[:-1] + ["PT_WEB_99"],
+                        order[:-1] + [None]]:
+            with self.assertRaises(tool.ToolError) as raised:
+                tool.execution_order(dict(self.context, execution_order=invalid), self.cases)
+            self.assertEqual(raised.exception.code, "CASE_CONFIG_ERROR")
+
     def test_completion_full_partial_and_read_only(self):
         self.assertEqual(len(self.check_completion()["pending_case_ids"]), 44)
         for cid, case in self.cases.items():

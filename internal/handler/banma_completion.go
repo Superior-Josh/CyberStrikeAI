@@ -91,6 +91,7 @@ func (h *AgentHandler) fixedCaseCheckFor(conversationID string) func([]string) (
 			var response struct {
 				OK             bool     `json:"ok"`
 				CatalogCaseIDs []string `json:"catalog_case_ids"`
+				ExecutionOrder []string `json:"execution_order"`
 				agentfinalizer.FixedCaseCompletion
 			}
 			if json.Unmarshal(output, &response) != nil || !response.OK || response.RunDir == "" || len(response.SelectedCaseIDs) == 0 || response.ValidSavedCount+len(response.PendingCaseIDs) != len(response.SelectedCaseIDs) {
@@ -100,7 +101,7 @@ func (h *AgentHandler) fixedCaseCheckFor(conversationID string) func([]string) (
 			if err != nil || strings.Join(expected, "\x00") != strings.Join(response.SelectedCaseIDs, "\x00") {
 				return checks, fmt.Errorf("fixed case authorization scope mismatch")
 			}
-			if err := h.verifyFixedCaseRuntimeRecords(conversationID, &response.FixedCaseCompletion); err != nil {
+			if err := h.verifyFixedCaseRuntimeRecords(conversationID, &response.FixedCaseCompletion, response.ExecutionOrder); err != nil {
 				return checks, err
 			}
 			checks = append(checks, response.FixedCaseCompletion)
@@ -169,7 +170,21 @@ func (h *AgentHandler) authorizedFixedCaseIDs(conversationID, dir string, catalo
 	return nil, fmt.Errorf("matching successful init unavailable")
 }
 
-func (h *AgentHandler) verifyFixedCaseRuntimeRecords(conversationID string, check *agentfinalizer.FixedCaseCompletion) error {
+func (h *AgentHandler) verifyFixedCaseRuntimeRecords(conversationID string, check *agentfinalizer.FixedCaseCompletion, executionOrder []string) error {
+	selected := make(map[string]bool, len(check.SelectedCaseIDs))
+	for _, id := range check.SelectedCaseIDs {
+		selected[id] = true
+	}
+	if len(executionOrder) != len(check.SelectedCaseIDs) {
+		return fmt.Errorf("fixed case execution order incomplete")
+	}
+	seen := make(map[string]bool, len(executionOrder))
+	for _, id := range executionOrder {
+		if !selected[id] || seen[id] {
+			return fmt.Errorf("fixed case execution order invalid")
+		}
+		seen[id] = true
+	}
 	rows, err := h.db.Query("SELECT id FROM tool_executions WHERE conversation_id=? AND tool_name IN (?,?) AND status=? ORDER BY start_time DESC", conversationID, "banma_pentest_run_cases", "banma_report", "completed")
 	if err != nil {
 		return err
@@ -224,7 +239,7 @@ func (h *AgentHandler) verifyFixedCaseRuntimeRecords(conversationID string, chec
 		}
 	}
 	check.PendingCaseIDs = nil
-	for _, id := range check.SelectedCaseIDs {
+	for _, id := range executionOrder {
 		if pending[id] {
 			check.PendingCaseIDs = append(check.PendingCaseIDs, id)
 		}

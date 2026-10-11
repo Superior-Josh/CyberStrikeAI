@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
@@ -14,6 +17,49 @@ import (
 	"cyberstrike-ai/internal/mcp"
 	"go.uber.org/zap"
 )
+
+func TestBanmaRuntimeMissingSaveKeepsExecutionOrder(t *testing.T) {
+	db, err := database.NewDB(filepath.Join(t.TempDir(), "completion.db"), zap.NewNop())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	run := t.TempDir()
+	if err = os.Mkdir(filepath.Join(run, "evidence"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(run, "evidence/PT_WEB_04.json")
+	data := []byte("OFFLINE SAVED FILE")
+	if err = os.WriteFile(path, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	sum := sha256.Sum256(data)
+	if err = db.SaveToolExecution(&mcp.ToolExecution{
+		ID: "fixture-save", ConversationID: "fixture", ToolName: "banma_pentest_run_cases",
+		Arguments: map[string]interface{}{"mode": "save", "run_dir": run},
+		Status:    "completed", StartTime: time.Now(),
+		Result: &mcp.ToolResult{NativeFiles: []mcp.NativeFileRef{{Path: path, SHA256: hex.EncodeToString(sum[:])}}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	h := &AgentHandler{db: db}
+	check := agentfinalizer.FixedCaseCompletion{
+		RunDir: run, SelectedCaseIDs: []string{"PT_WEB_11", "PT_WEB_04", "PT_WEB_01"},
+		PendingCaseIDs: []string{"PT_WEB_11"}, ValidSavedCount: 2,
+	}
+	order := []string{"PT_WEB_04", "PT_WEB_01", "PT_WEB_11"}
+	if err = h.verifyFixedCaseRuntimeRecords("fixture", &check, order); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(check.PendingCaseIDs, []string{"PT_WEB_01", "PT_WEB_11"}) || check.ValidSavedCount != 1 {
+		t.Fatalf("newly missing save not merged in execution order: %+v", check)
+	}
+	for _, invalid := range [][]string{order[:2], {"PT_WEB_04", "PT_WEB_04", "PT_WEB_11"}, {"PT_WEB_04", "PT_WEB_01", "PT_WEB_99"}} {
+		if h.verifyFixedCaseRuntimeRecords("fixture", &check, invalid) == nil {
+			t.Fatal("invalid execution order accepted")
+		}
+	}
+}
 
 func TestBanmaCompletionBoundToExecutionsAndUsesRealChecker(t *testing.T) {
 	root, err := filepath.Abs("../..")
@@ -62,6 +108,9 @@ raise SystemExit(h.main())`
 	runs, err := h.fixedCaseCheckFor("fixture-conversation")([]string{execution.ID})
 	if err != nil || len(runs) != 1 || len(runs[0].PendingCaseIDs) != 44 {
 		t.Fatalf("real checker: %+v %v", runs, err)
+	}
+	if runs[0].SelectedCaseIDs[0] != "PT_WEB_01" || runs[0].PendingCaseIDs[0] != "PT_WEB_04" || runs[0].PendingCaseIDs[43] != "PT_WEB_11" {
+		t.Fatalf("runtime verification lost execution order or changed scope: %+v", runs[0])
 	}
 	d = agentfinalizer.Decide(db, agentfinalizer.Input{Response: "finished", MCPExecutionIDs: []string{execution.ID}, FixedCaseCheck: h.fixedCaseCheckFor("fixture-conversation")})
 	if d.Finalized || d.CompletionReason != agentfinalizer.ReasonPendingCases {
