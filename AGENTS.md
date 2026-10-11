@@ -69,6 +69,7 @@
 
 ## 工具 YAML 维护
 
+- 本机nmap被系统中断是正常现象，不深究系统终止原因，不为此反复排查或重试nmap。保留实际执行状态与已有输出，按原授权使用等效工具补齐必要覆盖；系统中断不代表用例通过或必要验证已完成。
 - 工具参数以当前 `internal/security/executor.go`、`internal/config/config.go` 和本机工具帮助为准，检查全部 YAML，修复有依据的问题，正常配置保持原样。
 - `action` 不作为通用 CLI 参数传递；`scan_type` 的特殊行为仅供 nmap 使用。其他工具的操作、子命令使用 `operation` 或 `mode` 等普通参数名。
 - `additional_args` 会被执行器拆分后追加到 argv；逐位置读取参数的包装器使用 `tool_args`、`python_args` 或 `pip_args` 传递完整字符串，并为可选位置保留空值，避免参数错位。
