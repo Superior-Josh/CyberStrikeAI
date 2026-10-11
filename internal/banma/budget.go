@@ -105,7 +105,7 @@ func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.T
 		allowed := false
 		for _, raw := range r.input.Targets {
 			a, _ := url.Parse(raw)
-			if err == nil && u != nil && a != nil && u.Scheme == a.Scheme && u.Host == a.Host {
+			if err == nil && u != nil && a != nil && (u.Scheme == "http" || u.Scheme == "https") && u.Host == a.Host {
 				allowed = true
 			}
 		}

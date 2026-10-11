@@ -450,6 +450,9 @@ func (r *Runner) executeCode(ctx context.Context, cid string, in Input, g map[st
 	if cid == "PT_WEB_01" {
 		return r.login(ctx, in, g)
 	}
+	if cid == "PT_WEB_13" {
+		return r.securityHeaders(ctx, in, g)
+	}
 	if cid != "PT_WEB_03" && cid != "PT_WEB_04" {
 		return Decision{}, false, nil
 	}

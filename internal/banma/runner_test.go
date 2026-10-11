@@ -168,3 +168,31 @@ func TestConfirmedFailureCanBeRetainedWithoutDeclaringCoverageComplete(t *testin
 		t.Fatal("failure was lost or incomplete coverage concealed", err)
 	}
 }
+
+func TestLocalNmapIsNotRetriedAfterItsSingleProbe(t *testing.T) {
+	r := &Runner{input: Input{Targets: []string{"http://127.0.0.1:4280"}}}
+	args := map[string]interface{}{"target": "127.0.0.1", "ports": "4280", "scan_type": "-sT"}
+	if r.checkOperation("nmap", args) != nil {
+		t.Fatal("first allowed scope probe rejected")
+	}
+	args["scan_type"] = "-sT -sV --script ssl-cert"
+	if r.checkOperation("nmap", args) == nil {
+		t.Fatal("system-interrupted local nmap can be repeatedly retried")
+	}
+}
+
+func TestPayloadDoesNotIncludeUnreferencedCaptureSources(t *testing.T) {
+	r := &Runner{captures: []*mcp.ToolExecution{fixtureExecution("http-framework-test", map[string]string{"output": "used"}), fixtureExecution("http-framework-test", map[string]string{"output": "unused"})}}
+	g := map[string]interface{}{"case": map[string]interface{}{"id": "PT_WEB_07", "steps": []interface{}{}}}
+	d := Decision{Checks: CompleteChecks(g, "通过", "fixture", []int{0}), Recovery: "未涉及"}
+	p, err := r.payload(d, g)
+	if err != nil || len(p["evidence"].([]interface{})) != 1 || len(p["actual_steps"].([]interface{})) != 1 {
+		t.Fatal("extra source without operation binding", err)
+	}
+	d.Recovery = "已恢复"
+	d.RecoveryEvidence = []int{1}
+	p, err = r.payload(d, g)
+	if err != nil || len(p["evidence"].([]interface{})) != 2 || len(p["actual_steps"].([]interface{})) != 2 {
+		t.Fatal("recovery source lost its operation binding", err)
+	}
+}

@@ -152,7 +152,7 @@ func (e *Executor) checkBanmaCall(ctx context.Context, name string, args map[str
 		permitted := false
 		for _, target := range targets {
 			u, err := url.Parse(target)
-			if err == nil && sameBanmaHost(u.Hostname(), requested.Hostname()) && effectivePort(u) == effectivePort(requested) && requested.Scheme == u.Scheme {
+			if err == nil && sameBanmaHost(u.Hostname(), requested.Hostname()) && effectivePort(u) == effectivePort(requested) && (requested.Scheme == "http" || requested.Scheme == "https") {
 				permitted = true
 			}
 		}

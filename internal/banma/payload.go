@@ -36,7 +36,19 @@ func (r *Runner) payload(d Decision, g map[string]interface{}) (map[string]inter
 	evidence := []interface{}{}
 	memberships := map[int][]string{}
 	eids := map[int][]string{}
+	used := map[int]bool{}
+	for _, check := range d.Checks {
+		for _, idx := range check.Evidence {
+			used[idx] = true
+		}
+	}
+	for _, idx := range d.RecoveryEvidence {
+		used[idx] = true
+	}
 	for i, e := range r.captures {
+		if !used[i] {
+			continue
+		}
 		if e == nil || e.Result == nil || strings.Contains(e.ToolName, "file") || strings.HasPrefix(e.ToolName, "banma_") {
 			continue
 		}
@@ -90,6 +102,11 @@ func (r *Runner) payload(d Decision, g map[string]interface{}) (map[string]inter
 	}
 	if len(seen) != len(refs) {
 		return nil, fmt.Errorf("handoff did not cover every required/conditional/step reference")
+	}
+	for _, idx := range d.RecoveryEvidence {
+		if len(memberships[idx]) == 0 {
+			memberships[idx] = []string{"S1"}
+		}
 	}
 	for i, e := range r.captures {
 		if len(memberships[i]) > 0 {
