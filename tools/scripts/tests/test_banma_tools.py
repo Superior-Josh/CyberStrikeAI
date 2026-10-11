@@ -389,6 +389,22 @@ class CaseTests(unittest.TestCase):
         built = self.build()
         self.assertEqual(built["artifact_status"], "草稿")
         self.assertTrue(any("待核验" in gap for gap in built["gaps"]))
+        self.assertEqual(built["counts"]["total"]["通过"], 0)
+        self.assertEqual(built["counts"]["total"]["未执行"], 44)
+
+    def test_pending_review_preserves_result_and_removes_formal_count(self):
+        self.save(self.payload())
+        tool.dispatch("mark_pending", str(ROOT / "cases"), str(self.run), "PT_WEB_01", {"reason": "OFFLINE missing semantic control"})
+        record = tool.read_json(self.run / "evidence/PT_WEB_01.json")
+        self.assertEqual(record["result"], "通过")
+        self.assertTrue(record["verification_pending"])
+        self.assertEqual(len(list((self.run / "evidence/versions").glob("*.json"))), 1)
+        self.assertNotIn("PT_WEB_01", tool.dispatch("list", str(ROOT / "cases"), str(self.run))["saved"])
+        self.assertEqual(self.build()["counts"]["total"]["通过"], 0)
+        self.assertIn("PT_WEB_01", self.check_completion()["pending_case_ids"])
+        self.save(self.payload())
+        self.assertEqual(self.build()["counts"]["total"]["通过"], 1)
+        self.assertEqual(self.source.read_text(), "OFFLINE FIXTURE ONLY\nNORMAL/VARIANT\n")
 
     def test_result_versions_and_failure_preservation(self):
         self.save(self.payload("失败"))

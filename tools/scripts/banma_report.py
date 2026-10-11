@@ -112,8 +112,8 @@ def inputs(run, definitions, context):
                 helper.validate_saved_result(run, cid, definitions[cid])
             except (helper.ToolError, OSError, ValueError, TypeError, KeyError, AttributeError):
                 valid = False
-        if legal_status:
-            record["_evidence_verified"] = valid
+        if legal_status and valid:
+            record["_evidence_verified"] = True
             records[cid] = record
         if not valid:
             gaps.append(cid + ": 结果/原文无效，待核验；不改写为通过或中断")

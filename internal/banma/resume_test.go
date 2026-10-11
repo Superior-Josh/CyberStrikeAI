@@ -23,7 +23,7 @@ func TestResumePreservesChecklistAndNeverReplaysAttemptedCase(t *testing.T) {
 		}
 	}
 	write("test_info.json", map[string]interface{}{"test_info": map[string]interface{}{"targets": input.Targets, "forbidden_actions": input.Forbidden, "write_authorized": false}})
-	write("run-state.json", Summary{Saved: []string{"PT_WEB_03"}, Pending: []string{"PT_WEB_02"}, Status: "blocked"})
+	write("run-state.json", Summary{Saved: []string{"PT_WEB_03"}, Pending: []string{"PT_WEB_02"}, Attempted: []string{"PT_WEB_AUTH_17"}, Status: "blocked"})
 	seen := []string{}
 	r := &Runner{History: func(context.Context, string, string) ([]*mcp.ToolExecution, error) { return nil, nil }}
 	r.Call = func(_ context.Context, name string, a map[string]interface{}) (*mcp.ToolExecution, error) {

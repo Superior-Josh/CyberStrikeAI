@@ -64,7 +64,10 @@ func (e *Executor) checkBanmaCall(ctx context.Context, name string, args map[str
 	if !ok {
 		return banmaFailure("BOUNDARY_UNAVAILABLE", "test_info", "初始化授权无效")
 	}
-	if name == "banma_report" {
+	if name == "banma_pentest_run_cases" && args["mode"] == "mark_pending" && !mcp.IsBanmaController(ctx) {
+		return banmaFailure("AUTHORIZATION_BOUNDARY", "mode", "复核缺口由代码控制器登记")
+	}
+	if name == "banma_report" || name == "banma_pentest_run_cases" && args["mode"] == "mark_pending" {
 		var initialized struct {
 			RunDir string `json:"run_dir"`
 		}

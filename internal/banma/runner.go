@@ -3,7 +3,9 @@ package banma
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -183,6 +185,11 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			}
 			if er != nil {
 				sum.Gaps[input.ReviewCase] = redactError(er, input)
+				if ctx.Err() == nil && guide["existing_result_path"] != nil {
+					if _, markErr := r.helper(ctx, "mark_pending", input.ReviewCase, map[string]interface{}{"reason": sum.Gaps[input.ReviewCase]}); markErr != nil {
+						return sum, markErr
+					}
+				}
 				if ctx.Err() != nil {
 					sum.Status = "cancelled"
 					_ = r.persist(sum)
@@ -462,6 +469,10 @@ func ReadCapture(e *mcp.ToolExecution) (Capture, error) {
 	b, err := os.ReadFile(e.Result.NativeFiles[0].Path)
 	if err != nil {
 		return c, err
+	}
+	hash := sha256.Sum256(b)
+	if hex.EncodeToString(hash[:]) != e.Result.NativeFiles[0].SHA256 {
+		return c, fmt.Errorf("native HTTP capture hash changed")
 	}
 	err = json.Unmarshal(b, &c)
 	return c, err

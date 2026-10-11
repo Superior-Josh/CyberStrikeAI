@@ -2,7 +2,9 @@ package banma
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -26,7 +28,8 @@ func TestHeaderEvaluatorDoesNotGuessComplexOrRepeatedPolicy(t *testing.T) {
 			path := filepath.Join(r.RunDir, fmt.Sprintf("%d.json", n))
 			os.WriteFile(path, raw, 0600)
 			e := fixtureExecution(name, map[string]string{"output": "fixture"})
-			e.Result.NativeFiles = []mcp.NativeFileRef{{Path: path}}
+			hash := sha256.Sum256(raw)
+			e.Result.NativeFiles = []mcp.NativeFileRef{{Path: path, SHA256: hex.EncodeToString(hash[:])}}
 			return e, nil
 		}
 		d, supported, err := r.securityHeaders(context.Background(), Input{Targets: []string{"http://127.0.0.1:4280"}}, map[string]interface{}{"case": map[string]interface{}{"steps": []interface{}{"header control"}}})

@@ -84,6 +84,12 @@ func (r *Runner) restoreRun(input Input, sum *Summary) error {
 			sum.Gaps[cid] = "进程退出时执行未收尾；保留原文，不重放未知操作，待同轮只读核验"
 		}
 	}
+	for _, cid := range sum.Attempted {
+		if !contains(sum.Saved, cid) && !contains(sum.Pending, cid) {
+			sum.Pending = append(sum.Pending, cid)
+			sum.Gaps[cid] = "进程退出时执行未收尾；不重放未知操作，待同轮只读核验"
+		}
+	}
 	r.sequence = int(time.Now().UnixMicro()) // retain unique paths across old counters
 	r.budget.Attempts = 30
 	r.budget.Max = 30
