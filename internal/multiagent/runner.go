@@ -706,6 +706,10 @@ func historyToMessages(history []agent.ChatMessage, appCfg *config.Config, mwCfg
 	for _, h := range history {
 		role := strings.ToLower(strings.TrimSpace(h.Role))
 		switch role {
+		case "system":
+			if strings.HasPrefix(h.Content, "[banma_fixed_case_completion] ") && !h.ModelFacingTrace {
+				raw = append(raw, schema.SystemMessage(h.Content))
+			}
 		case "user":
 			if strings.TrimSpace(h.Content) != "" {
 				content := h.Content

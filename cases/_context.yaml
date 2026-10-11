@@ -1,9 +1,13 @@
 ---
 result_contract:
-  version: 2
+  version: 3
   interruption_kinds:
     - 环境问题
   not_applicable_result: 通过
+verification_contract:
+  platform_provenance_required: true
+  judgment_review_required: true
+  report_check_required: true
 execution_instructions: '执行主体是CyberStrikeAI项目AI。正常入口是用户选择角色并提供ip:port及可选凭据，AI自行完成44项的发现、实际测试、证据采集、判断和报告，不要求人类逐项运行脚本或填写结果。
 
   默认全量任务必须完整执行cases/的44项（匿名18项、认证26项），每项单独show、完成全部必测及已触发条件验证、核对原文并取得save的有效成功结果；只有用户明确选择部分清单时才按该清单执行，不得自行设置case_ids缩减范围。不得以耗时较长、剩余项较多、上下文/输出较长、已发现漏洞或已生成草稿为由提前收尾、跳过编号、用一项结果覆盖其他编号或缩减样本。
@@ -13,6 +17,8 @@ execution_instructions: '执行主体是CyberStrikeAI项目AI。正常入口是�
   本轮按黑盒网络测试执行，本机部署不授予白盒访问权限；init时将禁止读取靶机源码/配置的限制记录在test_info的禁止动作字段，每次操作及输入事实引用核对该实际字段。禁止查找或读取靶机服务端源码、配置及内部实现资料，包括宿主/容器文件、镜像内容、挂载目录、部署映射、锁文件、数据库和内部日志；不得借漏洞利用、历史证据或归档副本读取这些资料。项目cases/指导、工具schema、报告模板、本次工具采集原文及扫描器自身模板可按流程读取；目标正常网络返回的页面/客户端JS按用例核查，不将其当作服务端源码。
 
   每次真实操作前安排唯一原文文件，HTTP优先使用http-framework-test.capture_file；异步调用核对真实执行状态和完整输出来源。不得将AI摘要、指导或运行元数据当目标原文。
+
+  原文source_ref必须是本轮实际采集执行UUID，actual_steps.execution_id及tool_name/tool_status必须与平台记录相符；文件读写产生的AI摘要只放观察或解释，不充当原文。空命中文件改引用真实执行记录导出，工具由平台导出完整记录而非模型抄写。save在落盘前通过现有审计模型只读对照用例原文复核判定；拒绝或不可用须修正调用/证据，不伪装目标中断，不重发未知副作用。
 
   首次save前以本项show返回的save_contract核对payload_required及各对象必填字段、类型和唯一ID；沿item_results.item_id→observations.operation_id→actual_steps.item_ids逐条确认属于同一子项，observation_ids/evidence_ids均存在且原文支持该观察，不借用其他子项的完成状态。文件证据source_path使用实际取得的绝对路径，先通过已有工具一次核对存在、可读、非空、完整及来源；发现不存在、截断或只有预览时先取得真实完整输出，不猜文件名，不用摘要补原文。输入事实仅定位本轮test_info具体字段；恢复与环境中断另核对对应必填资料。核对可汇总完成，不为预检重复目标请求，预检不代替save校验或安全语义复核。
 

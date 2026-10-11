@@ -1,6 +1,8 @@
 package multiagent
 
 import (
+	"cyberstrike-ai/internal/agent"
+	"strings"
 	"testing"
 
 	"github.com/cloudwego/eino/schema"
@@ -33,5 +35,13 @@ func TestEmitToolCallsUsesUniqueFallbackIDsAcrossBatches(t *testing.T) {
 	}
 	if ids[0] == ids[1] {
 		t.Fatalf("fallback ID was reused across batches: %q", ids[0])
+	}
+}
+
+func TestFixedCaseContinuationStateReachesModelMessages(t *testing.T) {
+	input := []agent.ChatMessage{{Role: "system", Content: "unrelated old system"}, {Role: "system", Content: "[banma_fixed_case_completion] []\ncontinue pending cases"}, {Role: "user", Content: "fixture"}}
+	messages := historyToMessages(input, nil, nil)
+	if len(messages) != 2 || messages[0].Role != schema.System || !strings.Contains(messages[0].Content, "continue pending cases") {
+		t.Fatalf("trusted runtime state lost: %+v", messages)
 	}
 }

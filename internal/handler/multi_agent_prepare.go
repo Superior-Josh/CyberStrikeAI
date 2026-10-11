@@ -90,6 +90,11 @@ func (h *AgentHandler) prepareMultiAgentSession(req *ChatRequest, c *gin.Context
 			return nil, fmt.Errorf("无权访问该对话")
 		}
 	}
+	if strings.TrimSpace(req.Role) == "" && !createdNew {
+		if saved, err := h.db.GetConversationLite(conversationID); err == nil {
+			req.Role = saved.RoleName
+		}
+	}
 	if err := h.db.SetConversationRoleName(conversationID, req.Role); err != nil {
 		h.logger.Warn("更新对话角色失败", zap.String("conversationId", conversationID), zap.String("role", req.Role), zap.Error(err))
 	}
@@ -146,7 +151,7 @@ func (h *AgentHandler) prepareMultiAgentSession(req *ChatRequest, c *gin.Context
 		}
 	} else if req.Role != "" && req.Role != "默认" && h.config != nil && h.config.Roles != nil {
 		if role, exists := h.config.Roles[req.Role]; exists && role.Enabled {
-			if role.UserPrompt != "" {
+			if role.UserPrompt != "" && req.Role != "斑马安全渗透测试" {
 				finalMessage = role.UserPrompt + "\n\n" + req.Message
 			}
 			roleTools = role.Tools

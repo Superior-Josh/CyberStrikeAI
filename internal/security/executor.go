@@ -39,6 +39,7 @@ type Executor struct {
 	shellNoOutputTimeoutSec int // execute/exec 无新输出空闲秒数；0=默认 300；-1=关闭（见 SetShellNoOutputTimeoutSeconds）
 	toolOutputMaxBytes      int
 	spillRootDir            string
+	banmaReviewer           func(context.Context, string) (string, error)
 }
 
 // NewExecutor 创建新的执行器
@@ -125,6 +126,9 @@ func (e *Executor) ExecuteTool(ctx context.Context, toolName string, args map[st
 		zap.Any("args", args),
 	)
 
+	if blocked := e.checkBanmaCall(ctx, toolName, args); blocked != nil {
+		return blocked, nil
+	}
 	// 特殊处理：exec工具直接执行系统命令
 	if toolName == "exec" {
 		e.logger.Debug("执行exec工具")
@@ -157,6 +161,13 @@ func (e *Executor) ExecuteTool(ctx context.Context, toolName string, args map[st
 		return e.executeInternalTool(ctx, toolName, toolConfig.Command, args)
 	}
 
+	if toolName == "banma_pentest_run_cases" && args["mode"] == "save" {
+		prepared, failure := e.prepareBanmaSave(ctx, args)
+		if failure != nil {
+			return failure, nil
+		}
+		args = prepared
+	}
 	// 构建命令 - 根据工具类型使用不同的参数格式
 	cmdArgs := e.buildCommandArgs(toolName, toolConfig, args)
 
@@ -334,7 +345,13 @@ func (e *Executor) RegisterTools(mcpServer *mcp.Server) {
 				zap.String("toolName", toolName),
 				zap.Any("args", args),
 			)
-			return e.ExecuteTool(ctx, toolName, args)
+			inputs := e.captureBanmaScriptInputs(ctx, toolName, args)
+			result, err := e.ExecuteTool(ctx, toolName, args)
+			if result != nil {
+				result.NativeInputs = inputs
+				e.attachNativeFiles(toolName, args, result)
+			}
+			return result, err
 		}
 
 		mcpServer.RegisterTool(tool, handler)

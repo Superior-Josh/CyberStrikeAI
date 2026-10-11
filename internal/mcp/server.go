@@ -1185,6 +1185,15 @@ func (s *Server) UpdateToolExecutionResult(executionID string, result *ToolResul
 	if executionID == "" || result == nil {
 		return nil
 	}
+	if previous, ok := s.GetExecution(executionID); ok && previous != nil && previous.Result != nil {
+		result = cloneToolResult(result)
+		if len(previous.Result.NativeFiles) > 0 {
+			result.NativeFiles = append([]NativeFileRef(nil), previous.Result.NativeFiles...)
+		}
+		if len(previous.Result.NativeInputs) > 0 {
+			result.NativeInputs = append([]NativeInputRef(nil), previous.Result.NativeInputs...)
+		}
+	}
 	if previous, ok := s.GetExecution(executionID); ok && previous != nil &&
 		(previous.Status == ToolExecutionStatusBlocked || previous.Result != nil && previous.Result.Blocked) {
 		result = cloneToolResult(result)
@@ -1739,4 +1748,42 @@ func (s *Server) sendError(w http.ResponseWriter, id interface{}, code int, mess
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) LatestBanmaInit(conversationID string) (*ToolExecution, error) {
+	if conversationID == "" {
+		return nil, nil
+	}
+	if reader, ok := s.storage.(interface {
+		LatestBanmaInit(string) (*ToolExecution, error)
+	}); ok {
+		return reader.LatestBanmaInit(conversationID)
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	var latest *ToolExecution
+	for _, record := range s.executions {
+		if record.ConversationID == conversationID && record.ToolName == "banma_pentest_run_cases" && record.Status == "completed" && record.Arguments["mode"] == "init" && record.Result != nil && !record.Result.IsError && (latest == nil || record.StartTime.After(latest.StartTime)) {
+			latest = record
+		}
+	}
+	return latest, nil
+}
+
+func (s *Server) RecordRuntimeBoundaryBlock(ctx context.Context, name string, args map[string]interface{}, result *ToolResult) string {
+	id := s.BeginToolExecution(ctx, name, args)
+	now := time.Now()
+	s.mu.Lock()
+	record := s.executions[id]
+	record.Status = ToolExecutionStatusBlocked
+	record.EndTime = &now
+	record.Result = result
+	result.Blocked, result.IsError = true, true
+	s.mu.Unlock()
+	if s.storage != nil {
+		if err := s.storage.SaveToolExecution(record); err != nil {
+			s.logger.Warn("保存调用边界拒绝失败", zap.Error(err))
+		}
+	}
+	return id
 }

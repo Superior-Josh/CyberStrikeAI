@@ -113,9 +113,22 @@ type ToolCall struct {
 }
 
 // ToolResult 表示工具执行结果
+type NativeFileRef struct {
+	Path   string `json:"path"`
+	SHA256 string `json:"sha256"`
+}
+
+type NativeInputRef struct {
+	Path   string `json:"path"`
+	SHA256 string `json:"sha256"`
+	Text   string `json:"text"`
+}
+
 type ToolResult struct {
-	Content []Content `json:"content"`
-	IsError bool      `json:"isError,omitempty"`
+	NativeInputs []NativeInputRef `json:"native_inputs,omitempty"`
+	NativeFiles  []NativeFileRef  `json:"native_files,omitempty"`
+	Content      []Content        `json:"content"`
+	IsError      bool             `json:"isError,omitempty"`
 	// Blocked means policy stopped the call before execution. IsError remains
 	// true for MCP/model handling, while monitoring uses a distinct status.
 	Blocked bool `json:"blocked,omitempty"`

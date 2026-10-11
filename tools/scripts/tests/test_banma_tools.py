@@ -15,6 +15,7 @@ sys.modules["banma_pentest_run_cases"] = tool
 report_spec = importlib.util.spec_from_file_location("report_tool", ROOT / "tools/scripts/banma_report.py")
 report = importlib.util.module_from_spec(report_spec)
 report_spec.loader.exec_module(report)
+sys.modules["banma_report"] = report
 
 
 class CaseTests(unittest.TestCase):
@@ -33,10 +34,11 @@ class CaseTests(unittest.TestCase):
     def payload(self, result="通过"):
         value = {
             "scope_items": [{"item_id": "S1", "requirement_ref": "required", "must_complete": True, "applicability_reason": "fixture", "baseline_source": "fixture", "planned_checks": ["fixture"]}],
-            "actual_steps": [{"operation_id": "O1", "item_ids": ["S1"], "tool_name": "offline-fixture", "method_summary": "fixture", "tool_status": "completed"}],
+            "actual_steps": [{"operation_id": "O1", "item_ids": ["S1"], "tool_name": "offline-fixture", "method_summary": "fixture", "tool_status": "completed", "execution_id": "00000000-0000-4000-8000-000000000001"}],
             "observations": [{"observation_id": "V1", "operation_id": "O1", "summary": "fixture", "evidence_ids": ["E1"]}],
-            "evidence": [{"evidence_id": "E1", "source_type": "原始文件", "source_ref": "offline-fixture-execution", "coverage": "fixture only", "source_path": str(self.source)}],
+            "evidence": [{"evidence_id": "E1", "source_type": "原始文件", "source_ref": "00000000-0000-4000-8000-000000000001", "coverage": "fixture only", "source_path": str(self.source), "provenance": {"execution_id": "00000000-0000-4000-8000-000000000001", "tool_name": "offline-fixture", "sha256": tool.digest(self.source.read_bytes()) if self.source.exists() else "missing"}}],
             "item_results": [{"item_id": "S1", "result": result, "reason": "fixture", "observation_ids": ["V1"], "evidence_ids": ["E1"]}],
+            "judgment_review": {"approved": True, "basis": "OFFLINE FIXTURE ONLY"},
             "result": result, "judgment_reason": "OFFLINE FORMAT TEST", "coverage_limitations": ["NO TARGET TEST"],
             "recovery": {"status": "未涉及", "evidence_ids": [], "actual_actions": [], "remaining_changes": []},
         }
@@ -82,6 +84,41 @@ class CaseTests(unittest.TestCase):
         source = Path(valid["evidence"][0]["saved_path"])
         source.write_text("CORRUPTED OFFLINE FIXTURE")
         self.assertEqual(self.check_completion()["pending_case_ids"], ["PT_WEB_01"])
+
+    def test_new_contract_rejects_unverified_summary_and_review(self):
+        value = self.payload()
+        value["evidence"][0].pop("provenance")
+        with self.assertRaises(tool.ToolError) as raised:
+            self.save(value)
+        self.assertEqual(raised.exception.code, "PROVENANCE_MISMATCH")
+        value = self.payload()
+        value["judgment_review"] = {"approved": False}
+        with self.assertRaises(tool.ToolError) as raised:
+            self.save(value)
+        self.assertEqual(raised.exception.code, "REVIEW_REQUIRED")
+
+    def test_report_receipt_becomes_pending_after_results_change(self):
+        tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_01")
+        self.save(self.payload())
+        built = self.build()
+        report.dispatch("check", str(self.run), str(ROOT / "cases"), str(ROOT / "templates/pentest_report_template.md"), report_file=built["report_path"])
+        self.assertFalse(self.check_completion()["report_pending"])
+        updated = self.payload()
+        updated["judgment_reason"] = "UPDATED OFFLINE OBSERVATION"
+        self.save(updated)
+        self.assertTrue(self.check_completion()["report_pending"])
+
+    def test_review_input_decodes_native_body_without_secret_values(self):
+        import base64
+        body = "<input name='user_token' value='PRIVATE_CSRF_MARKER'>"
+        capture = {"source": "http-framework-test native response capture", "request_body_base64": base64.b64encode(b"password=PRIVATE_PASSWORD_MARKER&user_token=PRIVATE_CSRF_MARKER").decode(), "body_base64": base64.b64encode(body.encode()).decode(), "request_headers": [["Cookie", "PHPSESSID=PRIVATE_SESSION_MARKER"]], "headers": [["Set-Cookie", "PHPSESSID=PRIVATE_SESSION_MARKER"]]}
+        self.source.write_text(json.dumps(capture))
+        material = tool.review_input(str(self.run), "PT_WEB_01", self.payload(), str(ROOT / "cases"))
+        rendered = json.dumps(material)
+        self.assertNotIn("PRIVATE_PASSWORD_MARKER", rendered)
+        self.assertNotIn("PRIVATE_CSRF_MARKER", rendered)
+        self.assertNotIn("PRIVATE_SESSION_MARKER", rendered)
+        self.assertIn("response_csrf_fingerprints", rendered)
 
     def test_catalog_and_complete_guidance(self):
         self.assertEqual(len(self.cases), 44)
@@ -181,7 +218,7 @@ class CaseTests(unittest.TestCase):
         with self.assertRaises(tool.ToolError) as raised:
             self.save(value)
         self.assertEqual(raised.exception.field, "actual_steps.execution_id")
-        value["actual_steps"][0].pop("execution_id")
+        value["actual_steps"][0]["execution_id"] = "00000000-0000-4000-8000-000000000001"
         self.assertEqual(self.save(value)["result"], "通过")
 
     def test_invalid_exploration_columns_do_not_persist(self):
@@ -337,6 +374,7 @@ class CaseTests(unittest.TestCase):
 
     def test_complete_offline_report_statistics(self):
         for cid, case in self.cases.items():
+            tool.dispatch("show", str(ROOT / "cases"), str(self.run), cid)
             tool.save_result(self.run, cid, case, self.payload())
         report.save_info(self.run, {"test_info": {"test_object": "OFFLINE-FIXTURE-NO-TARGET", "tester": "OFFLINE", "reviewer": "OFFLINE", "approver": "OFFLINE", "document_version": "OFFLINE", "acsl_grade": "OFFLINE-FIXTURE", "acsl_basis": "OFFLINE-NOT-A-SECURITY-ASSESSMENT", "ended_at": tool.datetime.now(tool.timezone.utc).isoformat()}})
         built = self.build()

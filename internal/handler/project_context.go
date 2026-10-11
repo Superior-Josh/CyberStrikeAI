@@ -26,6 +26,11 @@ func (h *AgentHandler) agentRoleSessionContextBlock(conversationID, roleName str
 	if h == nil || h.config == nil {
 		return base
 	}
+	if strings.TrimSpace(roleName) == "" && h.db != nil {
+		if saved, err := h.db.GetConversationLite(conversationID); err == nil {
+			roleName = saved.RoleName
+		}
+	}
 	role := banmaRoleSystemBlock(roleName, h.config.Roles)
 	return project.AppendSystemPromptBlock(base, role)
 }

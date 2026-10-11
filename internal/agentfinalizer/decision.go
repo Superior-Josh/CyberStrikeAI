@@ -31,6 +31,7 @@ const (
 // user-facing answer. Natural-language assistant text is only a candidate until
 // this object says Finalizable.
 type FixedCaseCompletion struct {
+	ReportPending   bool     `json:"report_pending,omitempty"`
 	RunDir          string   `json:"run_dir"`
 	SelectedCaseIDs []string `json:"selected_case_ids"`
 	PendingCaseIDs  []string `json:"pending_case_ids"`
@@ -167,7 +168,7 @@ func Decide(db *database.DB, in Input) Decision {
 			return d
 		}
 		for _, run := range runs {
-			if len(run.PendingCaseIDs) > 0 {
+			if len(run.PendingCaseIDs) > 0 || run.ReportPending {
 				d.Status = StatusBlocked
 				d.CompletionReason = ReasonPendingCases
 				d.EvidenceVerified = false

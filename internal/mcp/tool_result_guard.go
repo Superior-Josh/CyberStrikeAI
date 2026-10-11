@@ -58,6 +58,12 @@ func cloneToolResult(in *ToolResult) *ToolResult {
 		return nil
 	}
 	out := *in
+	if in.NativeFiles != nil {
+		out.NativeFiles = append([]NativeFileRef(nil), in.NativeFiles...)
+	}
+	if in.NativeInputs != nil {
+		out.NativeInputs = append([]NativeInputRef(nil), in.NativeInputs...)
+	}
 	if in.Content != nil {
 		out.Content = append([]Content(nil), in.Content...)
 	}

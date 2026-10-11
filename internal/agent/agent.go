@@ -24,17 +24,18 @@ import (
 
 // Agent AI代理
 type Agent struct {
-	openAIClient        *openai.Client
-	config              *config.OpenAIConfig
-	agentConfig         *config.AgentConfig
-	mcpServer           *mcp.Server
-	externalMCPMgr      *mcp.ExternalMCPManager // 外部MCP管理器
-	logger              *zap.Logger
-	maxIterations       int
-	mu                  sync.RWMutex      // 添加互斥锁以支持并发更新
-	toolNameMapping     map[string]string // 工具名称映射：OpenAI格式 -> 原始格式（用于外部MCP工具）
-	promptBaseDir       string            // 解析 system_prompt_path 时相对路径的基准目录（通常为 config.yaml 所在目录）
-	toolDescriptionMode string            // 工具描述模式: "short" | "full"，默认 short
+	runtimeBoundaryCheck func(context.Context, string, map[string]interface{}) *mcp.ToolResult
+	openAIClient         *openai.Client
+	config               *config.OpenAIConfig
+	agentConfig          *config.AgentConfig
+	mcpServer            *mcp.Server
+	externalMCPMgr       *mcp.ExternalMCPManager // 外部MCP管理器
+	logger               *zap.Logger
+	maxIterations        int
+	mu                   sync.RWMutex      // 添加互斥锁以支持并发更新
+	toolNameMapping      map[string]string // 工具名称映射：OpenAI格式 -> 原始格式（用于外部MCP工具）
+	promptBaseDir        string            // 解析 system_prompt_path 时相对路径的基准目录（通常为 config.yaml 所在目录）
+	toolDescriptionMode  string            // 工具描述模式: "short" | "full"，默认 short
 }
 
 type agentConversationIDKey struct{}
@@ -820,6 +821,8 @@ func (a *Agent) UpdateMCPExecutionDisplayResult(executionID, resultText string) 
 	if exec := a.mcpExecution(executionID); exec != nil && exec.Result != nil {
 		tr.IsError = exec.Result.IsError
 		tr.Blocked = exec.Result.Blocked
+		tr.NativeFiles = append([]mcp.NativeFileRef(nil), exec.Result.NativeFiles...)
+		tr.NativeInputs = append([]mcp.NativeInputRef(nil), exec.Result.NativeInputs...)
 	}
 	if a.mcpServer != nil {
 		_ = a.mcpServer.UpdateToolExecutionResult(executionID, tr)
@@ -930,4 +933,38 @@ func extractQuotedToolName(errMsg string) string {
 		return ""
 	}
 	return rest[:end]
+}
+
+func (a *Agent) SetRuntimeBoundaryCheck(check func(context.Context, string, map[string]interface{}) *mcp.ToolResult) {
+	a.runtimeBoundaryCheck = check
+}
+func (a *Agent) CheckRuntimeBoundary(ctx context.Context, name string, args map[string]interface{}) *mcp.ToolResult {
+	if a == nil || a.runtimeBoundaryCheck == nil {
+		return nil
+	}
+	return a.runtimeBoundaryCheck(ctx, name, args)
+}
+
+func (a *Agent) ExecutionMetadata(id string) (string, string) {
+	if a == nil {
+		return "", ""
+	}
+	if a.mcpServer != nil {
+		if record, ok := a.mcpServer.GetExecution(id); ok {
+			return record.ToolName, record.Status
+		}
+	}
+	if a.externalMCPMgr != nil {
+		if record, ok := a.externalMCPMgr.GetExecution(id); ok {
+			return record.ToolName, record.Status
+		}
+	}
+	return "", ""
+}
+
+func (a *Agent) RecordRuntimeBoundaryBlock(ctx context.Context, name string, args map[string]interface{}, result *mcp.ToolResult) string {
+	if a == nil || a.mcpServer == nil {
+		return ""
+	}
+	return a.mcpServer.RecordRuntimeBoundaryBlock(ctx, name, args, result)
 }

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"cyberstrike-ai/internal/database"
+	"cyberstrike-ai/internal/mcp"
 	"cyberstrike-ai/internal/multiagent"
 
 	"github.com/gin-gonic/gin"
@@ -959,6 +960,14 @@ func (h *AgentHandler) interceptHITLForEinoTool(runCtx context.Context, cancelRu
 		_ = json.Unmarshal([]byte(arguments), &argsObj)
 		if argsObj != nil {
 			payload["argumentsObj"] = argsObj
+		}
+	}
+	if h.agent != nil {
+		if blocked := h.agent.CheckRuntimeBoundary(runCtx, toolName, argsObj); blocked != nil {
+			id := h.agent.RecordRuntimeBoundaryBlock(runCtx, toolName, argsObj, blocked)
+			body := map[string]interface{}{"blocked": true, "error_code": "AUTHORIZATION_BOUNDARY", "reason": mcp.ToolResultPlainText(blocked), "platform_execution": map[string]interface{}{"execution_id": id, "tool_name": toolName, "tool_status": "blocked"}}
+			encoded, _ := json.Marshal(body)
+			return "", multiagent.NewRuntimeBoundaryError(string(encoded))
 		}
 	}
 	d, err := h.waitHITLApproval(runCtx, cancelRun, conversationID, assistantMessageID, toolName, "", payload, sendEventFunc)

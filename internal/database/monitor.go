@@ -1127,3 +1127,35 @@ func (db *DB) DecreaseToolStats(toolName string, totalCalls, successCalls, faile
 
 	return nil
 }
+
+// LatestBanmaInit scopes runtime checks to the actual initialized conversation.
+func (db *DB) LatestBanmaInit(conversationID string) (*mcp.ToolExecution, error) {
+	rows, err := db.Query("SELECT id FROM tool_executions WHERE conversation_id=? AND tool_name=? AND status=? ORDER BY start_time DESC", conversationID, "banma_pentest_run_cases", "completed")
+	if err != nil {
+		return nil, err
+	}
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			rows.Close()
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for _, id := range ids {
+		record, err := db.GetToolExecution(id)
+		if err != nil {
+			return nil, err
+		}
+		if record.Arguments["mode"] == "init" && record.Result != nil && !record.Result.IsError {
+			return record, nil
+		}
+	}
+	return nil, nil
+}

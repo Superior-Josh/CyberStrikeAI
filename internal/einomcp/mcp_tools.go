@@ -45,14 +45,14 @@ func ToolsFromDefinitions(
 			return nil, fmt.Errorf("tool %q: %w", d.Function.Name, err)
 		}
 		out = append(out, &mcpBridgeTool{
-			info:           info,
-			name:           d.Function.Name,
-			agent:          ag,
-			holder:         holder,
-			record:         rec,
-			chunk:          toolOutputChunk,
-			invokeNotify:   invokeNotify,
-			einoAgentName:  strings.TrimSpace(einoAgentName),
+			info:          info,
+			name:          d.Function.Name,
+			agent:         ag,
+			holder:        holder,
+			record:        rec,
+			chunk:         toolOutputChunk,
+			invokeNotify:  invokeNotify,
+			einoAgentName: strings.TrimSpace(einoAgentName),
 		})
 	}
 	return out, nil
@@ -181,10 +181,15 @@ func runMCPToolInvocation(
 	if res.ExecutionID != "" && record != nil {
 		record(res.ExecutionID, compose.GetToolCallID(ctx))
 	}
-	if res.IsError {
-		return ToolErrorPrefix + res.Result, nil
+	body := res.Result
+	if res.ExecutionID != "" {
+		name, status := ag.ExecutionMetadata(res.ExecutionID)
+		body = withExecutionMetadata(body, res.ExecutionID, name, status)
 	}
-	return res.Result, nil
+	if res.IsError {
+		return ToolErrorPrefix + body, nil
+	}
+	return body, nil
 }
 
 // UnknownToolReminderHandler 供 compose.ToolsNodeConfig.UnknownToolsHandler 使用：
@@ -211,4 +216,16 @@ func unknownToolReminderText(requested string) string {
 Please retry using only names that appear in the tool definitions for this turn (exact match, case-sensitive). Do not invent or rename tools; adjust your plan and continue.
 
 （工具 %q 未注册：请仅使用本回合上下文中给出的工具名称，须完全一致；请勿自行改写或猜测名称，并继续后续步骤。）`, requested, requested)
+}
+
+func withExecutionMetadata(body, id, name, status string) string {
+	meta := map[string]interface{}{"execution_id": id, "tool_name": name, "tool_status": status}
+	var object map[string]interface{}
+	if json.Unmarshal([]byte(body), &object) == nil && object != nil {
+		object["platform_execution"] = meta
+		encoded, _ := json.Marshal(object)
+		return string(encoded)
+	}
+	encoded, _ := json.Marshal(meta)
+	return body + "\n[platform_execution] " + string(encoded)
 }

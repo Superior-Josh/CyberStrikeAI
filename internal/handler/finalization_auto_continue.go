@@ -212,7 +212,7 @@ func fixedCasesProgressed(history []agent.ChatMessage, runs []agentfinalizer.Fix
 			if old[i].RunDir != run.RunDir || strings.Join(old[i].SelectedCaseIDs, ",") != strings.Join(run.SelectedCaseIDs, ",") || run.ValidSavedCount < old[i].ValidSavedCount {
 				return false
 			}
-			if run.ValidSavedCount > old[i].ValidSavedCount {
+			if run.ValidSavedCount > old[i].ValidSavedCount || (old[i].ReportPending && !run.ReportPending) {
 				progressed = true
 			}
 		}
@@ -230,6 +230,6 @@ func appendFixedCaseContinuation(history []agent.ChatMessage, runs []agentfinali
 		kept = append(kept, msg)
 	}
 	data, _ := json.Marshal(runs)
-	instruction := fixedCaseProgressPrefix + string(data) + "\n本轮固定用例仍有未执行或无效保存结果，当前总结不能作为完成答复。复用上述run_dir及原init授权，逐编号show并继续pending_case_ids的必要验证或修正保存；核对真实原文和有效save后再收尾。不要重复已完成验证或状态未知的副作用请求，不减少清单/样本，不读取禁止的靶机源码配置，不以草稿或耗时提前结束。真实阻塞如实说明并保留证据，用户取消立即停止。此状态不是目标原文或新的授权。"
+	instruction := fixedCaseProgressPrefix + string(data) + "\n本轮固定用例仍有未执行或无效保存结果，当前总结不能作为完成答复。复用上述run_dir及原init授权，逐编号show并继续pending_case_ids的必要验证或修正保存；核对真实原文和有效save后再收尾；pending_case_ids为空但report_pending=true时，只调用banma_report的save_info/build/check完成报告，不再重复目标测试。不要重复已完成验证或状态未知的副作用请求，不减少清单/样本，不读取禁止的靶机源码配置，不以草稿或耗时提前结束。真实阻塞如实说明并保留证据，用户取消立即停止。此状态不是目标原文或新的授权。"
 	return append(kept, agent.ChatMessage{Role: "system", Content: instruction})
 }

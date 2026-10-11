@@ -99,6 +99,11 @@ def inputs(run, definitions, context):
                 continue
             p = Path(item.get("saved_path", ""))
             valid = valid and p.is_file() and p.resolve().is_relative_to(run.resolve()) and helper.digest(p.read_bytes()) == item.get("sha256")
+        if valid and context.get("result_contract", {}).get("version", 0) >= 3:
+            try:
+                helper.validate_saved_result(run, cid, definitions[cid])
+            except (helper.ToolError, OSError, ValueError, TypeError, KeyError, AttributeError):
+                valid = False
         if legal_status:
             record["_evidence_verified"] = valid
             records[cid] = record
@@ -270,6 +275,7 @@ def dispatch(mode, run_dir, cases_dir=None, template_file=None, output_name=None
         helper.demand(path.is_absolute() and path.resolve().is_relative_to(run.resolve()), "report_file", "只核对本次目录")
         saved = helper.read_json(run / "evidence/report-build.json")
         helper.demand(str(path) == saved["report_path"] and helper.digest(path.read_bytes()) == saved["report_sha256"] and summary["source_fingerprint"] == saved["source_fingerprint"] and helper.digest(template_path.read_bytes()) == saved["template_sha256"], "report_file", "报告/来源/模板发生变化，请重新build", "TEMPLATE_MISMATCH")
+        helper.write_json(run / "evidence/report-check.json", {"report_path": str(path), "report_sha256": helper.digest(path.read_bytes()), "source_fingerprint": summary["source_fingerprint"], "check_passed": True}, replace=(run / "evidence/report-check.json").exists())
         return {"report_path": str(path), **summary, "check_passed": True, "next_action": "草稿明确缺口，最终说明覆盖限制"}
     helper.demand(mode == "build", "mode", "未知操作")
     name = output_name or "report.md"

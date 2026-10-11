@@ -156,3 +156,17 @@ func TestExecutionServiceStoresGuardedResult(t *testing.T) {
 		t.Fatalf("unexpected spill body len=%d", len(body))
 	}
 }
+
+func TestDisplayUpdatePreservesRuntimeFileProvenance(t *testing.T) {
+	server := NewServer(zap.NewNop())
+	id := server.BeginToolExecution(context.Background(), "fixture", nil)
+	server.executions[id].Status = "completed"
+	server.executions[id].Result = &ToolResult{Content: []Content{{Type: "text", Text: "native output"}}, NativeFiles: []NativeFileRef{{Path: "fixture.json", SHA256: "runtime-hash"}}, NativeInputs: []NativeInputRef{{Path: "script.py", SHA256: "script-hash", Text: "OFFLINE FIXTURE"}}}
+	if err := server.UpdateToolExecutionResult(id, &ToolResult{Content: []Content{{Type: "text", Text: "reduced display"}}}); err != nil {
+		t.Fatal(err)
+	}
+	record, ok := server.GetExecution(id)
+	if !ok || len(record.Result.NativeFiles) != 1 || record.Result.NativeFiles[0].SHA256 != "runtime-hash" || len(record.Result.NativeInputs) != 1 {
+		t.Fatal("display update lost source chain")
+	}
+}

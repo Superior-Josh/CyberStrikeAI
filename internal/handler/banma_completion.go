@@ -2,9 +2,13 @@ package handler
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -96,6 +100,9 @@ func (h *AgentHandler) fixedCaseCheckFor(conversationID string) func([]string) (
 			if err != nil || strings.Join(expected, "\x00") != strings.Join(response.SelectedCaseIDs, "\x00") {
 				return checks, fmt.Errorf("fixed case authorization scope mismatch")
 			}
+			if err := h.verifyFixedCaseRuntimeRecords(conversationID, &response.FixedCaseCompletion); err != nil {
+				return checks, err
+			}
 			checks = append(checks, response.FixedCaseCompletion)
 		}
 		return checks, nil
@@ -160,4 +167,71 @@ func (h *AgentHandler) authorizedFixedCaseIDs(conversationID, dir string, catalo
 		return cases, nil
 	}
 	return nil, fmt.Errorf("matching successful init unavailable")
+}
+
+func (h *AgentHandler) verifyFixedCaseRuntimeRecords(conversationID string, check *agentfinalizer.FixedCaseCompletion) error {
+	rows, err := h.db.Query("SELECT id FROM tool_executions WHERE conversation_id=? AND tool_name IN (?,?) AND status=? ORDER BY start_time DESC", conversationID, "banma_pentest_run_cases", "banma_report", "completed")
+	if err != nil {
+		return err
+	}
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return err
+		}
+		ids = append(ids, id)
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return err
+	}
+	verified := map[string]string{}
+	for _, id := range ids {
+		record, err := h.db.GetToolExecution(id)
+		if err != nil {
+			return err
+		}
+		if record.Result == nil || record.Result.IsError || record.Arguments["run_dir"] != check.RunDir {
+			continue
+		}
+		if record.Arguments["mode"] != "save" && record.Arguments["mode"] != "check" {
+			continue
+		}
+		for _, file := range record.Result.NativeFiles {
+			if _, exists := verified[file.Path]; !exists {
+				verified[file.Path] = file.SHA256
+			}
+		}
+	}
+	matches := func(path string) bool {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return false
+		}
+		sum := sha256.Sum256(data)
+		return verified[path] == hex.EncodeToString(sum[:])
+	}
+	pending := map[string]bool{}
+	for _, id := range check.PendingCaseIDs {
+		pending[id] = true
+	}
+	for _, id := range check.SelectedCaseIDs {
+		if !matches(filepath.Join(check.RunDir, "evidence", id+".json")) {
+			pending[id] = true
+		}
+	}
+	check.PendingCaseIDs = nil
+	for _, id := range check.SelectedCaseIDs {
+		if pending[id] {
+			check.PendingCaseIDs = append(check.PendingCaseIDs, id)
+		}
+	}
+	check.ValidSavedCount = len(check.SelectedCaseIDs) - len(check.PendingCaseIDs)
+	if !matches(filepath.Join(check.RunDir, "evidence/report-check.json")) {
+		check.ReportPending = true
+	}
+	return nil
 }

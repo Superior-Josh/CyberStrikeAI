@@ -15,6 +15,18 @@ type hitlInterceptorKey struct{}
 
 type HITLToolInterceptor func(ctx context.Context, toolName, arguments string) (string, error)
 
+type runtimeBoundaryError struct{ result string }
+
+func (e *runtimeBoundaryError) Error() string     { return e.result }
+func NewRuntimeBoundaryError(result string) error { return &runtimeBoundaryError{result: result} }
+func runtimeBoundaryResult(err error) (string, bool) {
+	var denied *runtimeBoundaryError
+	if errors.As(err, &denied) {
+		return "__CYBERSTRIKE_AI_TOOL_ERROR__\n" + denied.result, true
+	}
+	return "", false
+}
+
 type humanRejectError struct {
 	reason string
 }
@@ -105,6 +117,9 @@ func hitlInvokableToolCallMiddleware() compose.InvokableToolMiddleware {
 					originalArgs = input.Arguments
 					edited, err := fn(ctx, input.Name, input.Arguments)
 					if err != nil {
+						if result, blocked := runtimeBoundaryResult(err); blocked {
+							return &compose.ToolOutput{Result: result}, nil
+						}
 						if IsHumanRejectError(err) {
 							// Human rejection should be a soft tool result so the model can continue iterating.
 							// tool_search 须保持 JSON，否则 Eino toolsearch 中间件解析历史时会硬崩 ChatModel。
@@ -143,6 +158,9 @@ func hitlStreamableToolCallMiddleware() compose.StreamableToolMiddleware {
 					originalArgs = input.Arguments
 					edited, err := fn(ctx, input.Name, input.Arguments)
 					if err != nil {
+						if result, blocked := runtimeBoundaryResult(err); blocked {
+							return &compose.StreamToolOutput{Result: schema.StreamReaderFromArray([]string{result})}, nil
+						}
 						if IsHumanRejectError(err) {
 							msg := HitlRejectToolResult(input.Name, err.Error())
 							hitlClearReturnDirectlyIfTransfer(ctx, input.Name)
