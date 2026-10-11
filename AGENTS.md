@@ -2,6 +2,8 @@
 
 ## 实现目标
 
+2026-10-11方案调整：`Implementation_Plan.md`第一至十二章为新的待实施设计，转向现有工作流调度、代码受控执行/覆盖校验/证据绑定与AI分析候选判断；旧方案及验证记录保留在历史附录。当前角色、用例、工具和接口仍为旧实现。本轮只修订方案文档，未授权实施新路线；实施须另行明确授权，不能因方案提交启动服务、目标测试或代码迁移。迁移时按新方案逐项调整下列旧实现约定，保留黑盒授权、三态结果、唯一用例来源及历史资料边界，不用文档更新宣称已具备44项自动执行或判定能力。
+
 为 CyberStrikeAI 实现“斑马安全渗透测试”角色、用例指导与证据保存工具及报告工具。已按 `Implementation_Plan.md` 实现两个辅助工具和角色；实际测试调用项目现有工具完成，源码/加载/离线验证/项目 AI 实测分别记录，不能将部分验收说成完整测试。
 
 唯一用例来源为 [cases/](cases/)：`anonymous/`、`authenticated/` 下每项 YAML 配置及 `_context.yaml` 中的共同/分组要求；同步关系为 [cases/](cases/) → [templates/pentest_report_template.md](templates/pentest_report_template.md)。`templates/web_pentest_cases.md` 已弃用，仅保留历史内容，不再读取、同步或作为验证依据。不在角色或工具 YAML 中复制另一套用例和判定标准。
