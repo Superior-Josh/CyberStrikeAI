@@ -135,17 +135,15 @@ class CaseTests(unittest.TestCase):
         source.write_text("CORRUPTED OFFLINE FIXTURE")
         self.assertEqual(self.check_completion()["pending_case_ids"], ["PT_WEB_01"])
 
-    def test_new_contract_rejects_unverified_summary_and_review(self):
+    def test_new_contract_requires_provenance_without_second_model(self):
         value = self.payload()
         value["evidence"][0].pop("provenance")
         with self.assertRaises(tool.ToolError) as raised:
             self.save(value)
         self.assertEqual(raised.exception.code, "PROVENANCE_MISMATCH")
         value = self.payload()
-        value["judgment_review"] = {"approved": False}
-        with self.assertRaises(tool.ToolError) as raised:
-            self.save(value)
-        self.assertEqual(raised.exception.code, "REVIEW_REQUIRED")
+        value.pop("judgment_review")
+        self.assertEqual(self.save(value)["result"], "通过")
 
     def test_report_receipt_becomes_pending_after_results_change(self):
         tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_01")
@@ -196,17 +194,18 @@ class CaseTests(unittest.TestCase):
         with self.assertRaises(tool.ToolError):
             tool.run_path(str(tool.ROOT))
 
-    def test_save_requires_case_specific_guidance(self):
-        with self.assertRaises(tool.ToolError) as raised:
-            tool.dispatch("save", str(ROOT / "cases"), str(self.run), "PT_WEB_04", self.payload())
-        self.assertEqual(raised.exception.field, "case_id")
-        self.assertIn("show", str(raised.exception))
-        tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_01")
-        with self.assertRaises(tool.ToolError):
-            tool.dispatch("save", str(ROOT / "cases"), str(self.run), "PT_WEB_04", self.payload())
-        tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_04")
+    def test_code_contract_does_not_require_model_show(self):
         saved = tool.dispatch("save", str(ROOT / "cases"), str(self.run), "PT_WEB_04", self.payload())
         self.assertEqual(saved["result"], "通过")
+
+    def test_saved_partial_failure_stays_pending(self):
+        value = self.payload("失败")
+        value["coverage_complete"] = False
+        value["coverage_limitations"] = ["OFFLINE missing required branch"]
+        self.save(value)
+        self.assertEqual(self.check_completion()["pending_case_ids"], tool.execution_order(self.context, self.cases))
+        record = tool.read_json(self.run / "evidence/PT_WEB_01.json")
+        self.assertEqual(record["result"], "失败")
 
     def test_native_evidence_and_json_permissions(self):
         saved = self.save(self.payload())

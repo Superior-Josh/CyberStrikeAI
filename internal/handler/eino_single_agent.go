@@ -117,6 +117,9 @@ func (h *AgentHandler) EinoSingleAgentLoopStream(c *gin.Context) {
 			"userMessageId":  prep.UserMessageID,
 		})
 	}
+	if h.runBanmaStream(c, &req, prep, sendEvent) {
+		return
+	}
 	if h.runRoleWorkflowStreamIfBound(c, &req, prep, sendEvent) {
 		return
 	}
@@ -446,6 +449,9 @@ func (h *AgentHandler) EinoSingleAgentLoop(c *gin.Context) {
 	h.activateHITLForConversation(prep.ConversationID, req.Hitl)
 	if h.hitlManager != nil {
 		defer h.hitlManager.DeactivateConversation(prep.ConversationID)
+	}
+	if h.runBanmaJSON(c, &req, prep) {
+		return
 	}
 	if h.runRoleWorkflowJSONIfBound(c, &req, prep) {
 		return

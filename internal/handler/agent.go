@@ -19,6 +19,7 @@ import (
 	"cyberstrike-ai/internal/agent"
 	"cyberstrike-ai/internal/audit"
 	"cyberstrike-ai/internal/authctx"
+	"cyberstrike-ai/internal/banma"
 	"cyberstrike-ai/internal/config"
 	"cyberstrike-ai/internal/database"
 	"cyberstrike-ai/internal/mcp/builtin"
@@ -400,6 +401,7 @@ type ChatFinalizationRequest struct {
 
 // ChatRequest 聊天请求
 type ChatRequest struct {
+	Banma                *banma.Input            `json:"banma,omitempty"`
 	Message              string                  `json:"message" binding:"required"`
 	ConversationID       string                  `json:"conversationId,omitempty"`
 	ProjectID            string                  `json:"projectId,omitempty"` // 新对话绑定的项目（可选；未指定时可用 config.project.default_project_id）

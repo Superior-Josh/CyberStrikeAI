@@ -921,6 +921,7 @@ func (s *Server) GetAllTools() []Tool {
 
 // CallTool 直接调用工具（用于内部调用）
 func (s *Server) CallTool(ctx context.Context, toolName string, args map[string]interface{}) (*ToolResult, string, error) {
+	args = PrepareBanmaArguments(ctx, toolName, args)
 	if s.executionService == nil {
 		s.executionService = NewExecutionService(s.storage, s.logger)
 		s.executionService.ConfigureToolResultMaxBytes(s.toolResultMaxBytes)

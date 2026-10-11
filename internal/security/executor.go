@@ -39,7 +39,6 @@ type Executor struct {
 	shellNoOutputTimeoutSec int // execute/exec 无新输出空闲秒数；0=默认 300；-1=关闭（见 SetShellNoOutputTimeoutSeconds）
 	toolOutputMaxBytes      int
 	spillRootDir            string
-	banmaReviewer           func(context.Context, string) (string, error)
 }
 
 // NewExecutor 创建新的执行器
@@ -341,6 +340,9 @@ func (e *Executor) RegisterTools(mcpServer *mcp.Server) {
 		}
 
 		handler := func(ctx context.Context, args map[string]interface{}) (*mcp.ToolResult, error) {
+			if toolName == "http-framework-test" && mcp.IsBanmaController(ctx) {
+				return e.executeBanmaHTTP(ctx, args)
+			}
 			e.logger.Debug("工具handler被调用",
 				zap.String("toolName", toolName),
 				zap.Any("args", args),

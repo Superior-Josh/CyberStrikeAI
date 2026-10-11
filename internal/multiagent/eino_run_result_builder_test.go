@@ -106,3 +106,18 @@ func TestEinoRunResultBuilderPlanExecuteUnwrapsFallbackAssistant(t *testing.T) {
 		t.Fatalf("response = %q, want fallback executor text", got.Response)
 	}
 }
+
+func TestStructuredResponseSurvivesPresentationDeduplication(t *testing.T) {
+	raw := `{
+ "checks": [
+ {"ref":"required","result":"通过","reason":"a","evidence":[0]},
+ {"ref":"conditional","result":"通过","reason":"b","evidence":[0]}
+ ],
+ "gaps": [],
+ "recovery":"未涉及"
+ }`
+	result := buildEinoRunResultFromAccumulated("eino_single", nil, nil, raw, "", "", nil, false)
+	if result.RawResponse != raw {
+		t.Fatal("presentation transform corrupted structured contract")
+	}
+}

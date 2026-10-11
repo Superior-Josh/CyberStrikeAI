@@ -44,6 +44,14 @@ def source_refs(values, records, run):
 
 def save_info(run, payload):
     helper.demand(isinstance(payload, dict) and set(payload) <= {"test_info", "target_profile", "exploratory_sections", "findings", "conclusion"}, "payload", "报告资料字段缺失或未知")
+    base = helper.read_json(run / "evidence/test_info.json")
+    if base.get("context", {}).get("result_contract", {}).get("version", 0) >= 4:
+        helper.demand("conclusion" not in payload, "conclusion", "新路线结论从有效保存结果派生，不另写自由结论")
+        for finding in payload.get("findings", []):
+            helper.demand(not any(str(ref).startswith("test_info") for ref in finding.get("source_refs", [])), "findings.source_refs", "输入事实不支持目标漏洞")
+        for row in payload.get("target_profile", []):
+            if row.get("field") not in {"目标", "目标地址"}:
+                helper.demand(not any(str(ref).startswith("test_info") for ref in row.get("source_refs", [])), "target_profile.source_refs", "组件/部署观察须引用本轮网络原文")
     path = run / "evidence/report_info.json"
     old = helper.read_json(path) if path.exists() else {}
     for key, value in payload.items():
@@ -109,6 +117,8 @@ def inputs(run, definitions, context):
             records[cid] = record
         if not valid:
             gaps.append(cid + ": 结果/原文无效，待核验；不改写为通过或中断")
+        if record.get("coverage_complete", True) is not True:
+            gaps.append(cid + ": 已保存失败/观察，必要覆盖未完成；不作为整项完成")
     counts = {g: {s: 0 for s in ("通过", "失败", "中断", "未执行")} for g in ("anonymous", "authenticated", "total")}
     for cid, case in definitions.items():
         status = records[cid]["result"] if cid in records else "未执行"

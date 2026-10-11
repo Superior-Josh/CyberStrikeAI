@@ -6609,6 +6609,47 @@ func (h *OpenAPIHandler) GetOpenAPISpec(c *gin.Context) {
 		},
 	}
 
+	banmaSchema := map[string]interface{}{"type": "object", "description": "斑马代码执行输入；不提供case_ids默认完整44项。凭据仅用于本轮，不写入用例或报告。", "required": []string{"targets"}, "properties": map[string]interface{}{
+		"review_case_id":    map[string]interface{}{"type": "string", "description": "仅重新判定指定用例的同轮已有采集记录，需report_run_dir；不追加目标操作"},
+		"report_run_dir":    map[string]interface{}{"type": "string", "description": "同一会话仅修复已初始化目录的报告，不执行目标请求"},
+		"targets":           map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}},
+		"case_ids":          map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}, "description": "仅用户明确限定部分执行时填写"},
+		"write_authorized":  map[string]interface{}{"type": "boolean", "default": false},
+		"forbidden_actions": map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}},
+		"username":          map[string]interface{}{"type": "string"}, "password": map[string]interface{}{"type": "string", "writeOnly": true},
+	}}
+	for _, route := range []string{"/api/multi-agent", "/api/multi-agent/stream", "/api/eino-agent", "/api/eino-agent/stream"} {
+		paths := spec["paths"].(map[string]interface{})
+		path, ok := paths[route].(map[string]interface{})
+		if !ok {
+			continue
+		}
+		post, ok := path["post"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+		body, ok := post["requestBody"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+		content, ok := body["content"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+		media, ok := content["application/json"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+		schema, ok := media["schema"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+		properties, ok := schema["properties"].(map[string]interface{})
+		if ok {
+			properties["banma"] = banmaSchema
+		}
+	}
+
 	enrichSpecWithI18nKeys(spec)
 	c.JSON(http.StatusOK, spec)
 }

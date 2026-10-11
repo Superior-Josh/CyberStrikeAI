@@ -3,21 +3,16 @@ package security
 import (
 	"context"
 	"crypto/sha256"
-	"cyberstrike-ai/internal/config"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"cyberstrike-ai/internal/mcp"
 )
 
-func (e *Executor) SetBanmaReviewer(review func(context.Context, string) (string, error)) {
-	e.banmaReviewer = review
-}
 func banmaFailure(code, field, reason string) *mcp.ToolResult {
 	data, _ := json.Marshal(map[string]interface{}{"ok": false, "error_code": code, "field": field, "reason": reason, "retry_hint": "修正真实执行、证据引用或覆盖后重试，不重复状态未知的副作用，不手写原文"})
 	return &mcp.ToolResult{Content: []mcp.Content{{Type: "text", Text: string(data)}}, IsError: true, Blocked: code == "AUTHORIZATION_BOUNDARY" || code == "BOUNDARY_UNAVAILABLE"}
@@ -82,6 +77,9 @@ func (e *Executor) attachNativeFiles(name string, args map[string]interface{}, r
 }
 
 func (e *Executor) prepareBanmaSave(ctx context.Context, args map[string]interface{}) (map[string]interface{}, *mcp.ToolResult) {
+	if !mcp.IsBanmaController(ctx) {
+		return nil, banmaFailure("CONTROLLER_REQUIRED", "save", "新路线由代码关联操作并保存；Eino仅交回单项判断")
+	}
 	// Clone model arguments before binding trusted runtime values.
 	data, err := json.Marshal(args)
 	if err != nil {
@@ -197,42 +195,10 @@ func (e *Executor) prepareBanmaSave(ctx context.Context, args map[string]interfa
 		item["source_path"] = path
 		item["provenance"] = map[string]interface{}{"execution_id": record.ID, "tool_name": record.ToolName, "sha256": nativeHash(source)}
 	}
-	// Review against the original case, using only verified evidence. No target operations.
-	if e.banmaReviewer == nil {
-		return nil, banmaFailure("REVIEW_UNAVAILABLE", "judgment_review", "判定复核未加载，不能当作通过或环境中断")
-	}
-	tool := e.toolIndex["banma_pentest_run_cases"]
-	if tool == nil {
-		return nil, banmaFailure("REVIEW_UNAVAILABLE", "tool", "辅助工具未加载")
-	}
-	reviewPayload, _ := json.Marshal(payload)
-	reviewArgs := map[string]interface{}{"run_dir": run, "case_id": prepared["case_id"], "payload": string(reviewPayload)}
-	prompt, failure := e.banmaReviewInput(ctx, tool, reviewArgs)
-	if failure != nil {
-		return nil, failure
-	}
-	verdict, err := e.banmaReviewer(ctx, prompt)
-	if err != nil {
-		return nil, banmaFailure("REVIEW_UNAVAILABLE", "judgment_review", "复核调用失败，保持原文并修正，不新增目标请求")
-	}
-	var review struct {
-		Approved bool     `json:"approved"`
-		Issues   []string `json:"issues"`
-	}
-	if json.Unmarshal([]byte(strings.TrimSpace(verdict)), &review) != nil || !review.Approved || len(review.Issues) > 0 {
-		return nil, banmaFailure("JUDGMENT_REJECTED", "judgment_reason", "原文不足以支持完整覆盖或所选判定；按复核反馈核查："+strings.Join(review.Issues, "；"))
-	}
-	payload["judgment_review"] = map[string]interface{}{"approved": true, "basis": "case YAML and verified execution evidence"}
+	// Provenance is checked here; safety semantics belong to the code runner or
+	// its Eino handoff, not a second mandatory model approval.
+	payload["judgment_method"] = mcp.BanmaJudgmentMethod(ctx)
 	return prepared, nil
-}
-
-func (e *Executor) banmaReviewInput(ctx context.Context, tool *config.ToolConfig, args map[string]interface{}) (string, *mcp.ToolResult) {
-	argv := append(append([]string(nil), tool.Args...), "--review-input", "--run-dir", fmt.Sprint(args["run_dir"]), "--case-id", fmt.Sprint(args["case_id"]), "--payload", fmt.Sprint(args["payload"]))
-	output, err := exec.CommandContext(ctx, tool.Command, argv...).Output()
-	if err != nil {
-		return "", banmaFailure("REVIEW_UNAVAILABLE", "evidence", "无法准备完整复核原文；请核对来源和大小")
-	}
-	return string(output), nil
 }
 
 func (e *Executor) captureBanmaScriptInputs(ctx context.Context, name string, args map[string]interface{}) []mcp.NativeInputRef {

@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -70,18 +69,16 @@ h.ROOT=Path(scratch);sys.argv=["checker",*sys.argv[3:],"--cases-dir",project+"/c
 raise SystemExit(h.main())`
 	tool := config.ToolConfig{Name: "banma_pentest_run_cases", Command: python, Args: []string{"-c", reviewScript, project, root}, Enabled: true}
 	executor := NewExecutor(&config.SecurityConfig{Tools: []config.ToolConfig{tool}}, server, zap.NewNop())
-	reviews := 0
-	executor.SetBanmaReviewer(func(context.Context, string) (string, error) { reviews++; return `{"approved":true,"issues":[]}`, nil })
 	payload := map[string]interface{}{"actual_steps": []interface{}{map[string]interface{}{"execution_id": id, "tool_name": "http-framework-test", "tool_status": "completed"}}, "evidence": []interface{}{map[string]interface{}{"evidence_id": "E1", "source_type": "原始文件", "source_ref": id, "source_path": source}}}
 	args := map[string]interface{}{"run_dir": run, "case_id": "PT_WEB_03", "payload": payload}
-	ctx := mcp.WithMCPConversationID(context.Background(), "fixture")
+	ctx := mcp.WithBanmaController(mcp.WithMCPConversationID(context.Background(), "fixture"))
 	prepared, failure := executor.prepareBanmaSave(ctx, args)
 	if failure != nil {
 		t.Fatalf("valid native evidence rejected: %s", mcp.ToolResultPlainText(failure))
 	}
 	bound := prepared["payload"].(map[string]interface{})["evidence"].([]interface{})[0].(map[string]interface{})
-	if bound["provenance"] == nil || prepared["payload"].(map[string]interface{})["judgment_review"] == nil || reviews != 1 {
-		t.Fatal("runtime provenance/review not bound")
+	if bound["provenance"] == nil || prepared["payload"].(map[string]interface{})["judgment_method"] != "code_or_eino" {
+		t.Fatal("runtime provenance/method not bound")
 	}
 	exported := bound["source_path"].(string)
 	stat, err := os.Stat(exported)
@@ -100,17 +97,11 @@ raise SystemExit(h.main())`
 	if _, bad := executor.prepareBanmaSave(ctx, args); bad == nil {
 		t.Fatal("rewritten native source accepted")
 	}
-	if reviews != 1 {
-		t.Fatal("untrusted evidence reached semantic reviewer")
-	}
 	if err = os.WriteFile(source, content, 0600); err != nil {
 		t.Fatal(err)
 	}
-	executor.SetBanmaReviewer(func(context.Context, string) (string, error) {
-		return `{"approved":false,"issues":["invalid CSRF normal control"]}`, nil
-	})
-	if _, bad := executor.prepareBanmaSave(ctx, args); bad == nil || !strings.Contains(mcp.ToolResultPlainText(bad), "JUDGMENT_REJECTED") {
-		t.Fatal("rejected judgment allowed")
+	if _, bad := executor.prepareBanmaSave(mcp.WithoutBanmaController(ctx), args); bad == nil {
+		t.Fatal("Eino cannot save directly")
 	}
 	if _, bad := executor.prepareBanmaSave(mcp.WithMCPConversationID(context.Background(), "another"), args); bad == nil {
 		t.Fatal("cross-conversation evidence accepted")

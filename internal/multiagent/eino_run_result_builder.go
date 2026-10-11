@@ -97,6 +97,7 @@ func buildEinoRunResultFromAccumulated(
 		}
 	}
 	cleaned := strings.TrimSpace(lastAssistant)
+	rawResponse := cleaned
 	if orchMode == "plan_execute" {
 		if e := strings.TrimSpace(lastPlanExecuteExecutor); e != "" {
 			cleaned = e
@@ -107,10 +108,12 @@ func buildEinoRunResultFromAccumulated(
 	// exit.final_result 是正式交付物：即使助手正文已有过渡语（如「交付终审报告：」），
 	// 也必须优先采用 exit 内容，避免 supervisor 等模式只展示空壳开场白。
 	if exitFinal := strings.TrimSpace(einoExtractExitDeliverableFromMsgs(runAccumulatedMsgs)); exitFinal != "" {
+		rawResponse = exitFinal
 		cleaned = einoMergeAssistantIntroWithExitFinal(cleaned, exitFinal)
 	} else if cleaned == "" {
 		if fb := strings.TrimSpace(einoExtractFallbackAssistantFromMsgs(runAccumulatedMsgs)); fb != "" {
 			cleaned = fb
+			rawResponse = fb
 			if orchMode == "plan_execute" {
 				cleaned = UnwrapPlanExecuteUserText(cleaned)
 			}
@@ -130,6 +133,7 @@ func buildEinoRunResultFromAccumulated(
 	}
 	out := &RunResult{
 		Response:             resp,
+		RawResponse:          rawResponse,
 		MCPExecutionIDs:      mcpIDs,
 		LastAgentTraceInput:  traceJSON,
 		LastAgentTraceOutput: lastOut,
@@ -154,7 +158,7 @@ func markModelFacingTraceForPersistence(msgs []adk.Message) []adk.Message {
 }
 
 // einoExtractExitDeliverableFromMsgs 从轨迹中提取当前轮次的 exit 正式交付物
-//（工具输出或 assistant 调用 exit 时的 arguments.final_result）。
+// （工具输出或 assistant 调用 exit 时的 arguments.final_result）。
 // 若更靠近末尾出现了非 exit 的工具结果，则认为 exit 不是终态交付。
 func einoExtractExitDeliverableFromMsgs(msgs []adk.Message) string {
 	for i := len(msgs) - 1; i >= 0; i-- {

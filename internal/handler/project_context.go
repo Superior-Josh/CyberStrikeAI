@@ -3,23 +3,9 @@ package handler
 import (
 	"strings"
 
-	"cyberstrike-ai/internal/config"
 	"cyberstrike-ai/internal/project"
 	"go.uber.org/zap"
 )
-
-// banmaRoleSystemBlock keeps the fixed-case role contract in system context,
-// rather than relying on a long user message surviving summarization.
-func banmaRoleSystemBlock(roleName string, roles map[string]config.RoleConfig) string {
-	if roleName != "斑马安全渗透测试" {
-		return ""
-	}
-	role, ok := roles[roleName]
-	if !ok || !role.Enabled {
-		return ""
-	}
-	return strings.TrimSpace(role.UserPrompt)
-}
 
 func (h *AgentHandler) agentRoleSessionContextBlock(conversationID, roleName string) string {
 	base := h.agentSessionContextBlock(conversationID)
@@ -31,8 +17,7 @@ func (h *AgentHandler) agentRoleSessionContextBlock(conversationID, roleName str
 			roleName = saved.RoleName
 		}
 	}
-	role := banmaRoleSystemBlock(roleName, h.config.Roles)
-	return project.AppendSystemPromptBlock(base, role)
+	return base
 }
 
 // agentSessionContextBlock 注入会话工作目录与项目黑板（用于 system prompt 追加块）。

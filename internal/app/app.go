@@ -430,7 +430,6 @@ func New(cfg *config.Config, log *logger.Logger, configPath string) (*App, error
 
 	// 创建处理器
 	agentHandler := handler.NewAgentHandler(agent, db, cfg, log.Logger)
-	executor.SetBanmaReviewer(agentHandler.ReviewBanmaResult)
 	agentHandler.SetAudit(auditSvc)
 	agentHandler.SetAgentsMarkdownDir(agentsDir)
 	// 如果知识库已启用，设置知识库管理器到AgentHandler以便记录检索日志

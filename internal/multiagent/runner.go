@@ -33,6 +33,7 @@ import (
 
 // RunResult 与单 Agent 循环结果字段对齐，便于复用存储与 SSE 收尾逻辑。
 type RunResult struct {
+	RawResponse          string // Unmodified final content for structured consumers; never a target original.
 	Response             string
 	MCPExecutionIDs      []string
 	LastAgentTraceInput  string // 已序列化的消息带（JSON）：原生循环或 Eino 均写入，供续跑/攻击链等恢复上下文

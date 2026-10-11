@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 	"time"
 
@@ -26,7 +25,7 @@ func shouldAutoContinueAfterFinalization(d agentfinalizer.Decision, attempt int)
 	if attempt >= finalizationAutoContinueMaxAttempts {
 		return false
 	}
-	return d.CompletionReason == agentfinalizer.ReasonMissingEvidence || d.CompletionReason == agentfinalizer.ReasonPendingCases
+	return d.CompletionReason == agentfinalizer.ReasonMissingEvidence
 }
 
 func (h *AgentHandler) tryAutoContinueAfterFinalization(
@@ -39,15 +38,6 @@ func (h *AgentHandler) tryAutoContinueAfterFinalization(
 	curFinalMessage *string,
 	progressCallback func(eventType, message string, data interface{}),
 ) bool {
-	if taskCtx.Err() != nil {
-		return false
-	}
-	if decision.CompletionReason == agentfinalizer.ReasonPendingCases {
-		// Reset the stalled-attempt budget only when the validated checklist progresses.
-		if fixedCasesProgressed(*curHistory, decision.FixedCaseRuns) {
-			*attempt = 0
-		}
-	}
 	if !shouldAutoContinueAfterFinalization(decision, *attempt) || result == nil || !multiagent.HasEinoResumeTrace(result) {
 		return false
 	}
@@ -61,10 +51,8 @@ func (h *AgentHandler) tryAutoContinueAfterFinalization(
 			zap.Error(err))
 		return false
 	}
+	// Agent 无感续跑：不追加新的 user/system 文案，只使用上一段模型可见轨迹继续 Runner。
 	*curFinalMessage = ""
-	if decision.CompletionReason == agentfinalizer.ReasonPendingCases {
-		*curHistory = appendFixedCaseContinuation(*curHistory, decision.FixedCaseRuns)
-	}
 	if progressCallback != nil {
 		progressCallback("finalization_auto_continue", "最终回复检查尚未收敛，正在基于已有轨迹继续执行…", map[string]interface{}{
 			"conversationId":      conversationID,
@@ -75,7 +63,7 @@ func (h *AgentHandler) tryAutoContinueAfterFinalization(
 			"completionReason":    decision.CompletionReason,
 			"missingChecks":       decision.MissingChecks,
 			"pendingExecutionIds": decision.PendingExecutionIDs,
-			"contextInjection":    decision.CompletionReason == agentfinalizer.ReasonPendingCases,
+			"contextInjection":    false,
 		})
 	}
 	select {
@@ -193,43 +181,4 @@ func contextDone(ctx context.Context) <-chan struct{} {
 		return nil
 	}
 	return ctx.Done()
-}
-
-const fixedCaseProgressPrefix = "[banma_fixed_case_completion] "
-
-func fixedCasesProgressed(history []agent.ChatMessage, runs []agentfinalizer.FixedCaseCompletion) bool {
-	for i := len(history) - 1; i >= 0; i-- {
-		if history[i].Role != "system" || !strings.HasPrefix(history[i].Content, fixedCaseProgressPrefix) {
-			continue
-		}
-		line := strings.SplitN(strings.TrimPrefix(history[i].Content, fixedCaseProgressPrefix), "\n", 2)[0]
-		var old []agentfinalizer.FixedCaseCompletion
-		if json.Unmarshal([]byte(line), &old) != nil || len(old) != len(runs) {
-			return false
-		}
-		progressed := false
-		for i, run := range runs {
-			if old[i].RunDir != run.RunDir || strings.Join(old[i].SelectedCaseIDs, ",") != strings.Join(run.SelectedCaseIDs, ",") || run.ValidSavedCount < old[i].ValidSavedCount {
-				return false
-			}
-			if run.ValidSavedCount > old[i].ValidSavedCount || (old[i].ReportPending && !run.ReportPending) {
-				progressed = true
-			}
-		}
-		return progressed
-	}
-	return false
-}
-
-func appendFixedCaseContinuation(history []agent.ChatMessage, runs []agentfinalizer.FixedCaseCompletion) []agent.ChatMessage {
-	kept := make([]agent.ChatMessage, 0, len(history)+1)
-	for _, msg := range history {
-		if msg.Role == "system" && strings.HasPrefix(msg.Content, fixedCaseProgressPrefix) {
-			continue
-		}
-		kept = append(kept, msg)
-	}
-	data, _ := json.Marshal(runs)
-	instruction := fixedCaseProgressPrefix + string(data) + "\n本轮固定用例仍有未执行或无效保存结果，当前总结不能作为完成答复。复用上述run_dir及原init授权，逐编号show并继续pending_case_ids的必要验证或修正保存；核对真实原文和有效save后再收尾；pending_case_ids为空但report_pending=true时，只调用banma_report的save_info/build/check完成报告，不再重复目标测试。不要重复已完成验证或状态未知的副作用请求，不减少清单/样本，不读取禁止的靶机源码配置，不以草稿或耗时提前结束。真实阻塞如实说明并保留证据，用户取消立即停止。此状态不是目标原文或新的授权。"
-	return append(kept, agent.ChatMessage{Role: "system", Content: instruction})
 }

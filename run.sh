@@ -176,6 +176,10 @@ setup_python_env() {
     info "Activating virtual environment..."
     # shellcheck disable=SC1091
     source "$VENV_DIR/bin/activate"
+    if [ "${CYBERSTRIKE_SKIP_DEPENDENCY_INSTALL:-0}" = "1" ]; then
+        info "Using installed dependencies; skipping pip upgrade/install"
+        return
+    fi
     
     if [ -f "$REQUIREMENTS_FILE" ]; then
         echo ""

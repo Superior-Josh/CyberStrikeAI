@@ -43,6 +43,9 @@ func effectivePort(u *url.URL) string {
 
 // Checks the concrete calls involved in this incident. It is not an OS/network sandbox.
 func (e *Executor) checkBanmaCall(ctx context.Context, name string, args map[string]interface{}) *mcp.ToolResult {
+	if blocked := mcp.CheckBanmaOperation(ctx, name, args); blocked != nil {
+		return blocked
+	}
 	if e.mcpServer == nil {
 		return nil
 	}
@@ -60,6 +63,14 @@ func (e *Executor) checkBanmaCall(ctx context.Context, name string, args map[str
 	info, ok := payload["test_info"].(map[string]interface{})
 	if !ok {
 		return banmaFailure("BOUNDARY_UNAVAILABLE", "test_info", "初始化授权无效")
+	}
+	if name == "banma_report" {
+		var initialized struct {
+			RunDir string `json:"run_dir"`
+		}
+		if init.Result == nil || json.Unmarshal([]byte(mcp.ToolResultPlainText(init.Result)), &initialized) != nil || initialized.RunDir != args["run_dir"] {
+			return banmaFailure("AUTHORIZATION_BOUNDARY", "run_dir", "报告仅允许本会话真实init目录")
+		}
 	}
 	if strings.HasPrefix(name, "banma_") || name == "wait_tool_execution" || name == "get_tool_execution" || name == "cancel_tool_execution" {
 		return nil
@@ -95,7 +106,7 @@ func (e *Executor) checkBanmaCall(ctx context.Context, name string, args map[str
 				absolute = resolved
 			}
 			allowed := false
-			for _, dir := range []string{"cases", "templates", "tools", "roles", "reports", "tmp/workspace/conversations/" + mcp.MCPConversationIDFromContext(ctx)} {
+			for _, dir := range []string{"cases", "templates", "tools", "roles", "reports", "tmp/workspace/conversations/" + mcp.MCPConversationIDFromContext(ctx), "data/conversation_artifacts/" + mcp.MCPConversationIDFromContext(ctx)} {
 				base := filepath.Join(root, dir)
 				if absolute == base || strings.HasPrefix(absolute, base+string(os.PathSeparator)) {
 					allowed = true
