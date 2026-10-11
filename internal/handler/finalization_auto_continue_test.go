@@ -11,6 +11,7 @@ import (
 	"cyberstrike-ai/internal/config"
 	"cyberstrike-ai/internal/database"
 	"cyberstrike-ai/internal/mcp"
+	"cyberstrike-ai/internal/multiagent"
 
 	"go.uber.org/zap"
 )
@@ -128,4 +129,74 @@ func TestCleanupPendingToolExecutionsAfterIterationAllowsFinalization(t *testing
 		time.Sleep(10 * time.Millisecond)
 	}
 	t.Fatal("execution did not become cancelled")
+}
+
+func TestFixedCaseContinuationMakesProgressAndStopsWhenStalled(t *testing.T) {
+	runs := []agentfinalizer.FixedCaseCompletion{{RunDir: "fixture", SelectedCaseIDs: []string{"PT_WEB_01", "PT_WEB_02"}, PendingCaseIDs: []string{"PT_WEB_02"}, ValidSavedCount: 1}}
+	d := agentfinalizer.Decision{Status: agentfinalizer.StatusBlocked, CompletionReason: agentfinalizer.ReasonPendingCases, FixedCaseRuns: runs}
+	if !shouldAutoContinueAfterFinalization(d, 0) || shouldAutoContinueAfterFinalization(d, finalizationAutoContinueMaxAttempts) {
+		t.Fatal("incorrect fixed-case retry budget")
+	}
+	history := appendFixedCaseContinuation(nil, runs)
+	if history[0].Role != "system" || fixedCasesProgressed(history, runs) {
+		t.Fatal("must inject runtime state and not claim progress")
+	}
+	next := append([]agentfinalizer.FixedCaseCompletion(nil), runs...)
+	next[0].ValidSavedCount = 2
+	next[0].PendingCaseIDs = nil
+	if !fixedCasesProgressed(history, next) {
+		t.Fatal("valid saved progress should refresh retry budget")
+	}
+	other := append([]agentfinalizer.FixedCaseCompletion(nil), next...)
+	other[0].RunDir = "other"
+	if fixedCasesProgressed(history, other) {
+		t.Fatal("another run cannot refresh progress")
+	}
+	if len(appendFixedCaseContinuation(history, next)) != 1 {
+		t.Fatal("must replace progress marker, not accumulate it")
+	}
+	d.CompletionReason = agentfinalizer.ReasonFixedCaseCheckFailed
+	if shouldAutoContinueAfterFinalization(d, 0) {
+		t.Fatal("unavailable read-only checker should block, not retry target")
+	}
+}
+
+func TestFixedCaseAutoContinueRestoresTraceAndRefreshesOnlyOnProgress(t *testing.T) {
+	db, err := database.NewDB(filepath.Join(t.TempDir(), "resume.db"), zap.NewNop())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	conv, err := db.CreateConversation("offline resume fixture", database.ConversationCreateMeta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &AgentHandler{db: db, logger: zap.NewNop()}
+	result := &multiagent.RunResult{LastAgentTraceInput: `[{"role":"user","content":"OFFLINE FIXTURE ONLY"}]`, LastAgentTraceOutput: "candidate summary"}
+	runs := []agentfinalizer.FixedCaseCompletion{{RunDir: "fixture", SelectedCaseIDs: []string{"A", "B"}, PendingCaseIDs: []string{"A", "B"}}}
+	d := agentfinalizer.Decision{Status: agentfinalizer.StatusBlocked, CompletionReason: agentfinalizer.ReasonPendingCases, FixedCaseRuns: runs}
+	var history []agentpkg.ChatMessage
+	message := "initial message"
+	attempt := 0
+	if !h.tryAutoContinueAfterFinalization(context.Background(), conv.ID, result, d, &attempt, &history, &message, nil) {
+		t.Fatal("pending cases did not resume")
+	}
+	if attempt != 1 || message != "" || history[len(history)-1].Role != "system" {
+		t.Fatal("missing trace/state injection")
+	}
+	attempt = finalizationAutoContinueMaxAttempts
+	if h.tryAutoContinueAfterFinalization(context.Background(), conv.ID, result, d, &attempt, &history, &message, nil) {
+		t.Fatal("stalled run resumed indefinitely")
+	}
+	d.FixedCaseRuns = append([]agentfinalizer.FixedCaseCompletion(nil), runs...)
+	d.FixedCaseRuns[0].ValidSavedCount = 1
+	d.FixedCaseRuns[0].PendingCaseIDs = []string{"B"}
+	if !h.tryAutoContinueAfterFinalization(context.Background(), conv.ID, result, d, &attempt, &history, &message, nil) || attempt != 1 {
+		t.Fatal("actual progress did not refresh retry budget")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if h.tryAutoContinueAfterFinalization(ctx, conv.ID, result, d, &attempt, &history, &message, nil) {
+		t.Fatal("cancelled task resumed")
+	}
 }

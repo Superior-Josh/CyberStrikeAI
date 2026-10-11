@@ -1,6 +1,7 @@
 package agentfinalizer
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
@@ -149,5 +150,49 @@ func TestFromRunResultDoesNotReusePreviousFinalizationStatusAsRunStatus(t *testi
 	second := FromRunResult(db, result, Input{})
 	if !second.Finalizable || !second.Finalized || second.Status != StatusCompleted {
 		t.Fatalf("second decision should ignore previous result status after pending cleanup: decision=%+v result=%+v", second, result)
+	}
+}
+
+func TestDecideChecksFixedChecklistBeforeFinalizing(t *testing.T) {
+	db := newDecisionTestDB(t)
+	saveDecisionTestExecution(t, db, "finished", mcp.ToolExecutionStatusCompleted)
+	for _, tc := range []struct {
+		name      string
+		pending   []string
+		checkErr  bool
+		completed bool
+	}{
+		{"19 of 44", []string{"PT_WEB_AUTH_02", "PT_WEB_AUTH_26"}, false, false},
+		{"invalid saved result", []string{"PT_WEB_01"}, false, false},
+		{"complete checklist", nil, false, true},
+		{"check unavailable", nil, true, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			d := Decide(db, Input{Response: "candidate summary", MCPExecutionIDs: []string{"finished"}, RequireExecutionEvidence: true,
+				FixedCaseCheck: func([]string) ([]FixedCaseCompletion, error) {
+					if tc.checkErr {
+						return nil, fmt.Errorf("fixture unavailable")
+					}
+					return []FixedCaseCompletion{{RunDir: "fixture", PendingCaseIDs: tc.pending}}, nil
+				},
+			})
+			if d.Finalized != tc.completed || d.Finalizable != tc.completed {
+				t.Fatalf("unexpected finalization: %+v", d)
+			}
+			if !tc.completed && d.EvidenceVerified {
+				t.Fatal("incomplete checklist must not be verified")
+			}
+			if len(tc.pending) > 0 && d.CompletionReason != ReasonPendingCases {
+				t.Fatalf("reason: %s", d.CompletionReason)
+			}
+		})
+	}
+}
+
+func TestFixedChecklistDoesNotOverrideCancellation(t *testing.T) {
+	called := false
+	d := Decide(nil, Input{Response: "cancelled", Status: StatusCancelled, FixedCaseCheck: func([]string) ([]FixedCaseCompletion, error) { called = true; return nil, nil }})
+	if called || d.Finalized || d.Status != StatusCancelled {
+		t.Fatalf("cancelled task was checked or completed: %+v", d)
 	}
 }

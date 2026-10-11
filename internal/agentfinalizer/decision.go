@@ -16,36 +16,47 @@ const (
 	StatusCancelled    = "cancelled"
 	StatusAwaitingHITL = "awaiting_hitl"
 
-	ReasonVerified        = "verified"
-	ReasonPendingTools    = "pending_tool_executions"
-	ReasonEmptyResponse   = "empty_response"
-	ReasonAwaitingHITL    = "awaiting_hitl"
-	ReasonFailed          = "failed"
-	ReasonCancelled       = "cancelled"
-	ReasonMissingEvidence = "missing_execution_evidence"
+	ReasonPendingCases         = "pending_fixed_cases"
+	ReasonFixedCaseCheckFailed = "fixed_case_check_failed"
+	ReasonVerified             = "verified"
+	ReasonPendingTools         = "pending_tool_executions"
+	ReasonEmptyResponse        = "empty_response"
+	ReasonAwaitingHITL         = "awaiting_hitl"
+	ReasonFailed               = "failed"
+	ReasonCancelled            = "cancelled"
+	ReasonMissingEvidence      = "missing_execution_evidence"
 )
 
 // Decision is the single contract that may promote an agent run to a final
 // user-facing answer. Natural-language assistant text is only a candidate until
 // this object says Finalizable.
+type FixedCaseCompletion struct {
+	RunDir          string   `json:"run_dir"`
+	SelectedCaseIDs []string `json:"selected_case_ids"`
+	PendingCaseIDs  []string `json:"pending_case_ids"`
+	ValidSavedCount int      `json:"valid_saved_count"`
+}
+
 type Decision struct {
-	Status               string   `json:"status"`
-	Finalizable          bool     `json:"finalizable"`
-	Finalized            bool     `json:"finalized"`
-	CompletionReason     string   `json:"completionReason"`
-	FinalText            string   `json:"finalText,omitempty"`
-	EvidenceVerified     bool     `json:"evidenceVerified"`
-	EvidenceRefs         []string `json:"evidenceRefs,omitempty"`
-	PendingExecutionIDs  []string `json:"pendingExecutionIds,omitempty"`
-	PendingToolRuns      []string `json:"pendingToolRuns,omitempty"`
-	MissingChecks        []string `json:"missingChecks,omitempty"`
-	AgentMode            string   `json:"agentMode,omitempty"`
-	ConversationID       string   `json:"conversationId,omitempty"`
-	AssistantMessageID   string   `json:"messageId,omitempty"`
-	CandidateResponseLen int      `json:"candidateResponseLen,omitempty"`
+	FixedCaseRuns        []FixedCaseCompletion `json:"fixedCaseRuns,omitempty"`
+	Status               string                `json:"status"`
+	Finalizable          bool                  `json:"finalizable"`
+	Finalized            bool                  `json:"finalized"`
+	CompletionReason     string                `json:"completionReason"`
+	FinalText            string                `json:"finalText,omitempty"`
+	EvidenceVerified     bool                  `json:"evidenceVerified"`
+	EvidenceRefs         []string              `json:"evidenceRefs,omitempty"`
+	PendingExecutionIDs  []string              `json:"pendingExecutionIds,omitempty"`
+	PendingToolRuns      []string              `json:"pendingToolRuns,omitempty"`
+	MissingChecks        []string              `json:"missingChecks,omitempty"`
+	AgentMode            string                `json:"agentMode,omitempty"`
+	ConversationID       string                `json:"conversationId,omitempty"`
+	AssistantMessageID   string                `json:"messageId,omitempty"`
+	CandidateResponseLen int                   `json:"candidateResponseLen,omitempty"`
 }
 
 type Input struct {
+	FixedCaseCheck           func([]string) ([]FixedCaseCompletion, error)
 	Response                 string
 	MCPExecutionIDs          []string
 	ConversationID           string
@@ -145,6 +156,28 @@ func Decide(db *database.DB, in Input) Decision {
 		return d
 	}
 
+	if in.FixedCaseCheck != nil {
+		runs, err := in.FixedCaseCheck(in.MCPExecutionIDs)
+		d.FixedCaseRuns = runs
+		if err != nil {
+			d.Status = StatusBlocked
+			d.CompletionReason = ReasonFixedCaseCheckFailed
+			d.EvidenceVerified = false
+			d.MissingChecks = append(d.MissingChecks, "fixed case completion check unavailable; task is not verified")
+			return d
+		}
+		for _, run := range runs {
+			if len(run.PendingCaseIDs) > 0 {
+				d.Status = StatusBlocked
+				d.CompletionReason = ReasonPendingCases
+				d.EvidenceVerified = false
+				d.MissingChecks = append(d.MissingChecks, "fixed case checklist has missing or invalid saved results")
+			}
+		}
+		if d.CompletionReason == ReasonPendingCases {
+			return d
+		}
+	}
 	d.Finalizable = true
 	d.Finalized = true
 	d.Status = StatusCompleted
@@ -156,6 +189,7 @@ func Decide(db *database.DB, in Input) Decision {
 
 func ResponsePayload(d Decision, extra map[string]interface{}) map[string]interface{} {
 	out := map[string]interface{}{
+		"fixedCaseRuns":       d.FixedCaseRuns,
 		"finalized":           d.Finalized,
 		"finalizable":         d.Finalizable,
 		"status":              d.Status,

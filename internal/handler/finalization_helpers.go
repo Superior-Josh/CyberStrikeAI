@@ -32,6 +32,7 @@ func (h *AgentHandler) finalizeAgentRunForDeliveryWithPolicy(
 	requireExecutionEvidence bool,
 ) agentfinalizer.Decision {
 	decision := agentfinalizer.FromRunResult(h.db, result, agentfinalizer.Input{
+		FixedCaseCheck:           h.fixedCaseCheckFor(conversationID),
 		ConversationID:           conversationID,
 		AssistantMessageID:       assistantMessageID,
 		AgentMode:                agentMode,
@@ -51,6 +52,7 @@ func (h *AgentHandler) decideAgentRunForDeliveryWithPolicy(
 	requireExecutionEvidence bool,
 ) agentfinalizer.Decision {
 	return agentfinalizer.FromRunResult(h.db, result, agentfinalizer.Input{
+		FixedCaseCheck:           h.fixedCaseCheckFor(conversationID),
 		ConversationID:           conversationID,
 		AssistantMessageID:       assistantMessageID,
 		AgentMode:                agentMode,
@@ -67,6 +69,7 @@ func (h *AgentHandler) decideAgentRunForDelivery(
 	mcpExecutionIDs []string,
 ) agentfinalizer.Decision {
 	return agentfinalizer.FromRunResult(h.db, result, agentfinalizer.Input{
+		FixedCaseCheck:           h.fixedCaseCheckFor(conversationID),
 		ConversationID:           conversationID,
 		AssistantMessageID:       assistantMessageID,
 		AgentMode:                agentMode,
@@ -119,6 +122,7 @@ func (h *AgentHandler) finalizeCandidateForDeliveryWithPolicy(
 	requireExecutionEvidence bool,
 ) agentfinalizer.Decision {
 	decision := agentfinalizer.Decide(h.db, agentfinalizer.Input{
+		FixedCaseCheck:           h.fixedCaseCheckFor(conversationID),
 		Response:                 response,
 		ConversationID:           conversationID,
 		AssistantMessageID:       assistantMessageID,

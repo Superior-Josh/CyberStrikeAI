@@ -47,6 +47,42 @@ class CaseTests(unittest.TestCase):
     def save(self, payload):
         return tool.save_result(self.run, "PT_WEB_01", self.cases["PT_WEB_01"], payload)
 
+    def check_completion(self):
+        return tool.completion_check(str(self.run), str(ROOT / "cases"))
+
+    def test_completion_full_partial_and_read_only(self):
+        self.assertEqual(len(self.check_completion()["pending_case_ids"]), 44)
+        for cid, case in self.cases.items():
+            tool.dispatch("show", str(ROOT / "cases"), str(self.run), cid)
+            tool.save_result(self.run, cid, case, self.payload())
+        before = {str(p): p.read_bytes() for p in self.run.rglob("*") if p.is_file()}
+        self.source.unlink()  # Check saved copies only; no original target file reads.
+        checked = self.check_completion()
+        self.assertEqual(checked["valid_saved_count"], 44)
+        self.assertEqual(checked["pending_case_ids"], [])
+        self.assertEqual(before, {str(p): p.read_bytes() for p in self.run.rglob("*") if p.is_file()})
+        path = self.run / "evidence/PT_WEB_AUTH_26.json"
+        path.unlink()
+        self.assertEqual(self.check_completion()["pending_case_ids"], ["PT_WEB_AUTH_26"])
+
+    def test_completion_respects_selected_scope_and_rejects_corrupt_records(self):
+        meta_path = self.run / "evidence/test_info.json"
+        meta = tool.read_json(meta_path)
+        meta["test_info"]["case_ids"] = ["PT_WEB_01"]
+        meta_path.write_text(json.dumps(meta))
+        tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_01")
+        self.save(self.payload())
+        self.assertEqual(self.check_completion()["pending_case_ids"], [])
+        path = self.run / "evidence/PT_WEB_01.json"
+        valid = tool.read_json(path)
+        for changed in [dict(valid, observations=[]), dict(valid, case_id="PT_WEB_02"), dict(valid, result="通过", item_results=[])]:
+            path.write_text(json.dumps(changed))
+            self.assertEqual(self.check_completion()["pending_case_ids"], ["PT_WEB_01"])
+        path.write_text(json.dumps(valid))
+        source = Path(valid["evidence"][0]["saved_path"])
+        source.write_text("CORRUPTED OFFLINE FIXTURE")
+        self.assertEqual(self.check_completion()["pending_case_ids"], ["PT_WEB_01"])
+
     def test_catalog_and_complete_guidance(self):
         self.assertEqual(len(self.cases), 44)
         guide = tool.dispatch("show", str(ROOT / "cases"), str(self.run), "PT_WEB_01")
