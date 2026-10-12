@@ -1,0 +1,66 @@
+{
+  "case_id": "PT_WEB_05",
+  "external_operation_id": "template-1",
+  "scope": {
+    "origins": ["http://localhost:4280"],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "limits": {
+    "max_requests": 100,
+    "timeout_seconds": 120
+  },
+  "scope_items": [
+    {"id": "surface", "must_complete": true},
+    {"id": "component-checks", "must_complete": true},
+    {"id": "vulnerability-scan", "must_complete": true}
+  ],
+  "inputs": {
+    "request": {
+      "url": "http://localhost:4280/login.php",
+      "method": "GET"
+    },
+    "scan_targets": [
+      {
+        "host": "localhost",
+        "port": 4280,
+        "protocol": "http",
+        "components": [
+          {"name": "Apache", "version": "2.4.68"},
+          {"name": "PHP", "version": "8.5.10"}
+        ]
+      }
+    ],
+    "approved_templates": [
+      {
+        "template_id": "CVE-2024-4577",
+        "path": "/Users/banma-josh/nuclei-templates/http/cves/2024/CVE-2024-4577.yaml",
+        "component": "PHP",
+        "version_detected": "8.5.10",
+        "severity": "critical",
+        "reviewed": true,
+        "component_evidence": "X-Powered-By: PHP/8.5.10 header observed in PT_WEB_04/http-1 response",
+        "request_bound": 4,
+        "rationale": "PHP CGI Argument Injection - tests if PHP runs in CGI mode with argument injection vulnerability. Payload sends POST with PHP code to /php-cgi/php-cgi.exe and common PHP paths. Non-destructive read-only check.",
+        "payload_review": "POST body contains <?php echo md5('CVE-2024-4577'); ?> - safe diagnostic, no destructive operations. Tests 4 paths, stops at first match."
+      }
+    ],
+    "surface_review": [
+      {"kind": "pages", "reason": "Login page and main pages checked in PT_WEB_02/PT_WEB_03", "evidence_refs": ["PT_WEB_02/resource-1", "PT_WEB_03/normal-before"]},
+      {"kind": "forms", "reason": "Login form analyzed in PT_WEB_03", "evidence_refs": ["PT_WEB_03/invalid-input"]},
+      {"kind": "scripts", "reason": "Client-side scripts checked in PT_WEB_13", "evidence_refs": ["PT_WEB_13/requests-1", "PT_WEB_13/requests-2"]},
+      {"kind": "network", "reason": "HTTP headers and server info from PT_WEB_04", "evidence_refs": ["PT_WEB_04/http-1"]},
+      {"kind": "candidate_endpoints", "reason": "Sensitive paths checked in PT_WEB_14, no exposed endpoints", "evidence_refs": ["PT_WEB_14/candidate-1 through candidate-24"]},
+      {"kind": "not_found_control", "reason": "404 baseline established in PT_WEB_14", "evidence_refs": ["PT_WEB_14/not-found"]}
+    ]
+  },
+  "evidence": [
+    {
+      "operation_id": "template-1",
+      "path": "cases/PT_WEB_05/raw/template-1.json"
+    }
+  ]
+}

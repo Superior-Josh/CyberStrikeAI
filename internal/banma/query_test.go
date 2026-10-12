@@ -67,3 +67,15 @@ func TestUnknownQueryFormDoesNotInventBinding(t *testing.T) {
 		}
 	}
 }
+
+func TestQueryBudgetIsSharedAcrossCodeAndHandoff(t *testing.T) {
+	r := &Runner{currentCase: "PT_WEB_AUTH_08", budget: Budget{QueryCase: "PT_WEB_AUTH_08", QueryMax: 2}}
+	args := map[string]interface{}{"url": "http://fixture.invalid/query", "method": "GET"}
+	if r.checkOperation("http-framework-test", args) != nil {
+		t.Fatal("first query blocked")
+	}
+	r.budget.Handoff = true
+	if r.checkOperation("http-framework-test", args) != nil || r.checkOperation("http-framework-test", args) == nil {
+		t.Fatal("handoff reset query budget")
+	}
+}

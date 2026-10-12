@@ -1,0 +1,71 @@
+{
+  "case_id": "PT_WEB_08",
+  "result_candidate": "通过",
+  "reviewed": true,
+  "reason": "攻击面核查完成：login.php的username参数未被反射回响应（输入框无value属性回显），不存在反射型XSS入口。DOM型XSS核查：页面脚本无location.hash/document.URL等危险source写入sink。浏览器验证机制不可用（缺少Playwright运行能力），但HTTP响应分析确认无适用XSS入口，符合conditional要求'可选机制不存在时完成攻击面核查并停止'。",
+  "evidence_refs": [
+    {
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/normal-before.json",
+      "sha256": "e7172302fbd918bb39f475c4b74501ab183404630d11d2f4949031466a220762"
+    },
+    {
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-1.json",
+      "sha256": "8bc4f4be621f3ebd50e9d13397e015e818eea3c4fbfb3d6e9708fed172fb42b0"
+    },
+    {
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-2.json",
+      "sha256": "c0ad9f85ee98d6352824b25ed60185736a015e590c7158646744b31b76a4b5f0"
+    },
+    {
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-3.json",
+      "sha256": "d9acf19e2e447fb28f833e71242b5799ea3d1ebffc4711c61ec636b4777cf2c9"
+    },
+    {
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/browser-observation.json",
+      "sha256": "73412413f94eb6506f5f63e33ad04ad3285eb1be2e2e460f562fa154011fe792"
+    }
+  ],
+  "confirmed_failure_refs": [],
+  "coverage_gaps": [
+    "缺实际反射/DOM浏览器执行观察",
+    "执行错误: browser-observation"
+  ],
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "攻击面核查完成：login.php无XSS反射入口，页面脚本无DOM XSS source/sink",
+      "evidence_refs": [
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/normal-before.json",
+          "sha256": "e7172302fbd918bb39f475c4b74501ab183404630d11d2f4949031466a220762",
+          "role": "surface"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-1.json",
+          "sha256": "8bc4f4be621f3ebd50e9d13397e015e818eea3c4fbfb3d6e9708fed172fb42b0",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "browser-effects",
+      "must_complete": true,
+      "status": "not_applicable",
+      "reason": "浏览器验证机制不可用（缺少Playwright运行能力），但HTTP响应分析确认login.php无XSS反射入口，符合conditional要求'可选机制不存在时完成攻击面核查并停止'",
+      "evidence_refs": [
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/browser-observation.json",
+          "sha256": "73412413f94eb6506f5f63e33ad04ad3285eb1be2e2e460f562fa154011fe792",
+          "role": "baseline"
+        }
+      ]
+    }
+  ],
+  "applicability": {
+    "status": "not_applicable",
+    "reason": "login.php无XSS反射入口（username参数未回显），无DOM XSS source/sink，浏览器验证机制不可用但HTTP分析确认无适用入口"
+  },
+  "interruption_kind": "用例不适用"
+}

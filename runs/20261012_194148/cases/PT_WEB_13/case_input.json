@@ -1,0 +1,25 @@
+{
+  "case_id": "PT_WEB_13",
+  "scope": {
+    "origins": ["http://localhost:4280"],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "limits": {
+    "max_requests": 10,
+    "timeout_seconds": 30
+  },
+  "scope_items": [
+    {"id": "surface", "must_complete": true},
+    {"id": "headers", "must_complete": true}
+  ],
+  "inputs": {
+    "requests": [
+      {"url": "http://localhost:4280/login.php", "method": "GET"},
+      {"url": "http://localhost:4280/nonexistent_page_xyz123abc.html", "method": "GET"}
+    ]
+  }
+}

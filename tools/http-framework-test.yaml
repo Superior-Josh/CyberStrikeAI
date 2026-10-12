@@ -1581,6 +1581,12 @@ parameters:
     description: "同次原生保存真实请求头/请求体base64及响应状态、多值头、正文base64/字节数；空正文仍有真实头。使用本次raw_dir唯一路径，repeat用{i}；含原始密码/Cookie/Token，权限0600，禁止输出到摘要/报告或AI补写原文。"
     required: false
     flag: "--capture-file"
+  - name: "browser_probe"
+    type: "bool"
+    description: "斑马单项的无界面Chrome运行观察：只导航GET，保存实际DOM、客户端存储及浏览器协议事件；禁用任意模型脚本与自动业务提交。Cookie由控制器绑定本项已观察属性；原文是浏览器协议导出，不冒充HTTP线缆字节。"
+    required: false
+    default: false
+    flag: "--browser-probe"
   - name: "http2"
     type: "bool"
     description: "启用 HTTP/2（需安装 h2：pip install 'httpx[http2]'）。也可写在 httpx_options：http2=true"

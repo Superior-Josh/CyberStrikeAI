@@ -1,0 +1,57 @@
+{
+  "case_id": "PT_WEB_14",
+  "result_candidate": "通过",
+  "reason": "24个敏感文件/目录候选路径均返回404或403，无敏感内容泄露。normal-before（200, 1342字节）与not-found（404, 313字节）建立基线对照。candidate-9/10/11返回403（.htaccess/.htpasswd/server-status），candidate-12返回302（admin/重定向），其余均返回404。所有sensitive_candidates的private_key/credential_field/stack_trace/absolute_path匹配均为空。匿名访问未能获取任何禁止公开的敏感文件内容。",
+  "reviewed": true,
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "login.php基线和not-found对照已建立，24个敏感路径候选已探测",
+      "evidence_refs": [
+        {"operation_id": "normal-before", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/normal-before.json", "sha256": "ed5c35ff570a64aec270726462bbae4477c8a9f6d84e4569e87e93235c8758c1", "role": "surface"},
+        {"operation_id": "not-found", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/not-found.json", "sha256": "1d0d8180d76b63df9388ff2d3fed90659f7c489dec56420dcd09a4d63751a7df", "role": "surface"}
+      ]
+    },
+    {
+      "id": "sensitive-content",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "所有24个敏感路径候选均返回404/403/302，无敏感内容泄露。403表示访问被正确拒绝，404表示资源不存在，302表示重定向到登录页。",
+      "evidence_refs": [
+        {"operation_id": "candidate-1", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-1.json", "sha256": "93dae306492312e9a1f1be732fddcdfe8e09d277d573e2cef7c870cf623f53a6", "role": "candidate"},
+        {"operation_id": "candidate-2", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-2.json", "sha256": "a53b1933ad6732cf3ba63d3cf9e57023d879f287161d1621c52aa6a79f0f5e97", "role": "candidate"},
+        {"operation_id": "candidate-3", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-3.json", "sha256": "c22ee9ddff175c9e608be0a4c42b047fa6a661de624aae7004b4230f3364a6ab", "role": "candidate"},
+        {"operation_id": "candidate-4", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-4.json", "sha256": "2c8cbffe502f8138f3c051d45a6af43b07164907b5b3f668a045368d84e049ab", "role": "candidate"},
+        {"operation_id": "candidate-5", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-5.json", "sha256": "81495e1b2ef000e64b97ab7f561223b81509ffa5eafad14b79320f5d96c3a7f4", "role": "candidate"},
+        {"operation_id": "candidate-6", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-6.json", "sha256": "bb295c890213163ff2a57ae73896aa73d2b0b44f2601a1c93df0bb0862ad9470", "role": "candidate"},
+        {"operation_id": "candidate-7", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-7.json", "sha256": "5f417a8c81d7557e4603ce977bddc154928ff503551c50552e91612989818562", "role": "candidate"},
+        {"operation_id": "candidate-8", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-8.json", "sha256": "386747440d3cd78c0037a6f064ac0906627d46e2b8315665195024af05554d35", "role": "candidate"},
+        {"operation_id": "candidate-9", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-9.json", "sha256": "e8442c6031ee4483a1bc7b1d470c02c1c13ce01e163763c5ef6e5dad97a3a42c", "role": "candidate"},
+        {"operation_id": "candidate-10", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-10.json", "sha256": "c413520aa43c4fa872f6cc527b4ae1332bdee47575cb2e1a3aeaa1e62197c2a2", "role": "candidate"},
+        {"operation_id": "candidate-11", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-11.json", "sha256": "f21ff4653e458a3219bc33666784e0cdb49cb101d0f782f7d07cea3c149d65ac", "role": "candidate"},
+        {"operation_id": "candidate-12", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-12.json", "sha256": "5599e14d2f0445cd4fd559ebb60b5f950c18d40147439697bb4ccfcf81b4ca94", "role": "candidate"},
+        {"operation_id": "candidate-13", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-13.json", "sha256": "1002765bdf65c483d98916b1389e5f9b09d925ac822cb2fc922f4cbb652ad31e", "role": "candidate"},
+        {"operation_id": "candidate-14", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-14.json", "sha256": "b8042f63676004b83e821d81ba53782b78df2f7b742f0b0eee64b4406323e210", "role": "candidate"},
+        {"operation_id": "candidate-15", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-15.json", "sha256": "f5356484d89c9fa001fa06a2eb2f6f9477b0751c1fb3b8744c75a79d724adebd", "role": "candidate"},
+        {"operation_id": "candidate-16", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-16.json", "sha256": "1d2ff22a479212004d0d998645ba8a490629f6f44a37866ed1608229b8279bae", "role": "candidate"},
+        {"operation_id": "candidate-17", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-17.json", "sha256": "6137294c15aad7ada0ea0e735e88a98ced956ea2d3687cd0ad34795e0f430654", "role": "candidate"},
+        {"operation_id": "candidate-18", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-18.json", "sha256": "40098d5a6cb0df198d902e529d7d93318261b6c3069a2482961f3c6ec2bdb8d2", "role": "candidate"},
+        {"operation_id": "candidate-19", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-19.json", "sha256": "ba697f5736415a79bb5eb1123974f0e6ff6a749a464062fdf67674f95fc29b40", "role": "candidate"},
+        {"operation_id": "candidate-20", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-20.json", "sha256": "575ef5458df8723f75d744d132c4807a93a7817c0b8e90e42cdd02f7984bd2dd", "role": "candidate"},
+        {"operation_id": "candidate-21", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-21.json", "sha256": "c097f35421e7b8060fc7cc92b5b03dfa9e7c51eceb9edd8fbf9c3b01f15afb27", "role": "candidate"},
+        {"operation_id": "candidate-22", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-22.json", "sha256": "8f7e395b6058d3e82a12d04e2b8bdb3c4130c5bf246d20b843f8194f0f073a13", "role": "candidate"},
+        {"operation_id": "candidate-23", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-23.json", "sha256": "1202ab49bd06a0d9a80b1c1c98526db3a8cb43d7f6327b1bffbbd927d2222e43", "role": "candidate"},
+        {"operation_id": "candidate-24", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-24.json", "sha256": "1c97e9dab979eba442f8ce9829aac6f06ec1c74c368e7e5ae6cf1e78ed38e221", "role": "candidate"},
+        {"operation_id": "not-found", "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/not-found.json", "sha256": "1d0d8180d76b63df9388ff2d3fed90659f7c489dec56420dcd09a4d63751a7df", "role": "not-found-control"}
+      ]
+    }
+  ],
+  "coverage_gaps": [],
+  "confirmed_failure_refs": [],
+  "applicability": {
+    "status": "applicable",
+    "reason": "DVWA作为漏洞靶场，敏感文件/目录泄露检查适用。已完成24个常见敏感路径探测，包括配置文件、备份文件、版本库等。"
+  }
+}

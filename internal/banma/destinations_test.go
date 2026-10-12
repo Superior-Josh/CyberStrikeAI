@@ -44,6 +44,20 @@ func TestRelativeExternalURLAndInternalFileProbesAreRejected(t *testing.T) {
 	}
 }
 
+func TestInvalidNmapArgumentsDoNotCountAsAnActualAttempt(t *testing.T) {
+	r := &Runner{input: Input{Targets: []string{"http://127.0.0.1:4280"}}}
+	if r.checkOperation("nmap", map[string]interface{}{"target": "http://127.0.0.1:4280"}) == nil {
+		t.Fatal("invalid target accepted")
+	}
+	args := map[string]interface{}{"target": "127.0.0.1", "ports": "4280"}
+	if r.checkOperation("nmap", args) != nil {
+		t.Fatal("argument correction consumed real attempt")
+	}
+	if r.checkOperation("nmap", args) == nil {
+		t.Fatal("actual local nmap attempt repeated")
+	}
+}
+
 func TestHistoricalForbiddenPayloadCannotValidateOldPass(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "raw.json")

@@ -1,0 +1,140 @@
+{
+  "case_id": "PT_WEB_16",
+  "execution_order": 6,
+  "scope_sha256": "7fee7d608a60f3a114dbb0d9435b0b9ed95f0d48b1523880d5883350ed085379",
+  "inputs_sha256": "0216e3e0549813cc5390af2d3946867f47b58a3bb2e56a8a40f9fd4519be0d93",
+  "limits_sha256": "1823db8b9c5d59b0e26150db4cb25f03c8d70a9adeaa4346473d14b75189d182",
+  "source_hashes": {
+    "cases/anonymous/PT_WEB_16.yaml": "a608eef4e90f359b1553449b5888a0004fdfed302154a90f5889297144a001c6",
+    "scripts/workflow.py": "10859fc16587291abe785b01289d8336e037f5e65fed5f2a36e9e81602968c39",
+    "scripts/runtime/common.py": "c1562df6cbba6eac07ba5650350c97593c658619f85eaf28c0e8372333ddd409",
+    "scripts/runtime/builders.py": "69c823fd1994b30d02601c816ce989194b3f73e31d9587124bcada85aea78191",
+    "scripts/runtime/execution.py": "a4cd50bf22b04442e426ca589ee7e405ffd5e0038e228d942e5b47b04da2987e",
+    "scripts/runtime/protocols.py": "f61349c4c311ddd78521e7a6e61c3abcdd68b67febf05f5d277914c8ffafccd0",
+    "scripts/runtime/lifecycle.py": "d68f1ee93f2d8b3a86dfa472d7b8e33193a2c1c3268f3d0d2a7a53719e330215",
+    "scripts/runtime/pt_web_16.py": "e86f6107c0a8c0b399dc399b57e07ccc38953630c526036aa145c91d00ab7517"
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "cors",
+      "must_complete": true
+    }
+  ],
+  "expected_requests": 5,
+  "operations": [
+    {
+      "operation_id": "normal-before",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/normal-before.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "origin-1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "GET",
+        "headers": {
+          "Origin": "http://localhost:4280"
+        },
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/origin-1.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "preflight-1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "OPTIONS",
+        "headers": {
+          "Origin": "http://localhost:4280",
+          "Access-Control-Request-Method": "GET",
+          "Access-Control-Request-Headers": "Origin"
+        },
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/preflight-1.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "origin-2",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "GET",
+        "headers": {
+          "Origin": "http://evil.example.com"
+        },
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/origin-2.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "preflight-2",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "OPTIONS",
+        "headers": {
+          "Origin": "http://evil.example.com",
+          "Access-Control-Request-Method": "GET",
+          "Access-Control-Request-Headers": "Origin"
+        },
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/preflight-2.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    }
+  ],
+  "coverage_gaps": [],
+  "details": {},
+  "limits": {
+    "max_requests": 15,
+    "timeout_seconds": 30
+  },
+  "result": null,
+  "status": "计划已构造",
+  "supplement_round": 0
+}

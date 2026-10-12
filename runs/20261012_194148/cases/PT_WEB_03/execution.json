@@ -1,0 +1,25 @@
+{
+  "case_id": "PT_WEB_03",
+  "status": "执行记录已保存",
+  "evidence": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/normal-before.json",
+      "sha256": "54665359e5826254f48651705df64cc9b7e3577f257d40d4cd46ea272ac1697d",
+      "elapsed_seconds": 0.005823
+    },
+    {
+      "operation_id": "not-found",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/not-found.json",
+      "sha256": "5f6f43d84a583703278b6de9b73f81cf832d666721db26d1ee3656d167f024ce",
+      "elapsed_seconds": 0.003411
+    },
+    {
+      "operation_id": "invalid-input",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/invalid-input.json",
+      "sha256": "b45733fd365e158d80096167c4fcc3f854a4e6519870167a9207ff04858a0a65",
+      "elapsed_seconds": 0.006861
+    }
+  ],
+  "coverage_gaps": []
+}

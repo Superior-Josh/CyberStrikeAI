@@ -1,0 +1,23 @@
+{
+  "scope": {
+    "origins": ["http://localhost:4280"],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "authorization_ref": "用户明确授权本机4280端口DVWA黑盒测试，允许所有操作，凭据admin:password",
+  "result_profile": "dvwa-local-4280",
+  "credentials": {
+    "username": "admin",
+    "password": "password"
+  },
+  "run_limits": {
+    "max_requests": 2000,
+    "max_case_requests": 100,
+    "max_supplement_rounds": 3,
+    "login_max_attempts": 30,
+    "login_window_seconds": 60
+  }
+}

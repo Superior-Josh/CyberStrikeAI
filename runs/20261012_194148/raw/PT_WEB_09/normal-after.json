@@ -1,0 +1,98 @@
+{
+  "source": "http-framework-test native response capture",
+  "captured_at_unix": 1791814962.7233899,
+  "method": "POST",
+  "url": "http://localhost:4280/login.php",
+  "input_url": "http://localhost:4280/login.php",
+  "wire_request_target": "/login.php",
+  "wire_request_target_base64": "L2xvZ2luLnBocA==",
+  "request_headers": [
+    [
+      "host",
+      "localhost:4280"
+    ],
+    [
+      "accept",
+      "*/*"
+    ],
+    [
+      "accept-encoding",
+      "gzip, deflate"
+    ],
+    [
+      "connection",
+      "keep-alive"
+    ],
+    [
+      "user-agent",
+      "python-httpx/0.28.1"
+    ],
+    [
+      "content-type",
+      "application/x-www-form-urlencoded"
+    ],
+    [
+      "cookie",
+      "security=impossible; PHPSESSID=8a49c7ba343932c1382812077effe4cf"
+    ],
+    [
+      "content-length",
+      "88"
+    ]
+  ],
+  "request_body_base64": "dXNlcm5hbWU9YWRtaW4mcGFzc3dvcmQ9cGFzc3dvcmQmTG9naW49TG9naW4mdXNlcl90b2tlbj1lMjAxYTEyNjJlYzhlY2VmN2YxMjdmMWViNGEyY2NlYg==",
+  "status_code": 302,
+  "http_version": "HTTP/1.1",
+  "headers": [
+    [
+      "date",
+      "Mon, 12 Oct 2026 14:22:42 GMT"
+    ],
+    [
+      "server",
+      "Apache/2.4.68 (Debian)"
+    ],
+    [
+      "x-powered-by",
+      "PHP/8.5.10"
+    ],
+    [
+      "expires",
+      "Thu, 19 Nov 1981 08:52:00 GMT"
+    ],
+    [
+      "cache-control",
+      "no-store, no-cache, must-revalidate"
+    ],
+    [
+      "pragma",
+      "no-cache"
+    ],
+    [
+      "set-cookie",
+      "PHPSESSID=3c58cf528f1ccf781bfd34a18954b429; expires=Tue, 13 Oct 2026 14:22:42 GMT; Max-Age=86400; path=/; domain=localhost; HttpOnly; SameSite=Strict"
+    ],
+    [
+      "location",
+      "index.php"
+    ],
+    [
+      "content-length",
+      "0"
+    ],
+    [
+      "keep-alive",
+      "timeout=5, max=100"
+    ],
+    [
+      "connection",
+      "Keep-Alive"
+    ],
+    [
+      "content-type",
+      "text/html; charset=UTF-8"
+    ]
+  ],
+  "body_base64": "",
+  "body_length": 0
+}

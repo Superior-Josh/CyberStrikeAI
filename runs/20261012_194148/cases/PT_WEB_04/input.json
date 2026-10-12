@@ -1,0 +1,37 @@
+{
+  "case_id": "PT_WEB_04",
+  "scope": {
+    "origins": [
+      "http://localhost:4280"
+    ],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "limits": {
+    "max_requests": 5,
+    "timeout_seconds": 30
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "services",
+      "must_complete": true
+    }
+  ],
+  "inputs": {
+    "requests": [
+      {
+        "url": "http://localhost:4280/login.php",
+        "method": "GET",
+        "purpose": "服务识别补证 - 获取完整HTTP响应头确认Web服务"
+      }
+    ]
+  },
+  "supplement_round": 1
+}

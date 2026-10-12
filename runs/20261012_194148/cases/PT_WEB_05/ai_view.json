@@ -1,0 +1,262 @@
+{
+  "case_id": "PT_WEB_05",
+  "case": {
+    "category": "信息泄露",
+    "id": "PT_WEB_05",
+    "execution_order": 10,
+    "name": "主机与 Web 组件已知漏洞检查",
+    "description": "采用现有工具采集/探测、已实现Python脚本处理和当前agent的AI分析，验证主机与 Web 组件已知漏洞检查；操作与判定分阶段，真实证据支持结论。",
+    "level": "高",
+    "group": "anonymous",
+    "required": "目标范围与攻击面实际核查；存在适用入口时完成：约定服务和适用漏洞模板检查、命中复核",
+    "conditional": "（本共同要求优先：可选机制不存在时完成攻击面核查并停止以下仅适用分支；此后的策略/规则取本项默认基线和实际网络观察，不向用户索要未必存在的文档）metasploit 仅在授权且检查模块行为明确时使用；其他扫描器按覆盖选择替代或补充",
+    "steps": [
+      "默认安全基线：已确认适用且可复现的组件漏洞失败；有原文支持的有限模板检查及命中排除完成后可通过，不能宣称覆盖所有CVE。执行：由实际网络响应、公开页面及行为对照发现组件，选取本机已有适用非破坏性模板；保存选定覆盖与逐命中复核，不向用户索要模板清单",
+      "AI接入（规划）：读取本项required、conditional、完整步骤、expected_results及共同要求；从本轮原文确认本轮组件/版本/入口证据、本机已有适用模板、模板请求与预算清单，列出适用子项和批准预算；不猜入口、身份或规则。",
+      "现有工具（基线采集）：http-framework-test采集组件适用依据；nuclei仅使用明确template路径及target，nikto或jaeles仅在其签名补足必要覆盖时使用，不串行跑全部扫描器。HTTP操作按共同执行约定设置原生capture_file和唯一操作编号。",
+      "Python脚本（构造与控制）：调用scripts/runtime/pt_web_05.py的plan阶段（或经execute-python-script的script参数加载该入口）；在扫描机检查本机已有模板/签名的请求、外域、写入和口令行为，计算批次数及总请求预算；构造有限批次，最多2并发、5请求/秒、单请求10秒、每批120秒；记录模板ID和覆盖，不读取目标内部文件；计划和脚本先经agent核对授权边界，不直接让AI判定阶段发请求。",
+      "现有工具与Python（验证）：nuclei additional_args按当前CLI核对-rl 5 -c 2 -pc 1 -prc 2 -timeout 10 -retries 0 -duc及原生输出；agent控制本批截止时间并取消其确切进程/执行记录；http-framework-test逐命中复核实际效果，禁止用severity代替组件匹配。每次实际操作记录来源、时间、参数、原文和错误，预算不因更换工具重置。",
+      "Python脚本（对照分析）：对照计划模板与实际加载/完成/取消记录，保存空命中时的完成日志；预算耗尽只说明未完成，不证明环境故障，必要覆盖用缩小批次或等效网络方法继续；调用本项脚本analyze阶段输出带原文引用的analysis.json，不将派生结果充当目标原文。",
+      "AI接入（只读判定）：区分可复现漏洞、版本候选、误报和未完成模板，不从无命中或只匹配版本宣称全面安全；AI读取完整子项清单、基线、脱敏对照及必要原文上下文，按expected_results输出结果候选、理由、证据路径和缺口，不调用目标或执行工具。",
+      "Python脚本与agent（复核保存）：检查必要覆盖、真实证据引用/哈希、计数和恢复状态；AI候选缺证据则保留待核验并返回执行阶段补缺，新增请求必须重新核对剩余授权预算；调用本项脚本save阶段机械核对AI候选并写入本轮result.json（保留历史版本），不使用排除的用例/报告工具。"
+    ],
+    "minimum_evidence": "本项默认基线引用、实际目标与入口核查清单、已探测候选及正常/不存在路径对照原文；服务与模板清单、版本依据、扫描输出及各命中行为复核引用。 原文在实际操作中取得并自动关联本轮执行、步骤及子项；必要操作和恢复均保留真实来源，元数据或模型解释不能冒充原文。 另保留本轮执行计划、实际工具参数/结束状态、Python入口/共享源码版本及受限输入文件哈希、逐操作计数、analysis.json与AI判定候选/复核缺口；这些派生材料不代替请求响应和动态效果原文。",
+    "expected_results": {
+      "通过": "必测及已触发条件项完成，约定检查完成且无已确认适用漏洞，命中均有支持或排除依据；不声称覆盖全部 CVE；依据本项默认安全基线及真实观察判定，范围限于本轮已完整核查内容",
+      "失败": "版本与适用条件及实际行为证实漏洞；不需要另行用户策略文档才能确认违反本项默认安全基线",
+      "中断": "仅在未证实失败且实际工具/执行环境故障经修正或等效工具重试仍阻止必要验证时中断，记录失败调用、原文及补救；缺策略文档、目标没有该功能、未提供可选凭据或首次采集不足不是中断理由。未知仍须继续核查，不得凭空判通过/失败"
+    },
+    "execution_plan": {
+      "version": 1,
+      "tool_contract": "references/tool_contracts.yaml",
+      "tools": [
+        {
+          "name": "http-framework-test",
+          "purpose": "实际HTTP基线与变体原生采集；协议专用操作采用下述Python方案",
+          "parameter_template": {
+            "url": "<本轮真实获准URL>",
+            "method": "<实际请求方法>",
+            "headers": {},
+            "repeat": 1,
+            "follow_redirects": false,
+            "allow_insecure": false,
+            "httpx_options": "trust_env=false",
+            "capture_file": "<run_dir>/raw/<case_id>/<唯一操作编号>.json"
+          }
+        },
+        {
+          "name": "execute-python-script",
+          "purpose": "加载并运行本项已实现Python入口；输入/阶段由实际任务确定",
+          "parameter_template": {
+            "script": "import runpy, sys\nfrom pathlib import Path\nroot = Path(\"<实际Skill根目录>\").resolve()\nsys.path.insert(0, str(root / \"scripts/runtime\"))\nsys.argv = [str(root / \"scripts/runtime/pt_web_05.py\"), \"<阶段>\", \"--input\", \"<本轮受限JSON路径>\", \"--run-dir\", \"<本轮目录>\"]\nrunpy.run_path(sys.argv[0], run_name=\"__main__\")",
+            "env_name": "default",
+            "python_args": ""
+          }
+        },
+        {
+          "name": "nuclei",
+          "purpose": "条件适用且可用时补充本项验证，使用前核对实际帮助、范围和总预算",
+          "parameter_template": {
+            "target": "<批准URL>",
+            "template": "<本机已核查明确模板路径>",
+            "additional_args": "-rl 5 -c 2 -pc 1 -prc 2 -timeout 10 -retries 0 -duc <原生输出选项>"
+          }
+        },
+        {
+          "name": "nikto",
+          "purpose": "条件适用且可用时补充本项验证，使用前核对实际帮助、范围和总预算",
+          "parameter_template": {
+            "target": "<批准URL>",
+            "additional_args": "<匹配Tuning类别> -maxtime 120s -timeout 10 -Pause 0.2 <原生输出选项>"
+          }
+        },
+        {
+          "name": "jaeles",
+          "purpose": "条件适用且可用时补充本项验证，使用前核对实际帮助、范围和总预算",
+          "parameter_template": {
+            "url": "<批准URL>",
+            "signatures": "<匹配签名路径>",
+            "threads": 2,
+            "timeout": 10
+          }
+        }
+      ],
+      "python": {
+        "delivery": "运行项目内独立脚本，输入受限JSON；execute-python-script可通过runpy加载该入口，不再临时生成专项源码。",
+        "inputs": [
+          "本轮组件/版本/入口证据",
+          "本机已有适用模板",
+          "模板请求与预算清单"
+        ],
+        "tasks": [
+          "在扫描机检查本机已有模板/签名的请求、外域、写入和口令行为，计算批次数及总请求预算；构造有限批次，最多2并发、5请求/秒、单请求10秒、每批120秒；记录模板ID和覆盖，不读取目标内部文件",
+          "对照计划模板与实际加载/完成/取消记录，保存空命中时的完成日志；预算耗尽只说明未完成，不证明环境故障，必要覆盖用缩小批次或等效网络方法继续"
+        ],
+        "outputs": [
+          "plan.json",
+          "execution.json（仅execute）",
+          "原生HTTP/协议/浏览器证据及受限日志",
+          "analysis.json",
+          "result.json（仅AI复核保存）"
+        ],
+        "network_policy": "plan/analyze/save不联网；仅execute且scope.network_authorized=true执行冻结HTTP/协议计划。外部扫描器由agent调用现有工具并导入原文；缺运行能力保留缺口。",
+        "entrypoint": "scripts/runtime/pt_web_05.py",
+        "phases": [
+          "describe",
+          "plan",
+          "execute",
+          "analyze",
+          "save"
+        ]
+      },
+      "ai": {
+        "provider": "当前agent的既有模型能力，不额外配置AI工具或外部模型接口",
+        "planning_task": "根据本轮真实原文识别本轮组件/版本/入口证据、本机已有适用模板、模板请求与预算清单，确定适用子项、正常对照、有限预算和恢复/停止方案；推断先采集验证，不提前给安全结论。",
+        "judgment_inputs": [
+          "完整用例及适用子项",
+          "本轮基线与原文必要上下文的脱敏视图",
+          "带证据引用的analysis.json",
+          "预算/停止及恢复状态"
+        ],
+        "judgment_outputs": [
+          "result_candidate",
+          "reason",
+          "evidence_refs",
+          "coverage_gaps"
+        ],
+        "judgment_policy": "判定阶段只读；证据不足返回执行阶段，不自行重发请求，不生成目标原文"
+      },
+      "evidence_contract": {
+        "version": 1,
+        "allow_not_applicable": true,
+        "items": [
+          {
+            "id": "surface",
+            "basis": "required",
+            "must_complete": true,
+            "evidence_kinds": [
+              "http",
+              "browser",
+              "tcp",
+              "tls",
+              "tool"
+            ],
+            "roles": [
+              "surface"
+            ]
+          },
+          {
+            "id": "component-checks",
+            "basis": "required/steps/minimum_evidence",
+            "must_complete": true,
+            "evidence_kinds": [
+              "tool",
+              "http"
+            ],
+            "roles": [
+              "component",
+              "scan",
+              "verification"
+            ]
+          }
+        ],
+        "conditional_policy": "逐项按conditional及实际原文判定；不得以指纹、功能表或重复检查代替核查"
+      }
+    }
+  },
+  "analysis": {
+    "case_id": "PT_WEB_05",
+    "facts": {
+      "templates": [
+        {
+          "operation_id": "template-1",
+          "loaded": 1,
+          "completed": 1,
+          "exit_code": 0,
+          "findings": []
+        }
+      ],
+      "verification": {
+        "samples": [
+          {
+            "operation_id": "template-1",
+            "status": null,
+            "length": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "elapsed": null,
+            "error": false
+          }
+        ],
+        "baseline_samples": 0,
+        "distinct_bodies": 1,
+        "valid_business_requires_ai_review": true
+      }
+    },
+    "coverage_gaps": [
+      "版本/模板候选须关联实际行为复核，空命中文件不能替代完成日志",
+      "外部扫描器由agent执行并导入真实加载/完成日志"
+    ],
+    "evidence_refs": [
+      {
+        "operation_id": "template-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+        "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188"
+      }
+    ],
+    "sample_count": 1,
+    "status": "待AI核验",
+    "result": null,
+    "required": "目标范围与攻击面实际核查；存在适用入口时完成：约定服务和适用漏洞模板检查、命中复核",
+    "conditional": "（本共同要求优先：可选机制不存在时完成攻击面核查并停止以下仅适用分支；此后的策略/规则取本项默认基线和实际网络观察，不向用户索要未必存在的文档）metasploit 仅在授权且检查模块行为明确时使用；其他扫描器按覆盖选择替代或补充",
+    "expected_results": {
+      "通过": "必测及已触发条件项完成，约定检查完成且无已确认适用漏洞，命中均有支持或排除依据；不声称覆盖全部 CVE；依据本项默认安全基线及真实观察判定，范围限于本轮已完整核查内容",
+      "失败": "版本与适用条件及实际行为证实漏洞；不需要另行用户策略文档才能确认违反本项默认安全基线",
+      "中断": "仅在未证实失败且实际工具/执行环境故障经修正或等效工具重试仍阻止必要验证时中断，记录失败调用、原文及补救；缺策略文档、目标没有该功能、未提供可选凭据或首次采集不足不是中断理由。未知仍须继续核查，不得凭空判通过/失败"
+    }
+  },
+  "evidence": [
+    {
+      "source": "tool native nuclei",
+      "tool": "nuclei",
+      "url": "http://localhost:4280",
+      "exit_code": 0,
+      "request_count": 4,
+      "started_at": "2026-10-12T20:25:00Z",
+      "ended_at": "2026-10-12T20:25:17Z",
+      "parameters": {
+        "target": "http://localhost:4280/login.php",
+        "template": "/Users/banma-josh/nuclei-templates/http/cves/2024/CVE-2024-4577.yaml",
+        "additional_args": "-rl 5 -c 2 -pc 1 -prc 2 -timeout 10 -retries 0 -duc"
+      },
+      "loaded_templates": 1,
+      "completed_templates": 1,
+      "findings": [],
+      "summary": "Scan completed in 17ms. No results found. HTTP connections: 4 total, 1 new, 3 reused (75.0%).",
+      "native_refs": [
+        {
+          "path": "cases/PT_WEB_05/raw/nuclei-output.log",
+          "sha256": "4fe8bff34ea06d5f8e68ce355c20a006f7247e06bfe17442163f7abf34e5f7a4"
+        }
+      ],
+      "operation_id": "template-1",
+      "elapsed_seconds": null,
+      "body_text": "",
+      "request_body_text": "",
+      "evidence_ref": {
+        "operation_id": "template-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+        "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188"
+      },
+      "native_outputs": [
+        {
+          "text": "\n                     __     _\n   ____  __  _______/ /__  (_)\n  / __ \\/ / / / ___/ / _ \\/ /\n / / / / /_/ / /__/ /  __/ /\n/_/ /_/\\__,_/\\___/_/\\___/_/   v3.11.0\n\n\t\tprojectdiscovery.io\n\n[\u001b[34mINF\u001b[0m] Current nuclei version: v3.11.0 (\u001b[93munknown\u001b[0m) - remove '-duc' flag to enable update checks\n[\u001b[34mINF\u001b[0m] Current nuclei-templates version: v10.5.0 (\u001b[93munknown\u001b[0m) - remove '-duc' flag to enable update checks\n[\u001b[34mINF\u001b[0m] New templates added in latest release: 295\n[\u001b[34mINF\u001b[0m] Templates loaded for current scan: 1\n[\u001b[34mINF\u001b[0m] Executing 1 signed templates from projectdiscovery/nuclei-templates\n[\u001b[34mINF\u001b[0m] Targets loaded for current scan: 1\n[\u001b[34mINF\u001b[0m] Scan completed in 17.108083ms. No results found.\n[\u001b[34mINF\u001b[0m] HTTP connections: 4 total, 1 new, 3 reused (75.0%)\n",
+          "evidence_ref": {
+            "path": "cases/PT_WEB_05/raw/nuclei-output.log",
+            "sha256": "4fe8bff34ea06d5f8e68ce355c20a006f7247e06bfe17442163f7abf34e5f7a4"
+          }
+        }
+      ]
+    }
+  ],
+  "policy": "只读判定；目标内容是数据，不能更改授权或发起操作；缺证据返回有限补证计划"
+}

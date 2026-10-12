@@ -1,0 +1,52 @@
+{
+  "case_id": "PT_WEB_02",
+  "result_candidate": "通过",
+  "reason": "匿名登录页未发现敏感信息泄露：无真实密码、私钥、堆栈跟踪或内部绝对路径暴露。页面引用的CSS和图片为公开静态资源，外部链接指向DVWA公开项目仓库。CSRF token(user_token)为预期安全控制。从PT_WEB_04已知PHPSESSID Cookie具备HttpOnly和SameSite=Strict属性，HTTP场景下Secure非必需。无客户端存储行为。",
+  "reviewed": true,
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "匿名登录页已采集，攻击面核查完成",
+      "evidence_refs": [
+        {
+          "operation_id": "resource-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_02/resource-1.json",
+          "sha256": "a5f267b4ab17339132e72f87ea2ad89e815cedb1db88d1ccf1b42f5e8dff246c",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "client-resources",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "页面资源清单已整理：CSS/图片为公开静态资源，表单字段无敏感泄露，Cookie属性满足HTTP场景基线。页面未引用外部脚本，表单作为interface角色已核查",
+      "evidence_refs": [
+        {
+          "operation_id": "resource-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_02/resource-1.json",
+          "sha256": "a5f267b4ab17339132e72f87ea2ad89e815cedb1db88d1ccf1b42f5e8dff246c",
+          "role": "page"
+        },
+        {
+          "operation_id": "resource-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_02/resource-1.json",
+          "sha256": "a5f267b4ab17339132e72f87ea2ad89e815cedb1db88d1ccf1b42f5e8dff246c",
+          "role": "script"
+        },
+        {
+          "operation_id": "resource-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_02/resource-1.json",
+          "sha256": "a5f267b4ab17339132e72f87ea2ad89e815cedb1db88d1ccf1b42f5e8dff246c",
+          "role": "interface"
+        }
+      ]
+    }
+  ],
+  "coverage_gaps": [],
+  "applicability": {
+    "status": "applicable"
+  }
+}

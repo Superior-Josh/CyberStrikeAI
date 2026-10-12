@@ -1,0 +1,48 @@
+{
+  "case_id": "PT_WEB_12",
+  "result_candidate": "失败",
+  "reason": "目标服务仅提供HTTP明文传输（http://localhost:4280），无TLS/HTTPS支持。登录页面/login.php包含认证表单（username/password字段），表单action指向HTTP明文URL并通过POST方法提交，凭据将以明文传输。无HSTS头，无HTTPS重定向。违反'认证/敏感服务须提供可信TLS1.2或1.3，不允许明文接收认证秘密'基线要求。",
+  "reviewed": true,
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "HTTP入口和登录表单已采集，攻击面核查完成",
+      "evidence_refs": [
+        {
+          "operation_id": "normal-before",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_12/normal-before.json",
+          "sha256": "b15bb2028104eb97a4f81ace7167bfa9abc047cf225375ec3acccf5ad014a0c5",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "HTTP明文服务无TLS，登录表单通过HTTP POST提交凭据，无HSTS，无HTTPS重定向",
+      "evidence_refs": [
+        {
+          "operation_id": "normal-before",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_12/normal-before.json",
+          "sha256": "b15bb2028104eb97a4f81ace7167bfa9abc047cf225375ec3acccf5ad014a0c5",
+          "role": "transport-baseline"
+        }
+      ]
+    }
+  ],
+  "confirmed_failure_refs": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_12/normal-before.json",
+      "sha256": "b15bb2028104eb97a4f81ace7167bfa9abc047cf225375ec3acccf5ad014a0c5",
+      "role": "transport-baseline"
+    }
+  ],
+  "coverage_gaps": [],
+  "applicability": {
+    "status": "applicable"
+  }
+}

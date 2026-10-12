@@ -1,0 +1,51 @@
+{
+  "case_id": "PT_WEB_09",
+  "result_candidate": "通过",
+  "reviewed": true,
+  "reason": "SQL注入对照测试完成。正常凭据(admin/password)登录成功，返回302重定向至index.php；两组交替的SQL布尔变体（true: admin' AND '1'='1，false: admin' AND '1'='2）均登录失败，返回302重定向至login.php，两个变体结果无差异，未观察到布尔差异或SQL错误信息。这证实username字段被当作字面字符串处理，未改变SQL查询语义。DVWA security=impossible级别使用参数化查询防护SQL注入。",
+  "evidence_refs": [
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1-csrf.json", "sha256": "f7a2d05dfd5a815a9f397393eb5341283a0a430de13517124cca971f722a3e0e"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1.json", "sha256": "df833fa28f64f7dc13d0e83df3bbf8bebfef95eafe2f90687edd0c9f87967d9f"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-1-csrf.json", "sha256": "d06d3da40d2a505f3fef81a71de83af49a9fa867d914a8dec17ca7bb1bc5bce5"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-1.json", "sha256": "a6e35b901a4dd28763bf79b092ebb2ec545d825e5815f10f219235b3fee285bc"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-2-csrf.json", "sha256": "fb12e494ec454c98fba36640ed1f4d29d1bee84f049c45d25a6900e80002cf3c"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-2.json", "sha256": "33fa743c276487e87a98b37951205f169c778e4603b217db9fe16ab1e8923dda"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-2-csrf.json", "sha256": "ab531e40587250aefc8b4223c30fc3960e667c51e80650fc114d2bc679a87392"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-2.json", "sha256": "f5f26c5596d7e7bb36b2917be8ebfff8d81bf3f081763699f5d6744a443aa430"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-1-csrf.json", "sha256": "f390b07a2f3e107062f59164e74e0947eaf359e9e406b6829999adb3acd7bacb"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-1.json", "sha256": "76549da4774e1b2b74ff15cfd2d579d266b51ec9d4d6024f1d734c87b7508643"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-2-csrf.json", "sha256": "18fb5833bbb6dc62ac09d3a6130754e1088445f55e57a57bce03207da02a6c5d"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-2.json", "sha256": "7df0338a1f9999903eed62cf08c5846aaab2ede0e9997a38e2c55c22240eb113"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-after-csrf.json", "sha256": "683fd3f11f4bf31c2017567fedb5725f258fc27fb97935277a274d1e1d234172"},
+    {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-after.json", "sha256": "d615d1416056d57ce720f570513d2390d028f687343dba19a9871502eb576d8b"}
+  ],
+  "confirmed_failure_refs": [],
+  "coverage_gaps": [],
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "攻击面核查完成：匿名可访问接口为login.php，测试其username字段",
+      "evidence_refs": [
+        {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1.json", "sha256": "df833fa28f64f7dc13d0e83df3bbf8bebfef95eafe2f90687edd0c9f87967d9f", "role": "surface"}
+      ]
+    },
+    {
+      "id": "query-controls",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "两组交替正常/真假对照完成：正常登录成功，SQL变体全部失败且无差异",
+      "evidence_refs": [
+        {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1.json", "sha256": "df833fa28f64f7dc13d0e83df3bbf8bebfef95eafe2f90687edd0c9f87967d9f", "role": "baseline"},
+        {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-1.json", "sha256": "a6e35b901a4dd28763bf79b092ebb2ec545d825e5815f10f219235b3fee285bc", "role": "true-variant"},
+        {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-2.json", "sha256": "33fa743c276487e87a98b37951205f169c778e4603b217db9fe16ab1e8923dda", "role": "false-variant"},
+        {"path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-after.json", "sha256": "d615d1416056d57ce720f570513d2390d028f687343dba19a9871502eb576d8b", "role": "normal-after"}
+      ]
+    }
+  ],
+  "applicability": {
+    "status": "applicable",
+    "reason": "login.php的username字段为真实匿名SQL输入入口，测试两组交替布尔对照"
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "case_id": "PT_WEB_09",
+  "execution_order": 13,
+  "scope_sha256": "7fee7d608a60f3a114dbb0d9435b0b9ed95f0d48b1523880d5883350ed085379",
+  "inputs_sha256": "fba4def2c8701723e60438d59dc24c8b53c4f71168b7c97364d6d9eb0f0ce3e3",
+  "limits_sha256": "813182e9d0897e0c7ce537d57fcff0631878e3a780cd3fc8723d91c0b70ea247",
+  "source_hashes": {
+    "cases/anonymous/PT_WEB_09.yaml": "4a17ba8a6d5c97b2982ce60769ed9a4f511f417a44c94c66429b1f3401aad945",
+    "scripts/workflow.py": "10859fc16587291abe785b01289d8336e037f5e65fed5f2a36e9e81602968c39",
+    "scripts/runtime/common.py": "c1562df6cbba6eac07ba5650350c97593c658619f85eaf28c0e8372333ddd409",
+    "scripts/runtime/builders.py": "69c823fd1994b30d02601c816ce989194b3f73e31d9587124bcada85aea78191",
+    "scripts/runtime/execution.py": "a4cd50bf22b04442e426ca589ee7e405ffd5e0038e228d942e5b47b04da2987e",
+    "scripts/runtime/protocols.py": "f61349c4c311ddd78521e7a6e61c3abcdd68b67febf05f5d277914c8ffafccd0",
+    "scripts/runtime/lifecycle.py": "d68f1ee93f2d8b3a86dfa472d7b8e33193a2c1c3268f3d0d2a7a53719e330215",
+    "scripts/runtime/pt_web_09.py": "56390a62c9ae79353cd0a133e5f3e98606285240387934ab113f61c94ecf05d3"
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "query-controls",
+      "must_complete": true
+    }
+  ],
+  "expected_requests": 14,
+  "operations": [
+    {
+      "operation_id": "normal-1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "POST",
+        "data": "username=admin&password=password&Login=Login",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous",
+      "csrf_refresh": {
+        "request": {
+          "url": "http://localhost:4280/login.php",
+          "method": "GET"
+        },
+        "field": "user_token",
+        "location": "form"
+      }
+    },
+    {
+      "operation_id": "variant-1-1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "POST",
+        "data": "password=password&Login=Login&username=admin%27+AND+%271%27%3D%271",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-1.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous",
+      "csrf_refresh": {
+        "request": {
+          "url": "http://localhost:4280/login.php",
+          "method": "GET"
+        },
+        "field": "user_token",
+        "location": "form"
+      }
+    },
+    {
+      "operation_id": "variant-1-2",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "POST",
+        "data": "password=password&Login=Login&username=admin%27+AND+%271%27%3D%272",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-2.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous",
+      "csrf_refresh": {
+        "request": {
+          "url": "http://localhost:4280/login.php",
+          "method": "GET"
+        },
+        "field": "user_token",
+        "location": "form"
+      }
+    },
+    {
+      "operation_id": "normal-2",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "POST",
+        "data": "username=admin&password=password&Login=Login",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-2.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous",
+      "csrf_refresh": {
+        "request": {
+          "url": "http://localhost:4280/login.php",
+          "method": "GET"
+        },
+        "field": "user_token",
+        "location": "form"
+      }
+    },
+    {
+      "operation_id": "variant-2-1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "POST",
+        "data": "password=password&Login=Login&username=admin%27+AND+%271%27%3D%271",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-1.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous",
+      "csrf_refresh": {
+        "request": {
+          "url": "http://localhost:4280/login.php",
+          "method": "GET"
+        },
+        "field": "user_token",
+        "location": "form"
+      }
+    },
+    {
+      "operation_id": "variant-2-2",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "POST",
+        "data": "password=password&Login=Login&username=admin%27+AND+%271%27%3D%272",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-2.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous",
+      "csrf_refresh": {
+        "request": {
+          "url": "http://localhost:4280/login.php",
+          "method": "GET"
+        },
+        "field": "user_token",
+        "location": "form"
+      }
+    },
+    {
+      "operation_id": "normal-after",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "POST",
+        "data": "username=admin&password=password&Login=Login",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-after.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous",
+      "csrf_refresh": {
+        "request": {
+          "url": "http://localhost:4280/login.php",
+          "method": "GET"
+        },
+        "field": "user_token",
+        "location": "form"
+      }
+    }
+  ],
+  "coverage_gaps": [],
+  "details": {},
+  "limits": {
+    "max_requests": 50,
+    "timeout_seconds": 120
+  },
+  "result": null,
+  "status": "计划已构造",
+  "supplement_round": 0
+}

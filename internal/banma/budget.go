@@ -13,16 +13,20 @@ import (
 )
 
 type Budget struct {
-	mu            sync.Mutex
-	Attempts      int
-	Max           int
-	Window        time.Duration
-	Started       time.Time
-	Stopped       bool
-	CodeLoop      bool
-	Handoff       bool
-	NMapUsed      bool
-	NormalStopped bool
+	mu             sync.Mutex
+	Attempts       int
+	Max            int
+	Window         time.Duration
+	Started        time.Time
+	Stopped        bool
+	CodeLoop       bool
+	Handoff        bool
+	NMapUsed       bool
+	NormalStopped  bool
+	QueryCase      string
+	QueryMax       int
+	QueryUsed      int
+	SecurityCookie string
 }
 
 func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.ToolResult {
@@ -74,16 +78,6 @@ func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.T
 				local = false
 			}
 		}
-		if local {
-			r.budget.mu.Lock()
-			used := r.budget.NMapUsed
-			r.budget.NMapUsed = true
-			r.budget.mu.Unlock()
-			if used {
-				return deny("本机nmap已尝试，不反复排查/重试，需用等效能力或保留缺口")
-			}
-		}
-
 		target := toString(args["target"])
 		ports := toString(args["ports"])
 		allowed := false
@@ -96,6 +90,16 @@ func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.T
 		if !allowed {
 			return deny("端口扫描仅限本轮明确授权的主机和端口")
 		}
+		if local {
+			r.budget.mu.Lock()
+			used := r.budget.NMapUsed
+			r.budget.NMapUsed = true
+			r.budget.mu.Unlock()
+			if used {
+				return deny("本机nmap已尝试，不反复排查/重试，需用等效能力或保留缺口")
+			}
+		}
+
 	}
 	if name == "katana" || name == "httpx" || name == "nikto" || name == "nuclei" {
 		target := toString(args["url"])
@@ -118,6 +122,9 @@ func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.T
 		}
 	}
 	if name == "http-framework-test" {
+		if err := r.checkSecurityPreference(args); err != nil {
+			return deny(err.Error())
+		}
 		if err := r.checkPayloadDestinations(u, toString(args["data"])); err != nil {
 			return deny(err.Error())
 		}
@@ -130,6 +137,15 @@ func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.T
 	if name != "http-framework-test" {
 		return nil
 	}
+	r.budget.mu.Lock()
+	if r.budget.QueryCase == r.currentCase && r.budget.QueryMax > 0 {
+		if r.budget.QueryUsed >= r.budget.QueryMax {
+			r.budget.mu.Unlock()
+			return deny("本项查询阶段请求预算已耗尽，代码与Eino共享且不重置")
+		}
+		r.budget.QueryUsed++
+	}
+	r.budget.mu.Unlock()
 	if repeat, ok := args["repeat"].(float64); ok && repeat > 1 {
 		return deny("重复候选及窗口必须由代码逐次执行，不能批次绕过共享计数")
 	}

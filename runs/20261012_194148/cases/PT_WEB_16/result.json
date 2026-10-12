@@ -1,0 +1,83 @@
+{
+  "case_id": "PT_WEB_16",
+  "result_candidate": "通过",
+  "reason": "匿名接口login.php的所有响应（基线、同源Origin、同源预检、异源Origin、异源预检）均未返回任何CORS头（access-control-allow-origin、access-control-allow-credentials、access-control-allow-methods、access-control-allow-headers均为空）。服务器采用安全默认行为，完全不允许跨域访问，已测禁止跨域读取被有效限制。符合匿名接口安全基线要求。",
+  "reviewed": true,
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "匿名接口login.php已采集，攻击面核查完成",
+      "evidence_refs": [
+        {
+          "operation_id": "normal-before",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/normal-before.json",
+          "sha256": "ca4b938599111680b971b82d9767c2b364fd04d487791b5f089cb7c2c0c57e28",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "cors",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "基线、同源和异源请求均未返回CORS头，跨域访问被有效限制",
+      "evidence_refs": [
+        {
+          "operation_id": "normal-before",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/normal-before.json",
+          "sha256": "ca4b938599111680b971b82d9767c2b364fd04d487791b5f089cb7c2c0c57e28",
+          "role": "baseline"
+        },
+        {
+          "operation_id": "origin-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/origin-1.json",
+          "sha256": "725004c587b26bcd4a2191db75ffa4c1f707c78b34ebd4583117a6fa42f1c6e7",
+          "role": "allowed-origin"
+        },
+        {
+          "operation_id": "origin-2",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/origin-2.json",
+          "sha256": "dc4fa0db2e80b6fd13bd67516a0503c60f7e3327cdfe2c22694915fa4b31174d",
+          "role": "forbidden-origin"
+        }
+      ]
+    }
+  ],
+  "coverage_gaps": [],
+  "applicability": {
+    "status": "applicable"
+  },
+  "result": "通过",
+  "restoration_pending": false,
+  "artifact_status": "case_complete",
+  "runtime_checks": "mechanical_only",
+  "evidence_refs": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/normal-before.json",
+      "sha256": "ca4b938599111680b971b82d9767c2b364fd04d487791b5f089cb7c2c0c57e28"
+    },
+    {
+      "operation_id": "origin-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/origin-1.json",
+      "sha256": "725004c587b26bcd4a2191db75ffa4c1f707c78b34ebd4583117a6fa42f1c6e7"
+    },
+    {
+      "operation_id": "preflight-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/preflight-1.json",
+      "sha256": "83943bc419999d00f9b1f321cbd5213694aeade531af145ba2a1698ed2567d25"
+    },
+    {
+      "operation_id": "origin-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/origin-2.json",
+      "sha256": "dc4fa0db2e80b6fd13bd67516a0503c60f7e3327cdfe2c22694915fa4b31174d"
+    },
+    {
+      "operation_id": "preflight-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/preflight-2.json",
+      "sha256": "fca8b6bd1afe44c3b248463e73fb7eac0d907fd2387fe4e7bf821fb920fda3d7"
+    }
+  ]
+}

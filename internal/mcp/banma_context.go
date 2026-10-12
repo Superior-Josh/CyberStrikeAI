@@ -50,3 +50,8 @@ func BanmaJudgmentMethod(ctx context.Context) string {
 	}
 	return "code_or_eino"
 }
+
+func HasBanmaCallCheck(ctx context.Context) bool {
+	_, ok := ctx.Value(banmaCallCheckKey{}).(func(string, map[string]interface{}) *ToolResult)
+	return ok
+}

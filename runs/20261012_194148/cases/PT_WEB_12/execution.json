@@ -1,0 +1,13 @@
+{
+  "case_id": "PT_WEB_12",
+  "status": "执行记录已保存",
+  "evidence": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_12/normal-before.json",
+      "sha256": "b15bb2028104eb97a4f81ace7167bfa9abc047cf225375ec3acccf5ad014a0c5",
+      "elapsed_seconds": 0.005189
+    }
+  ],
+  "coverage_gaps": []
+}

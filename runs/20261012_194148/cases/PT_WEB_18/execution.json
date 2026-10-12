@@ -1,0 +1,31 @@
+{
+  "case_id": "PT_WEB_18",
+  "status": "执行记录已保存",
+  "evidence": [
+    {
+      "operation_id": "page-requests-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+      "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b",
+      "elapsed_seconds": 0.003927
+    },
+    {
+      "operation_id": "resource-requests-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/resource-requests-1.json",
+      "sha256": "d9317875639662f074fdd8b0519a2fbf0ca31cb7b4a04886d430b1f172a89505",
+      "elapsed_seconds": 0.002358
+    },
+    {
+      "operation_id": "page-requests-1-s1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1-s1.json",
+      "sha256": "41c170536c18cb7d871935689084399633be8057ad01a10e146806848caa14b2",
+      "elapsed_seconds": 0.002506
+    },
+    {
+      "operation_id": "page-requests-2-s1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-2-s1.json",
+      "sha256": "587e563251c484c19a7d23ea3142d7315f23996fcd5b04f4ad00bbf57b00c568",
+      "elapsed_seconds": 0.002113
+    }
+  ],
+  "coverage_gaps": []
+}

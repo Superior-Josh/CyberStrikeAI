@@ -1,0 +1,66 @@
+{
+  "source": "http-framework-test native response capture",
+  "captured_at_unix": 1791806122.129225,
+  "method": "GET",
+  "url": "http://localhost:4280/nonexistent_page_xyz123abc.html",
+  "input_url": "http://localhost:4280/nonexistent_page_xyz123abc.html",
+  "wire_request_target": "/nonexistent_page_xyz123abc.html",
+  "wire_request_target_base64": "L25vbmV4aXN0ZW50X3BhZ2VfeHl6MTIzYWJjLmh0bWw=",
+  "request_headers": [
+    [
+      "host",
+      "localhost:4280"
+    ],
+    [
+      "accept",
+      "*/*"
+    ],
+    [
+      "accept-encoding",
+      "gzip, deflate"
+    ],
+    [
+      "connection",
+      "keep-alive"
+    ],
+    [
+      "user-agent",
+      "python-httpx/0.28.1"
+    ],
+    [
+      "cookie",
+      "security=impossible; PHPSESSID=8a49c7ba343932c1382812077effe4cf"
+    ]
+  ],
+  "request_body_base64": "",
+  "status_code": 404,
+  "http_version": "HTTP/1.1",
+  "headers": [
+    [
+      "date",
+      "Mon, 12 Oct 2026 11:55:22 GMT"
+    ],
+    [
+      "server",
+      "Apache/2.4.68 (Debian)"
+    ],
+    [
+      "content-length",
+      "313"
+    ],
+    [
+      "keep-alive",
+      "timeout=5, max=100"
+    ],
+    [
+      "connection",
+      "Keep-Alive"
+    ],
+    [
+      "content-type",
+      "text/html; charset=iso-8859-1"
+    ]
+  ],
+  "body_base64": "PCFET0NUWVBFIEhUTUwgUFVCTElDICItLy9XM0MvL0RURCBIVE1MIDQuMDEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvVFIvaHRtbDQvc3RyaWN0LmR0ZCI+CjxodG1sPjxoZWFkPgo8dGl0bGU+NDA0IE5vdCBGb3VuZDwvdGl0bGU+CjwvaGVhZD48Ym9keT4KPGgxPk5vdCBGb3VuZDwvaDE+CjxwPlRoZSByZXF1ZXN0ZWQgVVJMIHdhcyBub3QgZm91bmQgb24gdGhpcyBzZXJ2ZXIuPC9wPgo8aHI+CjxhZGRyZXNzPkFwYWNoZS8yLjQuNjggKERlYmlhbikgU2VydmVyIGF0IGxvY2FsaG9zdCBQb3J0IDQyODA8L2FkZHJlc3M+CjwvYm9keT48L2h0bWw+Cg==",
+  "body_length": 313
+}

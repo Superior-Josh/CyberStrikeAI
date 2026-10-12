@@ -149,6 +149,16 @@ func (r *Runner) reviewScope(guide map[string]interface{}) error {
 			if err != nil {
 				return fmt.Errorf("invalid historical request body")
 			}
+			r.observeSecurityPreference(capture)
+			cookieHeaders := map[string]string{}
+			for _, pair := range capture.RequestHeaders {
+				if len(pair) == 2 && strings.EqualFold(pair[0], "cookie") {
+					cookieHeaders["Cookie"] = pair[1]
+				}
+			}
+			if err = r.checkSecurityPreference(map[string]interface{}{"headers": cookieHeaders}); err != nil {
+				return err
+			}
 			if err = r.checkPayloadDestinations(target, string(data)); err != nil {
 				return fmt.Errorf("原执行%s违反冻结授权：%s；不得用该轨迹验收通过", record.ID, err)
 			}

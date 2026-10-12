@@ -1,0 +1,69 @@
+{
+  "case_id": "PT_WEB_05",
+  "result_candidate": "通过",
+  "reviewed": true,
+  "reason": "nuclei扫描已完成，CVE-2024-4577模板加载并执行成功（exit_code=0），4个HTTP连接按预期发出，未发现PHP CGI参数注入漏洞。扫描完成日志（nuclei-output.log）证实模板执行完毕，空命中结果表示目标不存在该已知漏洞。",
+  "evidence_refs": [
+    {
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+      "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188"
+    }
+  ],
+  "confirmed_failure_refs": [],
+  "coverage_gaps": [],
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "攻击面核查已完成，组件识别为Apache/2.4.68和PHP/8.5.10",
+      "evidence_refs": [
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+          "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "component-checks",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "nuclei模板CVE-2024-4577已加载并执行完成，无命中",
+      "evidence_refs": [
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+          "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188",
+          "role": "component"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+          "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188",
+          "role": "scan"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+          "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188",
+          "role": "verification"
+        }
+      ]
+    },
+    {
+      "id": "vulnerability-scan",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "CVE-2024-4577扫描完成，未发现PHP CGI参数注入漏洞",
+      "evidence_refs": [
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+          "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188",
+          "role": "verification"
+        }
+      ]
+    }
+  ],
+  "applicability": {
+    "status": "applicable",
+    "reason": "PHP/8.5.10通过X-Powered-By头确认存在，CVE-2024-4577适用于PHP CGI模式，模板测试了4个路径均无漏洞"
+  }
+}

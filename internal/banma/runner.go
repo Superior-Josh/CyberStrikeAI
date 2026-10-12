@@ -59,6 +59,7 @@ type Runner struct {
 	currentCase  string
 	session      map[string]interface{}
 	preparedOnly bool
+	codeDecision *Decision
 }
 type Summary struct {
 	Attempted        []string               `json:"attempted"`
@@ -183,7 +184,10 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			er = r.reviewScope(guide)
 			if er == nil {
 				var computed bool
-				decision, computed, er = PlaintextCredentialDecision(guide, r.captures, input.Username, input.Password)
+				decision, computed, er = PlaintextFormDecision(guide, r.captures)
+				if !computed && er == nil {
+					decision, computed, er = PlaintextCredentialDecision(guide, r.captures, input.Username, input.Password)
+				}
 				if computed {
 					reviewMethod = "code"
 				} else if er == nil {
@@ -242,13 +246,7 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 		}
 	}
 	if input.ResumeRunDir != "" {
-		if r.History == nil {
-			return sum, fmt.Errorf("resume history unavailable")
-		}
 		r.RunDir = input.ResumeRunDir
-		if _, err := r.History(ctx, r.RunDir, ""); err != nil {
-			return sum, err
-		}
 		if err := r.restoreRun(input, &sum); err != nil {
 			return sum, err
 		}
@@ -279,7 +277,7 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			r.persist(sum)
 			return sum, ctx.Err()
 		}
-		if input.ResumeRunDir != "" && contains(sum.Attempted, cid) {
+		if input.ResumeRunDir != "" && contains(sum.Attempted, cid) && !contains(sum.Pending, cid) {
 			continue
 		}
 		sum.Attempted = append(sum.Attempted, cid)
@@ -291,6 +289,7 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 		r.currentCase = cid
 		r.session = nil
 		r.preparedOnly = false
+		r.codeDecision = nil
 		r.emit("执行 "+cid, map[string]interface{}{"case_id": cid, "position": n + 1, "total": len(order), "saved": len(sum.Saved)})
 		guide, guideErr := r.helper(ctx, "show", cid, nil)
 		r.captures = nil
@@ -323,6 +322,19 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			authenticatedSession, guideErr = r.prepareAuthenticatedSession(ctx, cid, input)
 			r.session = authenticatedSession
 		}
+		if guideErr == nil {
+			if definition, ok := guide["case"].(map[string]interface{}); ok {
+				if budget, ok := definition["query_budget"].(map[string]interface{}); ok {
+					encoded, _ := json.Marshal(budget["max_requests"])
+					var maximum int
+					if json.Unmarshal(encoded, &maximum) == nil && maximum > 0 {
+						r.budget.mu.Lock()
+						r.budget.QueryCase, r.budget.QueryMax, r.budget.QueryUsed = cid, maximum, 0
+						r.budget.mu.Unlock()
+					}
+				}
+			}
+		}
 		var d Decision
 		method := "code"
 		if guideErr == nil {
@@ -335,7 +347,7 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 					guideErr = fmt.Errorf("Eino handoff unavailable")
 				} else {
 					// Secrets stay in the running context; never persist them in run metadata.
-					material := map[string]interface{}{"guidance": guide, "existing_operations": r.captures, "review_only": r.preparedOnly}
+					material := map[string]interface{}{"guidance": guide, "existing_operations": r.captures, "review_only": r.preparedOnly, "completed_code_checks": r.codeDecision}
 					if strings.Contains(cid, "_AUTH_") {
 						r.budget.mu.Lock()
 						credentialStopped := r.budget.NormalStopped
@@ -351,6 +363,26 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 					r.budget.Handoff = true
 					r.budget.mu.Unlock()
 					d, records, guideErr = r.Handoff(mcp.WithoutBanmaController(ctx), material)
+					if r.codeDecision != nil {
+						if guideErr != nil {
+							cause := guideErr
+							d = *r.codeDecision
+							d.Gaps = append(d.Gaps, "Eino补缺未完成："+redactError(cause, input))
+							guideErr = nil
+						} else {
+							fixed := map[string]bool{}
+							for _, check := range r.codeDecision.Checks {
+								fixed[check.Ref] = true
+							}
+							checks := []Check{}
+							for _, check := range d.Checks {
+								if !fixed[check.Ref] {
+									checks = append(checks, check)
+								}
+							}
+							d.Checks = append(checks, r.codeDecision.Checks...)
+						}
+					}
 					if d.Method == "code" {
 						method = "code"
 					}
@@ -372,6 +404,13 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 		if guideErr == nil {
 			var payload map[string]interface{}
 			payload, guideErr = r.payload(d, guide)
+			if guideErr != nil && r.codeDecision != nil {
+				invalid := guideErr
+				d = *r.codeDecision
+				d.Gaps = append(d.Gaps, "其余判定/来源格式尚未通过："+redactError(invalid, input))
+				method = "code"
+				payload, guideErr = r.payload(d, guide)
+			}
 			if guideErr == nil {
 				partialGaps, _ = payload["coverage_limitations"].([]string)
 				_, guideErr = r.helper(mcp.WithBanmaJudgment(ctx, method), "save", cid, payload)
@@ -498,6 +537,9 @@ func (r *Runner) request(ctx context.Context, cid, target, method string, header
 		r.budget.mu.Lock()
 		r.captures = append(r.captures, e)
 		r.budget.mu.Unlock()
+		if capture, readErr := ReadCapture(e); readErr == nil {
+			r.observeSecurityPreference(capture)
+		}
 	}
 	if err != nil {
 		return e, fmt.Errorf("HTTP execution unavailable")
@@ -552,6 +594,9 @@ var versionDisclosure = regexp.MustCompile(`(?i)\b(?:apache|nginx|php|tomcat|iis
 var pathDisclosure = regexp.MustCompile(`(?i)(?:/var/www/|/home/[a-z0-9_.-]+/|[a-z]:\\(?:inetpub|users)\\|stack trace:|traceback \(most recent call last\))`)
 
 func (r *Runner) executeCode(ctx context.Context, cid string, in Input, g map[string]interface{}) (Decision, bool, error) {
+	if cid == "PT_WEB_12" {
+		return r.observePlaintextLoginForm(ctx, in)
+	}
 	if cid == "PT_WEB_AUTH_08" {
 		return r.prepareQueryChecks(ctx, g)
 	}

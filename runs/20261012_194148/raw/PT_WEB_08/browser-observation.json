@@ -1,0 +1,7 @@
+{
+  "source": "web-pentesting runtime browser",
+  "url": "http://localhost:4280/login.php",
+  "error_type": "RuntimeErrorDetail",
+  "error": "缺少已有Playwright运行能力；未自动安装，浏览器验证未完成",
+  "elapsed_seconds": 5.2928924560546875e-05
+}

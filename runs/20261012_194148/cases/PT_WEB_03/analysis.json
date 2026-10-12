@@ -1,0 +1,116 @@
+{
+  "case_id": "PT_WEB_03",
+  "facts": {
+    "versions": [
+      {
+        "operation_id": "normal-before",
+        "version_candidates": [
+          "Apache/2.4.68",
+          "PHP/8.5.10"
+        ]
+      },
+      {
+        "operation_id": "not-found",
+        "version_candidates": [
+          "Apache/2.4.68",
+          "Apache/2.4.68"
+        ]
+      },
+      {
+        "operation_id": "invalid-input",
+        "version_candidates": [
+          "Apache/2.4.68",
+          "PHP/8.5.10"
+        ]
+      }
+    ],
+    "disclosure_candidates": [
+      {
+        "operation_id": "normal-before",
+        "matches": {
+          "private_key": [],
+          "credential_field": [],
+          "stack_trace": [],
+          "absolute_path": []
+        }
+      },
+      {
+        "operation_id": "not-found",
+        "matches": {
+          "private_key": [],
+          "credential_field": [],
+          "stack_trace": [],
+          "absolute_path": []
+        }
+      },
+      {
+        "operation_id": "invalid-input",
+        "matches": {
+          "private_key": [],
+          "credential_field": [],
+          "stack_trace": [],
+          "absolute_path": []
+        }
+      }
+    ],
+    "comparisons": {
+      "samples": [
+        {
+          "operation_id": "normal-before",
+          "status": 302,
+          "length": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "elapsed": 0.005823,
+          "error": false
+        },
+        {
+          "operation_id": "not-found",
+          "status": 404,
+          "length": 313,
+          "body_sha256": "0f2529f74a11f3831fde2bdef7de82d88095dc90f9ab9c8342f0374f0629e3fb",
+          "elapsed": 0.003411,
+          "error": false
+        },
+        {
+          "operation_id": "invalid-input",
+          "status": 200,
+          "length": 1342,
+          "body_sha256": "9aad5189fe4e10d2a5f02c74a534568da2e90bc1ef7e82e853207f6ae1b26871",
+          "elapsed": 0.006861,
+          "error": false
+        }
+      ],
+      "baseline_samples": 1,
+      "distinct_bodies": 3,
+      "valid_business_requires_ai_review": true
+    }
+  },
+  "coverage_gaps": [],
+  "evidence_refs": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/normal-before.json",
+      "sha256": "54665359e5826254f48651705df64cc9b7e3577f257d40d4cd46ea272ac1697d"
+    },
+    {
+      "operation_id": "not-found",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/not-found.json",
+      "sha256": "5f6f43d84a583703278b6de9b73f81cf832d666721db26d1ee3656d167f024ce"
+    },
+    {
+      "operation_id": "invalid-input",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/invalid-input.json",
+      "sha256": "b45733fd365e158d80096167c4fcc3f854a4e6519870167a9207ff04858a0a65"
+    }
+  ],
+  "sample_count": 3,
+  "status": "待AI核验",
+  "result": null,
+  "required": "目标范围与攻击面实际核查；存在适用入口时完成：约定服务的正常响应、错误页及服务 Banner",
+  "conditional": "（本共同要求优先：可选机制不存在时完成攻击面核查并停止以下仅适用分支；此后的策略/规则取本项默认基线和实际网络观察，不向用户索要未必存在的文档）非 HTTP 服务仅在授权端口内检查；nuclei、nikto 作为补充，不要求全部扫描器运行",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，约定响应未披露基线禁止的信息；依据本项默认安全基线及真实观察判定，范围限于本轮已完整核查内容",
+    "失败": "实际响应或 Banner 暴露明确禁止披露的版本、堆栈、配置或内部路径；不需要另行用户策略文档才能确认违反本项默认安全基线",
+    "中断": "仅在未证实失败且实际工具/执行环境故障经修正或等效工具重试仍阻止必要验证时中断，记录失败调用、原文及补救；缺策略文档、目标没有该功能、未提供可选凭据或首次采集不足不是中断理由。未知仍须继续核查，不得凭空判通过/失败"
+  }
+}

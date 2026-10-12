@@ -1,0 +1,14 @@
+{
+  "case_id": "PT_WEB_05",
+  "status": "执行记录已保存",
+  "evidence": [
+    {
+      "operation_id": "template-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/template-1.json",
+      "sha256": "3de1787efedbafce1f03ff34221e64cb9c80e752a550cba2676df1f5b3150188"
+    }
+  ],
+  "coverage_gaps": [
+    "外部扫描器由agent执行并导入真实加载/完成日志"
+  ]
+}

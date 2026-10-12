@@ -1,0 +1,160 @@
+{
+  "case_id": "PT_WEB_07",
+  "execution_order": 11,
+  "scope_sha256": "7fee7d608a60f3a114dbb0d9435b0b9ed95f0d48b1523880d5883350ed085379",
+  "inputs_sha256": "d166e14f84f009531b01ae2a2e6dab039b18ac1fd3ef087d1bb7acbdfe757e0b",
+  "limits_sha256": "813182e9d0897e0c7ce537d57fcff0631878e3a780cd3fc8723d91c0b70ea247",
+  "source_hashes": {
+    "cases/anonymous/PT_WEB_07.yaml": "7dbd23c16ef7ecc52137cf19a513361282a43e64f74f1a46e7ec6789101fad04",
+    "scripts/workflow.py": "10859fc16587291abe785b01289d8336e037f5e65fed5f2a36e9e81602968c39",
+    "scripts/runtime/common.py": "c1562df6cbba6eac07ba5650350c97593c658619f85eaf28c0e8372333ddd409",
+    "scripts/runtime/builders.py": "69c823fd1994b30d02601c816ce989194b3f73e31d9587124bcada85aea78191",
+    "scripts/runtime/execution.py": "a4cd50bf22b04442e426ca589ee7e405ffd5e0038e228d942e5b47b04da2987e",
+    "scripts/runtime/protocols.py": "f61349c4c311ddd78521e7a6e61c3abcdd68b67febf05f5d277914c8ffafccd0",
+    "scripts/runtime/lifecycle.py": "d68f1ee93f2d8b3a86dfa472d7b8e33193a2c1c3268f3d0d2a7a53719e330215",
+    "scripts/runtime/pt_web_07.py": "f1994e633e6bdfeb0df65e91d45bdb0e886db99276d1213d7ad5949c7e005a7c"
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "redirects",
+      "must_complete": true
+    }
+  ],
+  "expected_requests": 7,
+  "operations": [
+    {
+      "operation_id": "normal-before",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/normal-before.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "redirect-1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?redirect=%2Findex.php",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-1.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "redirect-2",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?redirect=%2F",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-2.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "redirect-3",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?redirect=%2Fvulnerabilities%2Fview_source.php",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-3.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "redirect-4",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?redirect=http%3A%2F%2Fevil.com",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-4.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "redirect-5",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?redirect=https%3A%2F%2Fattacker.com",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-5.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "redirect-6",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?redirect=%2F%2Fevil.com%2Fphishing",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-6.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    }
+  ],
+  "coverage_gaps": [],
+  "details": {
+    "follow_unapproved_location": false
+  },
+  "limits": {
+    "max_requests": 50,
+    "timeout_seconds": 120
+  },
+  "result": null,
+  "status": "计划已构造",
+  "supplement_round": 0
+}

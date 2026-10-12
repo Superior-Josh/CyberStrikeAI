@@ -1,0 +1,111 @@
+{
+  "case_id": "PT_WEB_07",
+  "result_candidate": "通过",
+  "reviewed": true,
+  "reason": "login.php的redirect参数未被处理，所有7个请求（1个基线+6个目的地变体）均返回200状态码且无Location头，未观察到任何重定向行为。攻击面核查完成：测试了同源目的地（/index.php、/、/vulnerabilities/view_source.php）和外域目的地（http://evil.com、https://attacker.com、//evil.com/phishing），均未触发重定向。结论：login.php未使用redirect参数进行跳转，不存在开放重定向入口。",
+  "evidence_refs": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/normal-before.json",
+      "sha256": "fd409afec1a3b5819d16a2a4533300457b01d14862feaf7cdadad1e5f3149225"
+    },
+    {
+      "operation_id": "redirect-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-1.json",
+      "sha256": "3a73252d93e8a4ce6b4e63747037969bf1914fa753ae63da272676d51ab12935"
+    },
+    {
+      "operation_id": "redirect-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-2.json",
+      "sha256": "aa15f48d78fa1784053d7bd41142730f4c6013da3a1a579f3d350410bda52c68"
+    },
+    {
+      "operation_id": "redirect-3",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-3.json",
+      "sha256": "8541c83dd0f3712594e223a270ecc5b45c85268da269b7000a1262cfa6b5d962"
+    },
+    {
+      "operation_id": "redirect-4",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-4.json",
+      "sha256": "72f0396035d8e70c14299bbb0092a4825ab9eb7ab56c31762c832af6dcb79546"
+    },
+    {
+      "operation_id": "redirect-5",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-5.json",
+      "sha256": "a2da5e06e52a2b65681f06583e51ff9205e880ed2537c708b469418df8d70b8e"
+    },
+    {
+      "operation_id": "redirect-6",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-6.json",
+      "sha256": "b51ac319c3636b2049507c77a2c2b0a3d9020ffd9e11b37769aef64bc5a4da78"
+    }
+  ],
+  "confirmed_failure_refs": [],
+  "coverage_gaps": [],
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "攻击面核查完成：测试login.php的redirect参数，未发现重定向机制",
+      "evidence_refs": [
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/normal-before.json",
+          "sha256": "fd409afec1a3b5819d16a2a4533300457b01d14862feaf7cdadad1e5f3149225",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "redirects",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "测试6个目的地变体（3个同源+3个外域），所有请求返回200且无Location头，未触发重定向",
+      "evidence_refs": [
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/normal-before.json",
+          "sha256": "fd409afec1a3b5819d16a2a4533300457b01d14862feaf7cdadad1e5f3149225",
+          "role": "baseline"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-1.json",
+          "sha256": "3a73252d93e8a4ce6b4e63747037969bf1914fa753ae63da272676d51ab12935",
+          "role": "allowed-destination"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-2.json",
+          "sha256": "aa15f48d78fa1784053d7bd41142730f4c6013da3a1a579f3d350410bda52c68",
+          "role": "allowed-destination"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-3.json",
+          "sha256": "8541c83dd0f3712594e223a270ecc5b45c85268da269b7000a1262cfa6b5d962",
+          "role": "allowed-destination"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-4.json",
+          "sha256": "72f0396035d8e70c14299bbb0092a4825ab9eb7ab56c31762c832af6dcb79546",
+          "role": "forbidden-destination"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-5.json",
+          "sha256": "a2da5e06e52a2b65681f06583e51ff9205e880ed2537c708b469418df8d70b8e",
+          "role": "forbidden-destination"
+        },
+        {
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-6.json",
+          "sha256": "b51ac319c3636b2049507c77a2c2b0a3d9020ffd9e11b37769aef64bc5a4da78",
+          "role": "forbidden-destination"
+        }
+      ]
+    }
+  ],
+  "applicability": {
+    "status": "applicable",
+    "reason": "login.php存在redirect参数入口，但实际未处理该参数进行重定向"
+  },
+  "result": "通过",
+  "restoration_pending": false,
+  "artifact_status": "case_complete",
+  "runtime_checks": "mechanical_only"
+}

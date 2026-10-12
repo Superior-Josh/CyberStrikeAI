@@ -1,0 +1,33 @@
+{
+  "case_id": "PT_WEB_04",
+  "status": "执行记录已保存",
+  "evidence": [
+    {
+      "operation_id": "tcp-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/tcp-1.json",
+      "sha256": "d2119d5b5779d4bee8f92d3a548645c275f220dbd672fbf75961271fdd653483",
+      "elapsed_seconds": 0.0038750171661376953
+    },
+    {
+      "operation_id": "http-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/http-1.json",
+      "sha256": "518a2434226a6be642f2b2e13d003313c9e0f68802ac1973b2ac2d1b4ffdb89a",
+      "elapsed_seconds": 0.003531
+    },
+    {
+      "operation_id": "tcp-1-s1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/tcp-1-s1.json",
+      "sha256": "d2bc99f0a708c4fb6d22e03d7ec9b25a356dfce060a73040775accb052e6b46f",
+      "elapsed_seconds": 0.004241943359375
+    },
+    {
+      "operation_id": "http-1-s1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/http-1-s1.json",
+      "sha256": "96754428ffe6b6da2a051f99bbeb1b5c924af9273146f5c78f5db5c77dc40546",
+      "elapsed_seconds": 0.004298
+    }
+  ],
+  "coverage_gaps": [
+    "TCP连接不能独立证明完整服务识别，须AI复核HTTP/Banner适用范围"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "case_id": "PT_WEB_05",
+  "execution_order": 10,
+  "scope_sha256": "7fee7d608a60f3a114dbb0d9435b0b9ed95f0d48b1523880d5883350ed085379",
+  "inputs_sha256": "8eb550e621edd499784c2b5880ee51802fa946a05913247128b9afd9bace05b2",
+  "limits_sha256": "90b5033ed38303599bf3aa0ed9bb06e613cdc03edf715dd091b21c5a5d491fdd",
+  "source_hashes": {
+    "cases/anonymous/PT_WEB_05.yaml": "cba526fb41eeacfa9bf6a26decf73b16e679fbcdc97de810b3ed00aed4b787ee",
+    "scripts/workflow.py": "10859fc16587291abe785b01289d8336e037f5e65fed5f2a36e9e81602968c39",
+    "scripts/runtime/common.py": "c1562df6cbba6eac07ba5650350c97593c658619f85eaf28c0e8372333ddd409",
+    "scripts/runtime/builders.py": "69c823fd1994b30d02601c816ce989194b3f73e31d9587124bcada85aea78191",
+    "scripts/runtime/execution.py": "a4cd50bf22b04442e426ca589ee7e405ffd5e0038e228d942e5b47b04da2987e",
+    "scripts/runtime/protocols.py": "f61349c4c311ddd78521e7a6e61c3abcdd68b67febf05f5d277914c8ffafccd0",
+    "scripts/runtime/lifecycle.py": "d68f1ee93f2d8b3a86dfa472d7b8e33193a2c1c3268f3d0d2a7a53719e330215",
+    "scripts/runtime/pt_web_05.py": "37d078ea3d261ae2efe637564bfe56e64bf1473f073d61f627bf2bd44192f613"
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "component-checks",
+      "must_complete": true
+    },
+    {
+      "id": "vulnerability-scan",
+      "must_complete": true
+    }
+  ],
+  "expected_requests": 4,
+  "operations": [
+    {
+      "operation_id": "template-1",
+      "tool": "nuclei",
+      "parameters": {
+        "target": "http://localhost:4280/login.php",
+        "template": "/Users/banma-josh/nuclei-templates/http/cves/2024/CVE-2024-4577.yaml",
+        "additional_args": "-rl 5 -c 2 -pc 1 -prc 2 -timeout 10 -retries 0 -duc"
+      },
+      "policy": "agent_tool",
+      "request_bound": 4
+    }
+  ],
+  "coverage_gaps": [
+    "外部扫描器由agent执行并导入真实加载/完成日志"
+  ],
+  "details": {
+    "batch_deadline_seconds": 120
+  },
+  "limits": {
+    "max_requests": 100,
+    "timeout_seconds": 120
+  },
+  "result": null,
+  "status": "计划已构造",
+  "supplement_round": 0
+}

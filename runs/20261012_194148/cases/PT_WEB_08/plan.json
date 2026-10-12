@@ -1,0 +1,119 @@
+{
+  "case_id": "PT_WEB_08",
+  "execution_order": 12,
+  "scope_sha256": "7fee7d608a60f3a114dbb0d9435b0b9ed95f0d48b1523880d5883350ed085379",
+  "inputs_sha256": "dd3202333e77ecc4c7f93d94cf820959c528c238aa595f4cde195670508133ff",
+  "limits_sha256": "bda2871d50ad97c7b4fa93d59af71478519c22fb26e7aabbd42afe1e79a3d339",
+  "source_hashes": {
+    "cases/anonymous/PT_WEB_08.yaml": "21c7cbbb71b7401b15f718847a9ca32e3b1f3eea50a8b477dd5a69f2aeb4914e",
+    "scripts/workflow.py": "10859fc16587291abe785b01289d8336e037f5e65fed5f2a36e9e81602968c39",
+    "scripts/runtime/common.py": "c1562df6cbba6eac07ba5650350c97593c658619f85eaf28c0e8372333ddd409",
+    "scripts/runtime/builders.py": "69c823fd1994b30d02601c816ce989194b3f73e31d9587124bcada85aea78191",
+    "scripts/runtime/execution.py": "a4cd50bf22b04442e426ca589ee7e405ffd5e0038e228d942e5b47b04da2987e",
+    "scripts/runtime/protocols.py": "f61349c4c311ddd78521e7a6e61c3abcdd68b67febf05f5d277914c8ffafccd0",
+    "scripts/runtime/lifecycle.py": "d68f1ee93f2d8b3a86dfa472d7b8e33193a2c1c3268f3d0d2a7a53719e330215",
+    "scripts/runtime/pt_web_08.py": "b6605531d39ee275015c50f1e69f1f1f23930d39a7c228b4ebac84b8634dc56f"
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "browser-effects",
+      "must_complete": true
+    }
+  ],
+  "expected_requests": 5,
+  "operations": [
+    {
+      "operation_id": "normal-before",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/normal-before.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "xss-1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?username=%3Cscript%3EWEB_PENTEST_MARKER%3C%2Fscript%3E",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-1.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "xss-2",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?username=%22%3E%3Cscript%3EWEB_PENTEST_MARKER%3C%2Fscript%3E",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-2.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "xss-3",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php?username=%27%3E%3Cscript%3EWEB_PENTEST_MARKER%3C%2Fscript%3E",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-3.json",
+        "timeout": "5.0"
+      },
+      "policy": "active",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "browser-observation",
+      "runtime": "browser",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "observe_events": true,
+        "navigation_scope": "same-origin"
+      },
+      "policy": "active"
+    }
+  ],
+  "coverage_gaps": [],
+  "details": {
+    "marker": "WEB_PENTEST_MARKER"
+  },
+  "limits": {
+    "max_requests": 30,
+    "timeout_seconds": 120
+  },
+  "result": null,
+  "status": "计划已构造",
+  "supplement_round": 0
+}

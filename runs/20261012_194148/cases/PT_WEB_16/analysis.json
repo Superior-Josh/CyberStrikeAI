@@ -1,0 +1,106 @@
+{
+  "case_id": "PT_WEB_16",
+  "facts": {
+    "cors": [
+      {
+        "operation_id": "normal-before",
+        "headers": {
+          "access-control-allow-origin": [],
+          "access-control-allow-credentials": [],
+          "access-control-allow-methods": [],
+          "access-control-allow-headers": [],
+          "vary": [
+            "Accept-Encoding"
+          ]
+        }
+      },
+      {
+        "operation_id": "origin-1",
+        "headers": {
+          "access-control-allow-origin": [],
+          "access-control-allow-credentials": [],
+          "access-control-allow-methods": [],
+          "access-control-allow-headers": [],
+          "vary": [
+            "Accept-Encoding"
+          ]
+        }
+      },
+      {
+        "operation_id": "preflight-1",
+        "headers": {
+          "access-control-allow-origin": [],
+          "access-control-allow-credentials": [],
+          "access-control-allow-methods": [],
+          "access-control-allow-headers": [],
+          "vary": [
+            "Accept-Encoding"
+          ]
+        }
+      },
+      {
+        "operation_id": "origin-2",
+        "headers": {
+          "access-control-allow-origin": [],
+          "access-control-allow-credentials": [],
+          "access-control-allow-methods": [],
+          "access-control-allow-headers": [],
+          "vary": [
+            "Accept-Encoding"
+          ]
+        }
+      },
+      {
+        "operation_id": "preflight-2",
+        "headers": {
+          "access-control-allow-origin": [],
+          "access-control-allow-credentials": [],
+          "access-control-allow-methods": [],
+          "access-control-allow-headers": [],
+          "vary": [
+            "Accept-Encoding"
+          ]
+        }
+      }
+    ],
+    "browser": []
+  },
+  "coverage_gaps": [],
+  "evidence_refs": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/normal-before.json",
+      "sha256": "ca4b938599111680b971b82d9767c2b364fd04d487791b5f089cb7c2c0c57e28"
+    },
+    {
+      "operation_id": "origin-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/origin-1.json",
+      "sha256": "725004c587b26bcd4a2191db75ffa4c1f707c78b34ebd4583117a6fa42f1c6e7"
+    },
+    {
+      "operation_id": "preflight-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/preflight-1.json",
+      "sha256": "83943bc419999d00f9b1f321cbd5213694aeade531af145ba2a1698ed2567d25"
+    },
+    {
+      "operation_id": "origin-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/origin-2.json",
+      "sha256": "dc4fa0db2e80b6fd13bd67516a0503c60f7e3327cdfe2c22694915fa4b31174d"
+    },
+    {
+      "operation_id": "preflight-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_16/preflight-2.json",
+      "sha256": "fca8b6bd1afe44c3b248463e73fb7eac0d907fd2387fe4e7bf821fb920fda3d7"
+    }
+  ],
+  "sample_count": 5,
+  "status": "待AI核验",
+  "result": null,
+  "required": "目标范围与攻击面实际核查；存在适用入口时完成：匿名接口正常响应及批准/非批准 Origin 对照",
+  "conditional": "（本共同要求优先：可选机制不存在时完成攻击面核查并停止以下仅适用分支；此后的策略/规则取本项默认基线和实际网络观察，不向用户索要未必存在的文档）非简单请求增加预检；需验证浏览器读取且头部证据不足时使用已有浏览器；不测试认证态读取",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，实际与预检策略符合匿名公开范围，已测禁止跨域读取被有效限制；依据本项默认安全基线及真实观察判定，范围限于本轮已完整核查内容；或完成攻击面核查确认无适用入口/未使用对应机制，记录“通过（攻击面不适用）”的理由和原文，不声称该机制的防护已验证",
+    "失败": "生效策略违反明确来源要求，或实测向禁止来源开放不应共享的数据；不需要另行用户策略文档才能确认违反本项默认安全基线",
+    "中断": "仅在未证实失败且实际工具/执行环境故障经修正或等效工具重试仍阻止必要验证时中断，记录失败调用、原文及补救；缺策略文档、目标没有该功能、未提供可选凭据或首次采集不足不是中断理由。未知仍须继续核查，不得凭空判通过/失败"
+  }
+}

@@ -1,0 +1,4 @@
+#LWP-Cookies-2.0
+Set-Cookie3: security=impossible; path="/"; domain=localhost.local; path_spec; discard; HttpOnly=None; version=0
+Set-Cookie3: PHPSESSID=8a49c7ba343932c1382812077effe4cf; path="/"; domain=localhost.local; path_spec; discard; version=0
+Set-Cookie3: PHPSESSID=3c58cf528f1ccf781bfd34a18954b429; path="/"; domain=.localhost; path_spec; expires="2026-10-13 14:22:42Z"; HttpOnly=None; SameSite=Strict; version=0

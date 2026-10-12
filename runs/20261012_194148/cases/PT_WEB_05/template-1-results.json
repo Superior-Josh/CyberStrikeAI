@@ -1,0 +1,21 @@
+{
+  "operation_id": "template-1",
+  "tool": "nuclei",
+  "template_path": "/Users/banma-josh/nuclei-templates/http/cves/2024/CVE-2024-4577.yaml",
+  "template_id": "CVE-2024-4577",
+  "target": "http://localhost:4280",
+  "loaded_templates": 1,
+  "completed_templates": 1,
+  "exit_code": 0,
+  "http_connections": {
+    "total": 4,
+    "new": 1,
+    "reused": 3,
+    "reuse_percentage": 75.0
+  },
+  "scan_duration_ms": 16.77,
+  "findings": [],
+  "raw_output_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/cases/PT_WEB_05/raw/nuclei-CVE-2024-4577.txt",
+  "raw_output_empty": true,
+  "notes": "No vulnerabilities found. CVE-2024-4577 (PHP CGI Argument Injection) not present. All 4 test paths returned negative results."
+}

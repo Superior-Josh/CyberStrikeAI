@@ -1,0 +1,86 @@
+{
+  "source": "http-framework-test native response capture",
+  "captured_at_unix": 1791806321.357022,
+  "method": "GET",
+  "url": "http://localhost:4280/dvwa/css/login.css",
+  "input_url": "http://localhost:4280/dvwa/css/login.css",
+  "wire_request_target": "/dvwa/css/login.css",
+  "wire_request_target_base64": "L2R2d2EvY3NzL2xvZ2luLmNzcw==",
+  "request_headers": [
+    [
+      "host",
+      "localhost:4280"
+    ],
+    [
+      "accept",
+      "*/*"
+    ],
+    [
+      "accept-encoding",
+      "gzip, deflate"
+    ],
+    [
+      "connection",
+      "keep-alive"
+    ],
+    [
+      "user-agent",
+      "python-httpx/0.28.1"
+    ],
+    [
+      "cookie",
+      "security=impossible; PHPSESSID=8a49c7ba343932c1382812077effe4cf"
+    ]
+  ],
+  "request_body_base64": "",
+  "status_code": 200,
+  "http_version": "HTTP/1.1",
+  "headers": [
+    [
+      "date",
+      "Mon, 12 Oct 2026 11:58:41 GMT"
+    ],
+    [
+      "server",
+      "Apache/2.4.68 (Debian)"
+    ],
+    [
+      "last-modified",
+      "Mon, 07 Sep 2026 14:44:36 GMT"
+    ],
+    [
+      "etag",
+      "\"34a-65ae5a8301d00-gzip\""
+    ],
+    [
+      "accept-ranges",
+      "bytes"
+    ],
+    [
+      "vary",
+      "Accept-Encoding"
+    ],
+    [
+      "content-encoding",
+      "gzip"
+    ],
+    [
+      "content-length",
+      "406"
+    ],
+    [
+      "keep-alive",
+      "timeout=5, max=100"
+    ],
+    [
+      "connection",
+      "Keep-Alive"
+    ],
+    [
+      "content-type",
+      "text/css"
+    ]
+  ],
+  "body_base64": "Ym9keSB7DQoJYmFja2dyb3VuZDogI2ZlZmZmZTsNCglmb250OiAxMnB4LzE1cHggQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZjsNCglsaW5lLWhlaWdodDogMjBweDsNCgljb2xvcjogIzZiNmI2YjsNCn0NCg0KI3dyYXBwZXIgew0KCXRleHQtYWxpZ246IGNlbnRlcjsNCgltYXJnaW46IDAgYXV0bzsNCn0NCg0KI2NvbnRlbnQgew0KCWRpc3BsYXk6IGlubGluZS1ibG9jazsNCglwYWRkaW5nOiAyMHB4Ow0KCXdpZHRoOiBhdXRvOw0KfQ0KDQojZm9vdGVyIHsNCglwb3NpdGlvbjogYWJzb2x1dGU7DQoJd2lkdGg6IDEwMCU7DQoJaGVpZ2h0OiA1MHB4Ow0KCWJvdHRvbTogMHB4Ow0KCWxlZnQ6IDBweDsNCn0NCg0KbGFiZWwgew0KCWZsb2F0OiBsZWZ0Ow0KCXRleHQtYWxpZ246IHJpZ2h0Ow0KCW1hcmdpbi1yaWdodDogMC41ZW07DQoJZGlzcGxheTogYmxvY2s7DQoJb3ZlcmZsb3c6IGhpZGRlbjsNCglwYWRkaW5nLXJpZ2h0OiA1MHB4Ow0KCWZvbnQtd2VpZ2h0OiBib2xkOw0KfQ0KDQoubG9naW5JbnB1dCB7DQoJZmxvYXQ6IGxlZnQ7DQoJY29sb3I6ICM2QjZCNkI7DQoJd2lkdGg6IDMyMHB4Ow0KCWJhY2tncm91bmQtY29sb3I6ICNGNEY0RjQ7DQoJYm9yZGVyOiAxcHg7DQoJYm9yZGVyLXN0eWxlOiBzb2xpZDsNCglib3JkZXItY29sb3I6ICNjNGM0YzQ7DQoJcGFkZGluZzogNnB4Ow0KCW1hcmdpbi1ib3R0b206IDEycHg7DQp9DQoNCmZpZWxkc2V0IHsNCgl3aWR0aDogMzUwcHg7DQoJcGFkZGluZzogMTBweCAyMHB4IDEwcHggMjBweDsNCglvdmVyZmxvdzogaGlkZGVuOw0KCWJvcmRlci1zdHlsZTogbm9uZTsNCn0NCg0KcCB7DQoJZm9udC1zaXplOiAxMHB4Ow0KfQ0KDQo=",
+  "body_length": 842
+}

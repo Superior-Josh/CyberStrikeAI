@@ -1,0 +1,39 @@
+{
+  "case_id": "PT_WEB_04",
+  "scope": {
+    "origins": ["http://localhost:4280"],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "limits": {
+    "max_requests": 10,
+    "timeout_seconds": 30
+  },
+  "scope_items": [
+    {"id": "surface", "must_complete": true},
+    {"id": "services", "must_complete": true}
+  ],
+  "inputs": {
+    "authorized_hosts": ["localhost"],
+    "authorized_ports": [4280],
+    "protocol": "tcp",
+    "expected_services": [
+      {"port": 4280, "protocol": "tcp", "expected_service": "http"}
+    ],
+    "scan_parameters": {
+      "scan_type": "-sT -sV -Pn -n",
+      "disable_scripts": true,
+      "disable_host_discovery": true
+    },
+    "requests": [
+      {
+        "url": "http://localhost:4280/",
+        "method": "GET",
+        "purpose": "HTTP基线对照"
+      }
+    ]
+  }
+}

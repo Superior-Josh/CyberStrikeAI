@@ -1,0 +1,24 @@
+{
+  "source": "tool native nuclei",
+  "tool": "nuclei",
+  "url": "http://localhost:4280",
+  "exit_code": 0,
+  "request_count": 4,
+  "started_at": "2026-10-12T20:25:00Z",
+  "ended_at": "2026-10-12T20:25:17Z",
+  "parameters": {
+    "target": "http://localhost:4280/login.php",
+    "template": "/Users/banma-josh/nuclei-templates/http/cves/2024/CVE-2024-4577.yaml",
+    "additional_args": "-rl 5 -c 2 -pc 1 -prc 2 -timeout 10 -retries 0 -duc"
+  },
+  "loaded_templates": 1,
+  "completed_templates": 1,
+  "findings": [],
+  "summary": "Scan completed in 17ms. No results found. HTTP connections: 4 total, 1 new, 3 reused (75.0%).",
+  "native_refs": [
+    {
+      "path": "cases/PT_WEB_05/raw/nuclei-output.log",
+      "sha256": "4fe8bff34ea06d5f8e68ce355c20a006f7247e06bfe17442163f7abf34e5f7a4"
+    }
+  ]
+}

@@ -1,0 +1,1871 @@
+{
+  "case_id": "PT_WEB_09",
+  "case": {
+    "category": "注入",
+    "id": "PT_WEB_09",
+    "execution_order": 13,
+    "name": "SQL 注入（公开接口）",
+    "description": "采用现有工具采集/探测、已实现Python脚本处理和当前agent的AI分析，验证SQL 注入（公开接口）；操作与判定分阶段，真实证据支持结论。",
+    "level": "高",
+    "group": "anonymous",
+    "required": "目标范围与攻击面实际核查；存在适用入口时完成：真实公开查询及已选注入方法的正常/变体对照",
+    "conditional": "（本共同要求优先：可选机制不存在时完成攻击面核查并停止以下仅适用分支；此后的策略/规则取本项默认基线和实际网络观察，不向用户索要未必存在的文档）布尔、报错和短延时方法按实际入口预先选择；sqlmap 与 nmap 脚本辅助检测，不要求全部方法运行",
+    "steps": [
+      "默认安全基线：公开输入不得改变SQL查询语义或读取非授权数据；每个已选方法至少两组交替正常/真假对照。执行：从匿名页面和接口发现真实查询；登录接口的SQL相关输入亦纳入；选定可验证方法及请求预算，正常和变体均保持其他业务前提有效",
+      "AI接入（规划）：读取本项required、conditional、完整步骤、expected_results及共同要求；从本轮原文确认匿名查询/登录SQL输入、有效正常业务前提、已选方法及预算，列出适用子项和批准预算；不猜入口、身份或规则。",
+      "现有工具（基线采集）：http-framework-test建立正常查询及随机/不存在对照；sqlmap只在可明确控制预算时以url、level=1、batch=true及当前支持参数作候选补充。HTTP操作按共同执行约定设置原生capture_file和唯一操作编号。",
+      "Python脚本（构造与控制）：调用scripts/runtime/pt_web_09.py的plan阶段（或经execute-python-script的script参数加载该入口）；为已选布尔/报错/短延时方法构造至少两组交替正常/真假对照和结束正常请求；保持其他字段、会话和CSRF有效，不导出真实数据库；计划和脚本先经agent核对授权边界，不直接让AI判定阶段发请求。",
+      "现有工具与Python（验证）：优先由agent逐次调用http-framework-test提交有限请求；sqlmap必须显式限制参数/风险/线程/超时且不启用dump/os-shell，无法可靠限制总量时不用扫描器。每次实际操作记录来源、时间、参数、原文和错误，预算不因更换工具重置。",
+      "Python脚本（对照分析）：对照数据差异、可归因错误和时间分布，记录前后正常业务及响应类别，排除登录错误和统一空页；调用本项脚本analyze阶段输出带原文引用的analysis.json，不将派生结果充当目标原文。",
+      "AI接入（只读判定）：判断是否实际改变查询语义/越界读取，每个已选方法分别核对对照有效性；AI读取完整子项清单、基线、脱敏对照及必要原文上下文，按expected_results输出结果候选、理由、证据路径和缺口，不调用目标或执行工具。",
+      "Python脚本与agent（复核保存）：检查必要覆盖、真实证据引用/哈希、计数和恢复状态；AI候选缺证据则保留待核验并返回执行阶段补缺，新增请求必须重新核对剩余授权预算；调用本项脚本save阶段机械核对AI候选并写入本轮result.json（保留历史版本），不使用排除的用例/报告工具。"
+    ],
+    "minimum_evidence": "本项默认基线引用、实际目标与入口核查清单、已探测候选及正常/不存在路径对照原文；参数/方法清单、正常与变体原始响应、样本时间及差异分析引用。 原文在实际操作中取得并自动关联本轮执行、步骤及子项；必要操作和恢复均保留真实来源，元数据或模型解释不能冒充原文。 另保留本轮执行计划、实际工具参数/结束状态、Python入口/共享源码版本及受限输入文件哈希、逐操作计数、analysis.json与AI判定候选/复核缺口；这些派生材料不代替请求响应和动态效果原文。",
+    "expected_results": {
+      "通过": "必测及已触发条件项完成，有效查询条件下约定方法完成，无可复现查询逻辑改变、越界读取或其他注入效果；依据本项默认安全基线及真实观察判定，范围限于本轮已完整核查内容；或完成攻击面核查确认无适用入口/未使用对应机制，记录“通过（攻击面不适用）”的理由和原文，不声称该机制的防护已验证",
+      "失败": "有效对照下证实可归因注入效果；不需要另行用户策略文档才能确认违反本项默认安全基线",
+      "中断": "仅在未证实失败且实际工具/执行环境故障经修正或等效工具重试仍阻止必要验证时中断，记录失败调用、原文及补救；缺策略文档、目标没有该功能、未提供可选凭据或首次采集不足不是中断理由。未知仍须继续核查，不得凭空判通过/失败"
+    },
+    "execution_plan": {
+      "version": 1,
+      "tool_contract": "references/tool_contracts.yaml",
+      "tools": [
+        {
+          "name": "http-framework-test",
+          "purpose": "实际HTTP基线与变体原生采集；协议专用操作采用下述Python方案",
+          "parameter_template": {
+            "url": "<本轮真实获准URL>",
+            "method": "<实际请求方法>",
+            "headers": {},
+            "repeat": 1,
+            "follow_redirects": false,
+            "allow_insecure": false,
+            "httpx_options": "trust_env=false",
+            "capture_file": "<run_dir>/raw/<case_id>/<唯一操作编号>.json"
+          }
+        },
+        {
+          "name": "execute-python-script",
+          "purpose": "加载并运行本项已实现Python入口；输入/阶段由实际任务确定",
+          "parameter_template": {
+            "script": "import runpy, sys\nfrom pathlib import Path\nroot = Path(\"<实际Skill根目录>\").resolve()\nsys.path.insert(0, str(root / \"scripts/runtime\"))\nsys.argv = [str(root / \"scripts/runtime/pt_web_09.py\"), \"<阶段>\", \"--input\", \"<本轮受限JSON路径>\", \"--run-dir\", \"<本轮目录>\"]\nrunpy.run_path(sys.argv[0], run_name=\"__main__\")",
+            "env_name": "default",
+            "python_args": ""
+          }
+        },
+        {
+          "name": "sqlmap",
+          "purpose": "条件适用且可用时补充本项验证，使用前核对实际帮助、范围和总预算",
+          "parameter_template": {
+            "url": "<批准查询URL>",
+            "level": 1,
+            "batch": true,
+            "additional_args": "<当前支持的限定参数/方法/风险/线程/超时及输出选项>"
+          }
+        }
+      ],
+      "python": {
+        "delivery": "运行项目内独立脚本，输入受限JSON；execute-python-script可通过runpy加载该入口，不再临时生成专项源码。",
+        "inputs": [
+          "匿名查询/登录SQL输入",
+          "有效正常业务前提",
+          "已选方法及预算"
+        ],
+        "tasks": [
+          "为已选布尔/报错/短延时方法构造至少两组交替正常/真假对照和结束正常请求；保持其他字段、会话和CSRF有效，不导出真实数据库",
+          "对照数据差异、可归因错误和时间分布，记录前后正常业务及响应类别，排除登录错误和统一空页"
+        ],
+        "outputs": [
+          "plan.json",
+          "execution.json（仅execute）",
+          "原生HTTP/协议/浏览器证据及受限日志",
+          "analysis.json",
+          "result.json（仅AI复核保存）"
+        ],
+        "network_policy": "plan/analyze/save不联网；仅execute且scope.network_authorized=true执行冻结HTTP/协议计划。外部扫描器由agent调用现有工具并导入原文；缺运行能力保留缺口。",
+        "entrypoint": "scripts/runtime/pt_web_09.py",
+        "phases": [
+          "describe",
+          "plan",
+          "execute",
+          "analyze",
+          "save"
+        ]
+      },
+      "ai": {
+        "provider": "当前agent的既有模型能力，不额外配置AI工具或外部模型接口",
+        "planning_task": "根据本轮真实原文识别匿名查询/登录SQL输入、有效正常业务前提、已选方法及预算，确定适用子项、正常对照、有限预算和恢复/停止方案；推断先采集验证，不提前给安全结论。",
+        "judgment_inputs": [
+          "完整用例及适用子项",
+          "本轮基线与原文必要上下文的脱敏视图",
+          "带证据引用的analysis.json",
+          "预算/停止及恢复状态"
+        ],
+        "judgment_outputs": [
+          "result_candidate",
+          "reason",
+          "evidence_refs",
+          "coverage_gaps"
+        ],
+        "judgment_policy": "判定阶段只读；证据不足返回执行阶段，不自行重发请求，不生成目标原文"
+      },
+      "evidence_contract": {
+        "version": 1,
+        "allow_not_applicable": true,
+        "items": [
+          {
+            "id": "surface",
+            "basis": "required",
+            "must_complete": true,
+            "evidence_kinds": [
+              "http",
+              "browser",
+              "tcp",
+              "tls",
+              "tool"
+            ],
+            "roles": [
+              "surface"
+            ]
+          },
+          {
+            "id": "query-controls",
+            "basis": "required/steps/minimum_evidence",
+            "must_complete": true,
+            "evidence_kinds": [
+              "http",
+              "tool"
+            ],
+            "roles": [
+              "baseline",
+              "true-variant",
+              "false-variant",
+              "normal-after"
+            ]
+          }
+        ],
+        "conditional_policy": "逐项按conditional及实际原文判定；不得以指纹、功能表或重复检查代替核查"
+      }
+    }
+  },
+  "analysis": {
+    "case_id": "PT_WEB_09",
+    "facts": {
+      "boolean_comparison": {
+        "samples": [
+          {
+            "operation_id": "normal-1-csrf",
+            "status": 200,
+            "length": 1342,
+            "body_sha256": "ddad46ba799320e212b1c87c70b6c12c15e8dfa4b3fa37eebd63bc1f8b0e43aa",
+            "elapsed": 0.014623,
+            "error": false
+          },
+          {
+            "operation_id": "normal-1",
+            "status": 302,
+            "length": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "elapsed": 0.006816,
+            "error": false
+          },
+          {
+            "operation_id": "variant-1-1-csrf",
+            "status": 200,
+            "length": 1342,
+            "body_sha256": "8bb54b36ddeefeb2dbba1f7c3bd85fdf2e5b286ed2fda7dfc2c23688b1160b62",
+            "elapsed": 0.004053,
+            "error": false
+          },
+          {
+            "operation_id": "variant-1-1",
+            "status": 302,
+            "length": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "elapsed": 0.005946,
+            "error": false
+          },
+          {
+            "operation_id": "variant-1-2-csrf",
+            "status": 200,
+            "length": 1342,
+            "body_sha256": "24f8f214fb7e3fd94b05e3ac2f64743e18344efd54cd6d88f10266b3103ebd7e",
+            "elapsed": 0.003908,
+            "error": false
+          },
+          {
+            "operation_id": "variant-1-2",
+            "status": 302,
+            "length": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "elapsed": 0.004605,
+            "error": false
+          },
+          {
+            "operation_id": "normal-2-csrf",
+            "status": 200,
+            "length": 1342,
+            "body_sha256": "9460901224ccc6183da59f7ef19dac3bec76cbe2e5f4f6154bb5382525b2bfe2",
+            "elapsed": 0.004747,
+            "error": false
+          },
+          {
+            "operation_id": "normal-2",
+            "status": 302,
+            "length": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "elapsed": 0.004224,
+            "error": false
+          },
+          {
+            "operation_id": "variant-2-1-csrf",
+            "status": 200,
+            "length": 1342,
+            "body_sha256": "d21bd34103df652b95fc7b71ffa96ec6328068ddc18e4d913145243401dbbbc5",
+            "elapsed": 0.004183,
+            "error": false
+          },
+          {
+            "operation_id": "variant-2-1",
+            "status": 302,
+            "length": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "elapsed": 0.00389,
+            "error": false
+          },
+          {
+            "operation_id": "variant-2-2-csrf",
+            "status": 200,
+            "length": 1342,
+            "body_sha256": "36876a7fb64ace7e2da9fff5a4d9d9691bbdfffd23ade8510ac33610826bfbcd",
+            "elapsed": 0.003121,
+            "error": false
+          },
+          {
+            "operation_id": "variant-2-2",
+            "status": 302,
+            "length": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "elapsed": 0.004149,
+            "error": false
+          },
+          {
+            "operation_id": "normal-after-csrf",
+            "status": 200,
+            "length": 1342,
+            "body_sha256": "b1f1a37ee7aca5d402047c8bcd23ec72cb37a5ef08363694d095177a9d6425bc",
+            "elapsed": 0.004127,
+            "error": false
+          },
+          {
+            "operation_id": "normal-after",
+            "status": 302,
+            "length": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "elapsed": 0.003901,
+            "error": false
+          }
+        ],
+        "baseline_samples": 6,
+        "distinct_bodies": 8,
+        "valid_business_requires_ai_review": true
+      },
+      "timing": {
+        "normal--csrf": {
+          "count": 2,
+          "median": 0.009685000000000001,
+          "min": 0.004747,
+          "max": 0.014623
+        },
+        "normal": {
+          "count": 2,
+          "median": 0.005520000000000001,
+          "min": 0.004224,
+          "max": 0.006816
+        },
+        "variant---csrf": {
+          "count": 4,
+          "median": 0.0039805,
+          "min": 0.003121,
+          "max": 0.004183
+        },
+        "variant": {
+          "count": 4,
+          "median": 0.004377,
+          "min": 0.00389,
+          "max": 0.005946
+        },
+        "normal-after-csrf": {
+          "count": 1,
+          "median": 0.004127,
+          "min": 0.004127,
+          "max": 0.004127
+        },
+        "normal-after": {
+          "count": 1,
+          "median": 0.003901,
+          "min": 0.003901,
+          "max": 0.003901
+        }
+      },
+      "sql_error_candidates": [
+        {
+          "operation_id": "normal-1-csrf",
+          "sql_error": false
+        },
+        {
+          "operation_id": "normal-1",
+          "sql_error": false
+        },
+        {
+          "operation_id": "variant-1-1-csrf",
+          "sql_error": false
+        },
+        {
+          "operation_id": "variant-1-1",
+          "sql_error": false
+        },
+        {
+          "operation_id": "variant-1-2-csrf",
+          "sql_error": false
+        },
+        {
+          "operation_id": "variant-1-2",
+          "sql_error": false
+        },
+        {
+          "operation_id": "normal-2-csrf",
+          "sql_error": false
+        },
+        {
+          "operation_id": "normal-2",
+          "sql_error": false
+        },
+        {
+          "operation_id": "variant-2-1-csrf",
+          "sql_error": false
+        },
+        {
+          "operation_id": "variant-2-1",
+          "sql_error": false
+        },
+        {
+          "operation_id": "variant-2-2-csrf",
+          "sql_error": false
+        },
+        {
+          "operation_id": "variant-2-2",
+          "sql_error": false
+        },
+        {
+          "operation_id": "normal-after-csrf",
+          "sql_error": false
+        },
+        {
+          "operation_id": "normal-after",
+          "sql_error": false
+        }
+      ]
+    },
+    "coverage_gaps": [],
+    "evidence_refs": [
+      {
+        "operation_id": "normal-1-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1-csrf.json",
+        "sha256": "f7a2d05dfd5a815a9f397393eb5341283a0a430de13517124cca971f722a3e0e"
+      },
+      {
+        "operation_id": "normal-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1.json",
+        "sha256": "df833fa28f64f7dc13d0e83df3bbf8bebfef95eafe2f90687edd0c9f87967d9f"
+      },
+      {
+        "operation_id": "variant-1-1-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-1-csrf.json",
+        "sha256": "d06d3da40d2a505f3fef81a71de83af49a9fa867d914a8dec17ca7bb1bc5bce5"
+      },
+      {
+        "operation_id": "variant-1-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-1.json",
+        "sha256": "a6e35b901a4dd28763bf79b092ebb2ec545d825e5815f10f219235b3fee285bc"
+      },
+      {
+        "operation_id": "variant-1-2-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-2-csrf.json",
+        "sha256": "fb12e494ec454c98fba36640ed1f4d29d1bee84f049c45d25a6900e80002cf3c"
+      },
+      {
+        "operation_id": "variant-1-2",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-2.json",
+        "sha256": "33fa743c276487e87a98b37951205f169c778e4603b217db9fe16ab1e8923dda"
+      },
+      {
+        "operation_id": "normal-2-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-2-csrf.json",
+        "sha256": "ab531e40587250aefc8b4223c30fc3960e667c51e80650fc114d2bc679a87392"
+      },
+      {
+        "operation_id": "normal-2",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-2.json",
+        "sha256": "f5f26c5596d7e7bb36b2917be8ebfff8d81bf3f081763699f5d6744a443aa430"
+      },
+      {
+        "operation_id": "variant-2-1-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-1-csrf.json",
+        "sha256": "f390b07a2f3e107062f59164e74e0947eaf359e9e406b6829999adb3acd7bacb"
+      },
+      {
+        "operation_id": "variant-2-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-1.json",
+        "sha256": "76549da4774e1b2b74ff15cfd2d579d266b51ec9d4d6024f1d734c87b7508643"
+      },
+      {
+        "operation_id": "variant-2-2-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-2-csrf.json",
+        "sha256": "18fb5833bbb6dc62ac09d3a6130754e1088445f55e57a57bce03207da02a6c5d"
+      },
+      {
+        "operation_id": "variant-2-2",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-2.json",
+        "sha256": "7df0338a1f9999903eed62cf08c5846aaab2ede0e9997a38e2c55c22240eb113"
+      },
+      {
+        "operation_id": "normal-after-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-after-csrf.json",
+        "sha256": "683fd3f11f4bf31c2017567fedb5725f258fc27fb97935277a274d1e1d234172"
+      },
+      {
+        "operation_id": "normal-after",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-after.json",
+        "sha256": "d615d1416056d57ce720f570513d2390d028f687343dba19a9871502eb576d8b"
+      }
+    ],
+    "sample_count": 14,
+    "status": "待AI核验",
+    "result": null,
+    "required": "目标范围与攻击面实际核查；存在适用入口时完成：真实公开查询及已选注入方法的正常/变体对照",
+    "conditional": "（本共同要求优先：可选机制不存在时完成攻击面核查并停止以下仅适用分支；此后的策略/规则取本项默认基线和实际网络观察，不向用户索要未必存在的文档）布尔、报错和短延时方法按实际入口预先选择；sqlmap 与 nmap 脚本辅助检测，不要求全部方法运行",
+    "expected_results": {
+      "通过": "必测及已触发条件项完成，有效查询条件下约定方法完成，无可复现查询逻辑改变、越界读取或其他注入效果；依据本项默认安全基线及真实观察判定，范围限于本轮已完整核查内容；或完成攻击面核查确认无适用入口/未使用对应机制，记录“通过（攻击面不适用）”的理由和原文，不声称该机制的防护已验证",
+      "失败": "有效对照下证实可归因注入效果；不需要另行用户策略文档才能确认违反本项默认安全基线",
+      "中断": "仅在未证实失败且实际工具/执行环境故障经修正或等效工具重试仍阻止必要验证时中断，记录失败调用、原文及补救；缺策略文档、目标没有该功能、未提供可选凭据或首次采集不足不是中断理由。未知仍须继续核查，不得凭空判通过/失败"
+    }
+  },
+  "evidence": [
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814959.277568,
+      "method": "GET",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ]
+      ],
+      "status_code": 200,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:39 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Tue, 23 Jun 2009 12:00:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "vary",
+          "Accept-Encoding"
+        ],
+        [
+          "content-encoding",
+          "gzip"
+        ],
+        [
+          "content-length",
+          "606"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html;charset=utf-8"
+        ]
+      ],
+      "body_length": 1342,
+      "operation_id": "normal-1-csrf",
+      "elapsed_seconds": 0.014623,
+      "body_text": "<!DOCTYPE html>\r\n\r\n<html lang=\"en-GB\">\r\n\r\n\t<head>\r\n\r\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\r\n\r\n\t\t<title>Login :: Damn Vulnerable Web Application (DVWA)</title>\r\n\r\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"dvwa/css/login.css\" />\r\n\r\n\t</head>\r\n\r\n\t<body>\r\n\r\n\t<div id=\"wrapper\">\r\n\r\n\t<div id=\"header\">\r\n\r\n\t<br />\r\n\r\n\t<p><img src=\"dvwa/images/login_logo.png\" /></p>\r\n\r\n\t<br />\r\n\r\n\t</div> <!--<div id=\"header\">-->\r\n\r\n\t<div id=\"content\">\r\n\r\n\t<form action=\"login.php\" method=\"post\">\r\n\r\n\t<fieldset>\r\n\r\n\t\t\t<label for=\"user\">Username</label> <input type=\"text\" class=\"loginInput\" size=\"20\" name=\"username\"><br />\r\n\r\n\r\n\t\t\t<label for=\"pass\">Password</label> <input type=\"password\" class=\"loginInput\" AUTOCOMPLETE=\"off\" size=\"20\" name=\"password\"><br />\r\n\r\n\t\t\t<br />\r\n\r\n\t\t\t<p class=\"submit\"><input type=\"submit\" value=\"Login\" name=\"Login\"></p>\r\n\r\n\t</fieldset>\r\n\r\n\t<input type='hidden' name='user_token' value='<redacted>' />\r\n\r\n\t</form>\r\n\r\n\t<br />\r\n\r\n\t\r\n\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\r\n\t</div > <!--<div id=\"content\">-->\r\n\r\n\t<div id=\"footer\">\r\n\r\n\t<p><a href=\"https://github.com/digininja/DVWA/\" target=\"_blank\">Damn Vulnerable Web Application (DVWA)</a></p>\r\n\r\n\t</div> <!--<div id=\"footer\"> -->\r\n\r\n\t</div> <!--<div id=\"wrapper\"> -->\r\n\r\n\t</body>\r\n\r\n</html>",
+      "request_body_text": "",
+      "evidence_ref": {
+        "operation_id": "normal-1-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1-csrf.json",
+        "sha256": "f7a2d05dfd5a815a9f397393eb5341283a0a430de13517124cca971f722a3e0e"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814959.524857,
+      "method": "POST",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "content-type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ],
+        [
+          "content-length",
+          "88"
+        ]
+      ],
+      "status_code": 302,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:39 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Thu, 19 Nov 1981 08:52:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-store, no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "set-cookie",
+          "<redacted>"
+        ],
+        [
+          "location",
+          "index.php"
+        ],
+        [
+          "content-length",
+          "0"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html; charset=UTF-8"
+        ]
+      ],
+      "body_length": 0,
+      "operation_id": "normal-1",
+      "elapsed_seconds": 0.006816,
+      "body_text": "",
+      "request_body_text": "username=admin&password=<redacted>&Login=Login&user_token=<redacted>",
+      "evidence_ref": {
+        "operation_id": "normal-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-1.json",
+        "sha256": "df833fa28f64f7dc13d0e83df3bbf8bebfef95eafe2f90687edd0c9f87967d9f"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814959.779799,
+      "method": "GET",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ]
+      ],
+      "status_code": 200,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:39 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Tue, 23 Jun 2009 12:00:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "vary",
+          "Accept-Encoding"
+        ],
+        [
+          "content-encoding",
+          "gzip"
+        ],
+        [
+          "content-length",
+          "607"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html;charset=utf-8"
+        ]
+      ],
+      "body_length": 1342,
+      "operation_id": "variant-1-1-csrf",
+      "elapsed_seconds": 0.004053,
+      "body_text": "<!DOCTYPE html>\r\n\r\n<html lang=\"en-GB\">\r\n\r\n\t<head>\r\n\r\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\r\n\r\n\t\t<title>Login :: Damn Vulnerable Web Application (DVWA)</title>\r\n\r\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"dvwa/css/login.css\" />\r\n\r\n\t</head>\r\n\r\n\t<body>\r\n\r\n\t<div id=\"wrapper\">\r\n\r\n\t<div id=\"header\">\r\n\r\n\t<br />\r\n\r\n\t<p><img src=\"dvwa/images/login_logo.png\" /></p>\r\n\r\n\t<br />\r\n\r\n\t</div> <!--<div id=\"header\">-->\r\n\r\n\t<div id=\"content\">\r\n\r\n\t<form action=\"login.php\" method=\"post\">\r\n\r\n\t<fieldset>\r\n\r\n\t\t\t<label for=\"user\">Username</label> <input type=\"text\" class=\"loginInput\" size=\"20\" name=\"username\"><br />\r\n\r\n\r\n\t\t\t<label for=\"pass\">Password</label> <input type=\"password\" class=\"loginInput\" AUTOCOMPLETE=\"off\" size=\"20\" name=\"password\"><br />\r\n\r\n\t\t\t<br />\r\n\r\n\t\t\t<p class=\"submit\"><input type=\"submit\" value=\"Login\" name=\"Login\"></p>\r\n\r\n\t</fieldset>\r\n\r\n\t<input type='hidden' name='user_token' value='<redacted>' />\r\n\r\n\t</form>\r\n\r\n\t<br />\r\n\r\n\t\r\n\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\r\n\t</div > <!--<div id=\"content\">-->\r\n\r\n\t<div id=\"footer\">\r\n\r\n\t<p><a href=\"https://github.com/digininja/DVWA/\" target=\"_blank\">Damn Vulnerable Web Application (DVWA)</a></p>\r\n\r\n\t</div> <!--<div id=\"footer\"> -->\r\n\r\n\t</div> <!--<div id=\"wrapper\"> -->\r\n\r\n\t</body>\r\n\r\n</html>",
+      "request_body_text": "",
+      "evidence_ref": {
+        "operation_id": "variant-1-1-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-1-csrf.json",
+        "sha256": "d06d3da40d2a505f3fef81a71de83af49a9fa867d914a8dec17ca7bb1bc5bce5"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814960.069362,
+      "method": "POST",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "content-type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ],
+        [
+          "content-length",
+          "114"
+        ]
+      ],
+      "status_code": 302,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:40 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Thu, 19 Nov 1981 08:52:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-store, no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "set-cookie",
+          "<redacted>"
+        ],
+        [
+          "location",
+          "login.php"
+        ],
+        [
+          "content-length",
+          "0"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html; charset=UTF-8"
+        ]
+      ],
+      "body_length": 0,
+      "operation_id": "variant-1-1",
+      "elapsed_seconds": 0.005946,
+      "body_text": "",
+      "request_body_text": "password=<redacted>&Login=Login&username=admin%27%2BAND%2B%271%27%3D%271&user_token=<redacted>",
+      "evidence_ref": {
+        "operation_id": "variant-1-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-1.json",
+        "sha256": "a6e35b901a4dd28763bf79b092ebb2ec545d825e5815f10f219235b3fee285bc"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814960.3603442,
+      "method": "GET",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ]
+      ],
+      "status_code": 200,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:40 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Tue, 23 Jun 2009 12:00:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "vary",
+          "Accept-Encoding"
+        ],
+        [
+          "content-encoding",
+          "gzip"
+        ],
+        [
+          "content-length",
+          "605"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html;charset=utf-8"
+        ]
+      ],
+      "body_length": 1342,
+      "operation_id": "variant-1-2-csrf",
+      "elapsed_seconds": 0.003908,
+      "body_text": "<!DOCTYPE html>\r\n\r\n<html lang=\"en-GB\">\r\n\r\n\t<head>\r\n\r\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\r\n\r\n\t\t<title>Login :: Damn Vulnerable Web Application (DVWA)</title>\r\n\r\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"dvwa/css/login.css\" />\r\n\r\n\t</head>\r\n\r\n\t<body>\r\n\r\n\t<div id=\"wrapper\">\r\n\r\n\t<div id=\"header\">\r\n\r\n\t<br />\r\n\r\n\t<p><img src=\"dvwa/images/login_logo.png\" /></p>\r\n\r\n\t<br />\r\n\r\n\t</div> <!--<div id=\"header\">-->\r\n\r\n\t<div id=\"content\">\r\n\r\n\t<form action=\"login.php\" method=\"post\">\r\n\r\n\t<fieldset>\r\n\r\n\t\t\t<label for=\"user\">Username</label> <input type=\"text\" class=\"loginInput\" size=\"20\" name=\"username\"><br />\r\n\r\n\r\n\t\t\t<label for=\"pass\">Password</label> <input type=\"password\" class=\"loginInput\" AUTOCOMPLETE=\"off\" size=\"20\" name=\"password\"><br />\r\n\r\n\t\t\t<br />\r\n\r\n\t\t\t<p class=\"submit\"><input type=\"submit\" value=\"Login\" name=\"Login\"></p>\r\n\r\n\t</fieldset>\r\n\r\n\t<input type='hidden' name='user_token' value='<redacted>' />\r\n\r\n\t</form>\r\n\r\n\t<br />\r\n\r\n\t\r\n\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\r\n\t</div > <!--<div id=\"content\">-->\r\n\r\n\t<div id=\"footer\">\r\n\r\n\t<p><a href=\"https://github.com/digininja/DVWA/\" target=\"_blank\">Damn Vulnerable Web Application (DVWA)</a></p>\r\n\r\n\t</div> <!--<div id=\"footer\"> -->\r\n\r\n\t</div> <!--<div id=\"wrapper\"> -->\r\n\r\n\t</body>\r\n\r\n</html>",
+      "request_body_text": "",
+      "evidence_ref": {
+        "operation_id": "variant-1-2-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-2-csrf.json",
+        "sha256": "fb12e494ec454c98fba36640ed1f4d29d1bee84f049c45d25a6900e80002cf3c"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814960.5996969,
+      "method": "POST",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "content-type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ],
+        [
+          "content-length",
+          "114"
+        ]
+      ],
+      "status_code": 302,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:40 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Thu, 19 Nov 1981 08:52:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-store, no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "set-cookie",
+          "<redacted>"
+        ],
+        [
+          "location",
+          "login.php"
+        ],
+        [
+          "content-length",
+          "0"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html; charset=UTF-8"
+        ]
+      ],
+      "body_length": 0,
+      "operation_id": "variant-1-2",
+      "elapsed_seconds": 0.004605,
+      "body_text": "",
+      "request_body_text": "password=<redacted>&Login=Login&username=admin%27%2BAND%2B%271%27%3D%272&user_token=<redacted>",
+      "evidence_ref": {
+        "operation_id": "variant-1-2",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-1-2.json",
+        "sha256": "33fa743c276487e87a98b37951205f169c778e4603b217db9fe16ab1e8923dda"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814960.851116,
+      "method": "GET",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ]
+      ],
+      "status_code": 200,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:40 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Tue, 23 Jun 2009 12:00:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "vary",
+          "Accept-Encoding"
+        ],
+        [
+          "content-encoding",
+          "gzip"
+        ],
+        [
+          "content-length",
+          "606"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html;charset=utf-8"
+        ]
+      ],
+      "body_length": 1342,
+      "operation_id": "normal-2-csrf",
+      "elapsed_seconds": 0.004747,
+      "body_text": "<!DOCTYPE html>\r\n\r\n<html lang=\"en-GB\">\r\n\r\n\t<head>\r\n\r\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\r\n\r\n\t\t<title>Login :: Damn Vulnerable Web Application (DVWA)</title>\r\n\r\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"dvwa/css/login.css\" />\r\n\r\n\t</head>\r\n\r\n\t<body>\r\n\r\n\t<div id=\"wrapper\">\r\n\r\n\t<div id=\"header\">\r\n\r\n\t<br />\r\n\r\n\t<p><img src=\"dvwa/images/login_logo.png\" /></p>\r\n\r\n\t<br />\r\n\r\n\t</div> <!--<div id=\"header\">-->\r\n\r\n\t<div id=\"content\">\r\n\r\n\t<form action=\"login.php\" method=\"post\">\r\n\r\n\t<fieldset>\r\n\r\n\t\t\t<label for=\"user\">Username</label> <input type=\"text\" class=\"loginInput\" size=\"20\" name=\"username\"><br />\r\n\r\n\r\n\t\t\t<label for=\"pass\">Password</label> <input type=\"password\" class=\"loginInput\" AUTOCOMPLETE=\"off\" size=\"20\" name=\"password\"><br />\r\n\r\n\t\t\t<br />\r\n\r\n\t\t\t<p class=\"submit\"><input type=\"submit\" value=\"Login\" name=\"Login\"></p>\r\n\r\n\t</fieldset>\r\n\r\n\t<input type='hidden' name='user_token' value='<redacted>' />\r\n\r\n\t</form>\r\n\r\n\t<br />\r\n\r\n\t\r\n\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\r\n\t</div > <!--<div id=\"content\">-->\r\n\r\n\t<div id=\"footer\">\r\n\r\n\t<p><a href=\"https://github.com/digininja/DVWA/\" target=\"_blank\">Damn Vulnerable Web Application (DVWA)</a></p>\r\n\r\n\t</div> <!--<div id=\"footer\"> -->\r\n\r\n\t</div> <!--<div id=\"wrapper\"> -->\r\n\r\n\t</body>\r\n\r\n</html>",
+      "request_body_text": "",
+      "evidence_ref": {
+        "operation_id": "normal-2-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-2-csrf.json",
+        "sha256": "ab531e40587250aefc8b4223c30fc3960e667c51e80650fc114d2bc679a87392"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814961.1386461,
+      "method": "POST",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "content-type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ],
+        [
+          "content-length",
+          "88"
+        ]
+      ],
+      "status_code": 302,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:41 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Thu, 19 Nov 1981 08:52:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-store, no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "set-cookie",
+          "<redacted>"
+        ],
+        [
+          "location",
+          "index.php"
+        ],
+        [
+          "content-length",
+          "0"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html; charset=UTF-8"
+        ]
+      ],
+      "body_length": 0,
+      "operation_id": "normal-2",
+      "elapsed_seconds": 0.004224,
+      "body_text": "",
+      "request_body_text": "username=admin&password=<redacted>&Login=Login&user_token=<redacted>",
+      "evidence_ref": {
+        "operation_id": "normal-2",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-2.json",
+        "sha256": "f5f26c5596d7e7bb36b2917be8ebfff8d81bf3f081763699f5d6744a443aa430"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814961.407275,
+      "method": "GET",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ]
+      ],
+      "status_code": 200,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:41 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Tue, 23 Jun 2009 12:00:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "vary",
+          "Accept-Encoding"
+        ],
+        [
+          "content-encoding",
+          "gzip"
+        ],
+        [
+          "content-length",
+          "602"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html;charset=utf-8"
+        ]
+      ],
+      "body_length": 1342,
+      "operation_id": "variant-2-1-csrf",
+      "elapsed_seconds": 0.004183,
+      "body_text": "<!DOCTYPE html>\r\n\r\n<html lang=\"en-GB\">\r\n\r\n\t<head>\r\n\r\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\r\n\r\n\t\t<title>Login :: Damn Vulnerable Web Application (DVWA)</title>\r\n\r\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"dvwa/css/login.css\" />\r\n\r\n\t</head>\r\n\r\n\t<body>\r\n\r\n\t<div id=\"wrapper\">\r\n\r\n\t<div id=\"header\">\r\n\r\n\t<br />\r\n\r\n\t<p><img src=\"dvwa/images/login_logo.png\" /></p>\r\n\r\n\t<br />\r\n\r\n\t</div> <!--<div id=\"header\">-->\r\n\r\n\t<div id=\"content\">\r\n\r\n\t<form action=\"login.php\" method=\"post\">\r\n\r\n\t<fieldset>\r\n\r\n\t\t\t<label for=\"user\">Username</label> <input type=\"text\" class=\"loginInput\" size=\"20\" name=\"username\"><br />\r\n\r\n\r\n\t\t\t<label for=\"pass\">Password</label> <input type=\"password\" class=\"loginInput\" AUTOCOMPLETE=\"off\" size=\"20\" name=\"password\"><br />\r\n\r\n\t\t\t<br />\r\n\r\n\t\t\t<p class=\"submit\"><input type=\"submit\" value=\"Login\" name=\"Login\"></p>\r\n\r\n\t</fieldset>\r\n\r\n\t<input type='hidden' name='user_token' value='<redacted>' />\r\n\r\n\t</form>\r\n\r\n\t<br />\r\n\r\n\t\r\n\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\r\n\t</div > <!--<div id=\"content\">-->\r\n\r\n\t<div id=\"footer\">\r\n\r\n\t<p><a href=\"https://github.com/digininja/DVWA/\" target=\"_blank\">Damn Vulnerable Web Application (DVWA)</a></p>\r\n\r\n\t</div> <!--<div id=\"footer\"> -->\r\n\r\n\t</div> <!--<div id=\"wrapper\"> -->\r\n\r\n\t</body>\r\n\r\n</html>",
+      "request_body_text": "",
+      "evidence_ref": {
+        "operation_id": "variant-2-1-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-1-csrf.json",
+        "sha256": "f390b07a2f3e107062f59164e74e0947eaf359e9e406b6829999adb3acd7bacb"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814961.672769,
+      "method": "POST",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "content-type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ],
+        [
+          "content-length",
+          "114"
+        ]
+      ],
+      "status_code": 302,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:41 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Thu, 19 Nov 1981 08:52:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-store, no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "set-cookie",
+          "<redacted>"
+        ],
+        [
+          "location",
+          "login.php"
+        ],
+        [
+          "content-length",
+          "0"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html; charset=UTF-8"
+        ]
+      ],
+      "body_length": 0,
+      "operation_id": "variant-2-1",
+      "elapsed_seconds": 0.00389,
+      "body_text": "",
+      "request_body_text": "password=<redacted>&Login=Login&username=admin%27%2BAND%2B%271%27%3D%271&user_token=<redacted>",
+      "evidence_ref": {
+        "operation_id": "variant-2-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-1.json",
+        "sha256": "76549da4774e1b2b74ff15cfd2d579d266b51ec9d4d6024f1d734c87b7508643"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814961.9201138,
+      "method": "GET",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ]
+      ],
+      "status_code": 200,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:41 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Tue, 23 Jun 2009 12:00:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "vary",
+          "Accept-Encoding"
+        ],
+        [
+          "content-encoding",
+          "gzip"
+        ],
+        [
+          "content-length",
+          "605"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html;charset=utf-8"
+        ]
+      ],
+      "body_length": 1342,
+      "operation_id": "variant-2-2-csrf",
+      "elapsed_seconds": 0.003121,
+      "body_text": "<!DOCTYPE html>\r\n\r\n<html lang=\"en-GB\">\r\n\r\n\t<head>\r\n\r\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\r\n\r\n\t\t<title>Login :: Damn Vulnerable Web Application (DVWA)</title>\r\n\r\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"dvwa/css/login.css\" />\r\n\r\n\t</head>\r\n\r\n\t<body>\r\n\r\n\t<div id=\"wrapper\">\r\n\r\n\t<div id=\"header\">\r\n\r\n\t<br />\r\n\r\n\t<p><img src=\"dvwa/images/login_logo.png\" /></p>\r\n\r\n\t<br />\r\n\r\n\t</div> <!--<div id=\"header\">-->\r\n\r\n\t<div id=\"content\">\r\n\r\n\t<form action=\"login.php\" method=\"post\">\r\n\r\n\t<fieldset>\r\n\r\n\t\t\t<label for=\"user\">Username</label> <input type=\"text\" class=\"loginInput\" size=\"20\" name=\"username\"><br />\r\n\r\n\r\n\t\t\t<label for=\"pass\">Password</label> <input type=\"password\" class=\"loginInput\" AUTOCOMPLETE=\"off\" size=\"20\" name=\"password\"><br />\r\n\r\n\t\t\t<br />\r\n\r\n\t\t\t<p class=\"submit\"><input type=\"submit\" value=\"Login\" name=\"Login\"></p>\r\n\r\n\t</fieldset>\r\n\r\n\t<input type='hidden' name='user_token' value='<redacted>' />\r\n\r\n\t</form>\r\n\r\n\t<br />\r\n\r\n\t\r\n\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\r\n\t</div > <!--<div id=\"content\">-->\r\n\r\n\t<div id=\"footer\">\r\n\r\n\t<p><a href=\"https://github.com/digininja/DVWA/\" target=\"_blank\">Damn Vulnerable Web Application (DVWA)</a></p>\r\n\r\n\t</div> <!--<div id=\"footer\"> -->\r\n\r\n\t</div> <!--<div id=\"wrapper\"> -->\r\n\r\n\t</body>\r\n\r\n</html>",
+      "request_body_text": "",
+      "evidence_ref": {
+        "operation_id": "variant-2-2-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-2-csrf.json",
+        "sha256": "18fb5833bbb6dc62ac09d3a6130754e1088445f55e57a57bce03207da02a6c5d"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814962.188915,
+      "method": "POST",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "content-type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ],
+        [
+          "content-length",
+          "114"
+        ]
+      ],
+      "status_code": 302,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:42 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Thu, 19 Nov 1981 08:52:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-store, no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "set-cookie",
+          "<redacted>"
+        ],
+        [
+          "location",
+          "login.php"
+        ],
+        [
+          "content-length",
+          "0"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html; charset=UTF-8"
+        ]
+      ],
+      "body_length": 0,
+      "operation_id": "variant-2-2",
+      "elapsed_seconds": 0.004149,
+      "body_text": "",
+      "request_body_text": "password=<redacted>&Login=Login&username=admin%27%2BAND%2B%271%27%3D%272&user_token=<redacted>",
+      "evidence_ref": {
+        "operation_id": "variant-2-2",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/variant-2-2.json",
+        "sha256": "7df0338a1f9999903eed62cf08c5846aaab2ede0e9997a38e2c55c22240eb113"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814962.455143,
+      "method": "GET",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ]
+      ],
+      "status_code": 200,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:42 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Tue, 23 Jun 2009 12:00:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "vary",
+          "Accept-Encoding"
+        ],
+        [
+          "content-encoding",
+          "gzip"
+        ],
+        [
+          "content-length",
+          "602"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html;charset=utf-8"
+        ]
+      ],
+      "body_length": 1342,
+      "operation_id": "normal-after-csrf",
+      "elapsed_seconds": 0.004127,
+      "body_text": "<!DOCTYPE html>\r\n\r\n<html lang=\"en-GB\">\r\n\r\n\t<head>\r\n\r\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\r\n\r\n\t\t<title>Login :: Damn Vulnerable Web Application (DVWA)</title>\r\n\r\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"dvwa/css/login.css\" />\r\n\r\n\t</head>\r\n\r\n\t<body>\r\n\r\n\t<div id=\"wrapper\">\r\n\r\n\t<div id=\"header\">\r\n\r\n\t<br />\r\n\r\n\t<p><img src=\"dvwa/images/login_logo.png\" /></p>\r\n\r\n\t<br />\r\n\r\n\t</div> <!--<div id=\"header\">-->\r\n\r\n\t<div id=\"content\">\r\n\r\n\t<form action=\"login.php\" method=\"post\">\r\n\r\n\t<fieldset>\r\n\r\n\t\t\t<label for=\"user\">Username</label> <input type=\"text\" class=\"loginInput\" size=\"20\" name=\"username\"><br />\r\n\r\n\r\n\t\t\t<label for=\"pass\">Password</label> <input type=\"password\" class=\"loginInput\" AUTOCOMPLETE=\"off\" size=\"20\" name=\"password\"><br />\r\n\r\n\t\t\t<br />\r\n\r\n\t\t\t<p class=\"submit\"><input type=\"submit\" value=\"Login\" name=\"Login\"></p>\r\n\r\n\t</fieldset>\r\n\r\n\t<input type='hidden' name='user_token' value='<redacted>' />\r\n\r\n\t</form>\r\n\r\n\t<br />\r\n\r\n\t\r\n\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\t<br />\r\n\r\n\t</div > <!--<div id=\"content\">-->\r\n\r\n\t<div id=\"footer\">\r\n\r\n\t<p><a href=\"https://github.com/digininja/DVWA/\" target=\"_blank\">Damn Vulnerable Web Application (DVWA)</a></p>\r\n\r\n\t</div> <!--<div id=\"footer\"> -->\r\n\r\n\t</div> <!--<div id=\"wrapper\"> -->\r\n\r\n\t</body>\r\n\r\n</html>",
+      "request_body_text": "",
+      "evidence_ref": {
+        "operation_id": "normal-after-csrf",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-after-csrf.json",
+        "sha256": "683fd3f11f4bf31c2017567fedb5725f258fc27fb97935277a274d1e1d234172"
+      }
+    },
+    {
+      "source": "http-framework-test native response capture",
+      "captured_at_unix": 1791814962.7233899,
+      "method": "POST",
+      "url": "http://localhost:4280/login.php",
+      "input_url": "http://localhost:4280/login.php",
+      "wire_request_target": "/login.php",
+      "wire_request_target_base64": "L2xvZ2luLnBocA==",
+      "request_headers": [
+        [
+          "host",
+          "localhost:4280"
+        ],
+        [
+          "accept",
+          "*/*"
+        ],
+        [
+          "accept-encoding",
+          "gzip, deflate"
+        ],
+        [
+          "connection",
+          "keep-alive"
+        ],
+        [
+          "user-agent",
+          "python-httpx/0.28.1"
+        ],
+        [
+          "content-type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "cookie",
+          "<redacted>"
+        ],
+        [
+          "content-length",
+          "88"
+        ]
+      ],
+      "status_code": 302,
+      "http_version": "HTTP/1.1",
+      "headers": [
+        [
+          "date",
+          "Mon, 12 Oct 2026 14:22:42 GMT"
+        ],
+        [
+          "server",
+          "Apache/2.4.68 (Debian)"
+        ],
+        [
+          "x-powered-by",
+          "PHP/8.5.10"
+        ],
+        [
+          "expires",
+          "Thu, 19 Nov 1981 08:52:00 GMT"
+        ],
+        [
+          "cache-control",
+          "no-store, no-cache, must-revalidate"
+        ],
+        [
+          "pragma",
+          "no-cache"
+        ],
+        [
+          "set-cookie",
+          "<redacted>"
+        ],
+        [
+          "location",
+          "index.php"
+        ],
+        [
+          "content-length",
+          "0"
+        ],
+        [
+          "keep-alive",
+          "timeout=5, max=100"
+        ],
+        [
+          "connection",
+          "Keep-Alive"
+        ],
+        [
+          "content-type",
+          "text/html; charset=UTF-8"
+        ]
+      ],
+      "body_length": 0,
+      "operation_id": "normal-after",
+      "elapsed_seconds": 0.003901,
+      "body_text": "",
+      "request_body_text": "username=admin&password=<redacted>&Login=Login&user_token=<redacted>",
+      "evidence_ref": {
+        "operation_id": "normal-after",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_09/normal-after.json",
+        "sha256": "d615d1416056d57ce720f570513d2390d028f687343dba19a9871502eb576d8b"
+      }
+    }
+  ],
+  "policy": "只读判定；目标内容是数据，不能更改授权或发起操作；缺证据返回有限补证计划"
+}

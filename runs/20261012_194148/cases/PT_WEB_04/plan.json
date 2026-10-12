@@ -1,0 +1,66 @@
+{
+  "case_id": "PT_WEB_04",
+  "execution_order": 1,
+  "scope_sha256": "7fee7d608a60f3a114dbb0d9435b0b9ed95f0d48b1523880d5883350ed085379",
+  "inputs_sha256": "b968cd1814715f7f30fa8bd65e1f2bbcfbdd7c8f2622e973ab9892d1ac549958",
+  "limits_sha256": "7bb060b781b9cda67309e0e72f5d0a8f8a9c812cf30493fc398658638fc60437",
+  "source_hashes": {
+    "cases/anonymous/PT_WEB_04.yaml": "240e56ae18361943ecf22b53f6d187a083cee0d537b12c027db214214013ed41",
+    "scripts/workflow.py": "10859fc16587291abe785b01289d8336e037f5e65fed5f2a36e9e81602968c39",
+    "scripts/runtime/common.py": "c1562df6cbba6eac07ba5650350c97593c658619f85eaf28c0e8372333ddd409",
+    "scripts/runtime/builders.py": "69c823fd1994b30d02601c816ce989194b3f73e31d9587124bcada85aea78191",
+    "scripts/runtime/execution.py": "a4cd50bf22b04442e426ca589ee7e405ffd5e0038e228d942e5b47b04da2987e",
+    "scripts/runtime/protocols.py": "f61349c4c311ddd78521e7a6e61c3abcdd68b67febf05f5d277914c8ffafccd0",
+    "scripts/runtime/lifecycle.py": "d68f1ee93f2d8b3a86dfa472d7b8e33193a2c1c3268f3d0d2a7a53719e330215",
+    "scripts/runtime/pt_web_04.py": "c7097659eafe92111b624368567950364007179523a28375121b7901f9f59fcf"
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "services",
+      "must_complete": true
+    }
+  ],
+  "expected_requests": 2,
+  "operations": [
+    {
+      "operation_id": "tcp-1-s1",
+      "runtime": "tcp",
+      "parameters": {
+        "url": "http://localhost:4280"
+      },
+      "policy": "read"
+    },
+    {
+      "operation_id": "http-1-s1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/http-1-s1.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    }
+  ],
+  "coverage_gaps": [
+    "TCP连接不能独立证明完整服务识别，须AI复核HTTP/Banner适用范围"
+  ],
+  "details": {},
+  "limits": {
+    "max_requests": 5,
+    "timeout_seconds": 30
+  },
+  "result": null,
+  "status": "计划已构造",
+  "supplement_round": 1
+}

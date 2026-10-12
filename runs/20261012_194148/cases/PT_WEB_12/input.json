@@ -1,0 +1,33 @@
+{
+  "case_id": "PT_WEB_12",
+  "scope": {
+    "origins": [
+      "http://localhost:4280"
+    ],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "limits": {
+    "max_requests": 10,
+    "timeout_seconds": 30
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "transport",
+      "must_complete": true
+    }
+  ],
+  "inputs": {
+    "request": {
+      "url": "http://localhost:4280/login.php",
+      "method": "GET"
+    }
+  }
+}

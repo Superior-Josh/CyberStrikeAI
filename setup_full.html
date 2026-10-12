@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html lang="en-GB">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+		<title>Setup :: Damn Vulnerable Web Application (DVWA)</title>
+
+		<link rel="stylesheet" type="text/css" href="dvwa/css/main.css" />
+
+		<link rel="icon" type="\image/ico" href="favicon.ico" />
+
+		<script type="text/javascript" src="dvwa/js/dvwaPage.js"></script>
+
+	</head>
+
+	<body class="home light">
+		<div id="container">
+
+			<div id="header">
+
+				<img src="dvwa/images/logo.png" alt="Damn Vulnerable Web Application" />
+                <a href="#" onclick="javascript:toggleTheme();" class="theme-icon" title="Toggle theme between light and dark.">
+                    <img src="dvwa/images/theme-light-dark.png" alt="Damn Vulnerable Web Application" />
+                </a>
+			</div>
+
+			<div id="main_menu">
+
+				<div id="main_menu_padded">
+				<ul class="menuBlocks"><li class="selected"><a href="setup.php">Setup DVWA</a></li>
+<li class=""><a href="instructions.php">Instructions</a></li>
+</ul><ul class="menuBlocks"><li class=""><a href="about.php">About</a></li>
+</ul>
+				</div>
+
+			</div>
+
+			<div id="main_body">
+
+				
+<div class="body_padded">
+	<h1>Database Setup <img src="dvwa/images/spanner.png" /></h1>
+
+	<p>Click on the 'Create / Reset Database' button below to create or reset your database.<br />
+	If you get an error make sure you have the correct user credentials in: <em>/var/www/html/config/config.inc.php</em></p>
+
+	<p>If the database already exists, <em>it will be cleared and the data will be reset</em>.<br />
+	You can also use this to reset the administrator credentials ("<em>admin</em> // <em>password</em>") at any stage.</p>
+	<hr />
+	<br />
+
+	<h2>Setup Check</h2>
+
+	<em>General</em><br />
+	Operating system: <em>*nix</em><br />
+	<br>
+	DVWA version: <em>Unknown</em><br><br>
+	<br>
+	reCAPTCHA key: <span class="failure">Missing</span><br />
+	<br />
+	Writable folder /var/www/html/hackable/uploads/: <span class="success">Yes</span><br />
+	Writable folder /var/www/html/config: <span class="success">Yes</span>
+	<br />
+	<br>
+
+	<em>Apache</em><br>
+	Web Server SERVER_NAME: <em>127.0.0.1</em><br /><br>
+	mod_rewrite: <em><span class='success'>Enabled</span></em><br>
+	mod_rewrite is required for the API labs.<br><br>
+
+	<em>PHP</em><br>
+	PHP version: <em>8.5.10</em><br />
+	
+	PHP function display_errors: <span class="success">Enabled</span><br />
+	PHP function display_startup_errors: <span class="success">Enabled</span><br />
+	PHP function allow_url_include: <span class="success">Enabled</span> - Feature deprecated in PHP 7.4, see lab for more information<br/ >
+	PHP function allow_url_fopen: <span class="success">Enabled</span><br />
+	PHP module gd: <span class="success">Installed</span><br />
+	PHP module mysql: <span class="success">Installed</span><br />
+	PHP module pdo_mysql: <span class="success">Installed</span><br />
+	<br />
+	<em>Database</em><br>
+	Backend database: <em>MySQL/MariaDB</em><br />
+	Database username: <em>dvwa</em><br />
+	Database password: <em>******</em><br />
+	Database database: <em>dvwa</em><br />
+	Database host: <em>db</em><br />
+	Database port: <em>3306</em><br />
+	<br />
+	<em>API</em><br>
+	<i>This section is only important if you want to use the API module.</i><br>
+	Vendor files installed: <em><span class='success'>Installed</span></em><br><br>
+
+	<i><span class="failure">Status in red</span>, indicate there will be an issue when trying to complete some modules.</i><br />
+	<br />
+	If you see disabled on either <i>allow_url_fopen</i> or <i>allow_url_include</i>, set the following in your php.ini file and restart Apache.<br />
+	<pre><code>allow_url_fopen = On
+allow_url_include = On</code></pre>
+	These are only required for the file inclusion labs so unless you want to play with those, you can ignore them.
+
+	<br /><br /><br />
+
+	<!-- Create db button -->
+	<form action="#" method="post">
+		<input name="create_db" type="submit" value="Create / Reset Database">
+		<input type='hidden' name='user_token' value='df77d0e655909e0df4a671e68a8b6a07' />
+	</form>
+	<br />
+	<hr />
+</div>
+				<br /><br />
+				
+
+			</div>
+
+			<div class="clear">
+			</div>
+
+			<div id="system_info">
+				
+			</div>
+
+			<div id="footer">
+
+				<p>Damn Vulnerable Web Application (DVWA)</p>
+				<script src='dvwa/js/add_event_listeners.js'></script>
+
+			</div>
+
+		</div>
+
+	</body>
+
+</html>

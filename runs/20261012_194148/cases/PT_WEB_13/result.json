@@ -1,0 +1,82 @@
+{
+  "case_id": "PT_WEB_13",
+  "result_candidate": "失败",
+  "reason": "登录页和404错误页均为HTML响应，但缺少所有必需安全头：无Content-Security-Policy（脚本来源限制缺失）、无X-Frame-Options（点击劫持防护缺失）、无X-Content-Type-Options: nosniff（MIME嗅探防护缺失）。违反HTML页面安全基线要求。HSTS在HTTP场景不适用。",
+  "reviewed": true,
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "登录页和404错误页已采集，攻击面核查完成",
+      "evidence_refs": [
+        {
+          "operation_id": "requests-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_13/requests-1.json",
+          "sha256": "14ff94cdf84843cc045c0c6ca9a26ccdb5988e123cc844430f83ce732195f610",
+          "role": "surface"
+        },
+        {
+          "operation_id": "requests-2",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_13/requests-2.json",
+          "sha256": "68b632eec52fe1622fb9abd60729d95026cc55da8ae29e804339cf17a36b3664",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "headers",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "两个HTML页面均缺少CSP、X-Frame-Options和X-Content-Type-Options安全头",
+      "evidence_refs": [
+        {
+          "operation_id": "requests-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_13/requests-1.json",
+          "sha256": "14ff94cdf84843cc045c0c6ca9a26ccdb5988e123cc844430f83ce732195f610",
+          "role": "page-type"
+        },
+        {
+          "operation_id": "requests-2",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_13/requests-2.json",
+          "sha256": "68b632eec52fe1622fb9abd60729d95026cc55da8ae29e804339cf17a36b3664",
+          "role": "page-type"
+        }
+      ]
+    }
+  ],
+  "confirmed_failure_refs": [
+    {
+      "operation_id": "requests-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_13/requests-1.json",
+      "sha256": "14ff94cdf84843cc045c0c6ca9a26ccdb5988e123cc844430f83ce732195f610",
+      "role": "page-type"
+    },
+    {
+      "operation_id": "requests-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_13/requests-2.json",
+      "sha256": "68b632eec52fe1622fb9abd60729d95026cc55da8ae29e804339cf17a36b3664",
+      "role": "page-type"
+    }
+  ],
+  "coverage_gaps": [],
+  "applicability": {
+    "status": "applicable"
+  },
+  "result": "失败",
+  "restoration_pending": false,
+  "artifact_status": "case_complete",
+  "runtime_checks": "mechanical_only",
+  "evidence_refs": [
+    {
+      "operation_id": "requests-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_13/requests-1.json",
+      "sha256": "14ff94cdf84843cc045c0c6ca9a26ccdb5988e123cc844430f83ce732195f610"
+    },
+    {
+      "operation_id": "requests-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_13/requests-2.json",
+      "sha256": "68b632eec52fe1622fb9abd60729d95026cc55da8ae29e804339cf17a36b3664"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "case_id": "PT_WEB_04",
+  "result_candidate": "通过",
+  "reason": "授权范围localhost:4280内TCP连接成功，HTTP服务识别为Apache/2.4.68 (Debian) + PHP/8.5.10，符合DVWA业务基线预期。未发现非预期管理/数据库服务暴露。未测范围不推断关闭。",
+  "reviewed": true,
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "TCP连接和HTTP基线采集完成，确认端口4280开放且响应正常",
+      "evidence_refs": [
+        {
+          "operation_id": "tcp-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/tcp-1.json",
+          "sha256": "d2119d5b5779d4bee8f92d3a548645c275f220dbd672fbf75961271fdd653483",
+          "role": "surface"
+        },
+        {
+          "operation_id": "http-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/http-1.json",
+          "sha256": "518a2434226a6be642f2b2e13d003313c9e0f68802ac1973b2ac2d1b4ffdb89a",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "services",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "HTTP服务识别成功，Apache/2.4.68 + PHP/8.5.10符合预期Web服务基线，无非预期管理/数据库暴露",
+      "evidence_refs": [
+        {
+          "operation_id": "tcp-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/tcp-1.json",
+          "sha256": "d2119d5b5779d4bee8f92d3a548645c275f220dbd672fbf75961271fdd653483",
+          "role": "authorized-service"
+        },
+        {
+          "operation_id": "http-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/http-1.json",
+          "sha256": "518a2434226a6be642f2b2e13d003313c9e0f68802ac1973b2ac2d1b4ffdb89a",
+          "role": "authorized-service"
+        }
+      ]
+    }
+  ],
+  "coverage_gaps": [],
+  "gap_resolutions": [
+    {
+      "gap": "TCP连接不能独立证明完整服务识别，须AI复核HTTP/Banner适用范围",
+      "reason": "补证轮HTTP响应(http-1-s1)确认Server: Apache/2.4.68 (Debian)和X-Powered-By: PHP/8.5.10，TCP连接+HTTP协议响应共同证明端口4280开放的是HTTP/Web服务",
+      "evidence_refs": [
+        {
+          "operation_id": "tcp-1-s1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/tcp-1-s1.json",
+          "sha256": "d2bc99f0a708c4fb6d22e03d7ec9b25a356dfce060a73040775accb052e6b46f",
+          "role": "authorized-service"
+        },
+        {
+          "operation_id": "http-1-s1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/http-1-s1.json",
+          "sha256": "96754428ffe6b6da2a051f99bbeb1b5c924af9273146f5c78f5db5c77dc40546",
+          "role": "authorized-service"
+        }
+      ]
+    }
+  ],
+  "applicability": {
+    "status": "applicable"
+  }
+}

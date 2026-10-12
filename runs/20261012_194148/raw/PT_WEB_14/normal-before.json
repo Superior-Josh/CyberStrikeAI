@@ -1,0 +1,90 @@
+{
+  "source": "http-framework-test native response capture",
+  "captured_at_unix": 1791806960.091137,
+  "method": "GET",
+  "url": "http://localhost:4280/login.php",
+  "input_url": "http://localhost:4280/login.php",
+  "wire_request_target": "/login.php",
+  "wire_request_target_base64": "L2xvZ2luLnBocA==",
+  "request_headers": [
+    [
+      "host",
+      "localhost:4280"
+    ],
+    [
+      "accept",
+      "*/*"
+    ],
+    [
+      "accept-encoding",
+      "gzip, deflate"
+    ],
+    [
+      "connection",
+      "keep-alive"
+    ],
+    [
+      "user-agent",
+      "python-httpx/0.28.1"
+    ],
+    [
+      "cookie",
+      "security=impossible; PHPSESSID=8a49c7ba343932c1382812077effe4cf"
+    ]
+  ],
+  "request_body_base64": "",
+  "status_code": 200,
+  "http_version": "HTTP/1.1",
+  "headers": [
+    [
+      "date",
+      "Mon, 12 Oct 2026 12:09:20 GMT"
+    ],
+    [
+      "server",
+      "Apache/2.4.68 (Debian)"
+    ],
+    [
+      "x-powered-by",
+      "PHP/8.5.10"
+    ],
+    [
+      "expires",
+      "Tue, 23 Jun 2009 12:00:00 GMT"
+    ],
+    [
+      "cache-control",
+      "no-cache, must-revalidate"
+    ],
+    [
+      "pragma",
+      "no-cache"
+    ],
+    [
+      "vary",
+      "Accept-Encoding"
+    ],
+    [
+      "content-encoding",
+      "gzip"
+    ],
+    [
+      "content-length",
+      "604"
+    ],
+    [
+      "keep-alive",
+      "timeout=5, max=100"
+    ],
+    [
+      "connection",
+      "Keep-Alive"
+    ],
+    [
+      "content-type",
+      "text/html;charset=utf-8"
+    ]
+  ],
+  "body_base64": "PCFET0NUWVBFIGh0bWw+DQoNCjxodG1sIGxhbmc9ImVuLUdCIj4NCg0KCTxoZWFkPg0KDQoJCTxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIgY29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PVVURi04IiAvPg0KDQoJCTx0aXRsZT5Mb2dpbiA6OiBEYW1uIFZ1bG5lcmFibGUgV2ViIEFwcGxpY2F0aW9uIChEVldBKTwvdGl0bGU+DQoNCgkJPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiB0eXBlPSJ0ZXh0L2NzcyIgaHJlZj0iZHZ3YS9jc3MvbG9naW4uY3NzIiAvPg0KDQoJPC9oZWFkPg0KDQoJPGJvZHk+DQoNCgk8ZGl2IGlkPSJ3cmFwcGVyIj4NCg0KCTxkaXYgaWQ9ImhlYWRlciI+DQoNCgk8YnIgLz4NCg0KCTxwPjxpbWcgc3JjPSJkdndhL2ltYWdlcy9sb2dpbl9sb2dvLnBuZyIgLz48L3A+DQoNCgk8YnIgLz4NCg0KCTwvZGl2PiA8IS0tPGRpdiBpZD0iaGVhZGVyIj4tLT4NCg0KCTxkaXYgaWQ9ImNvbnRlbnQiPg0KDQoJPGZvcm0gYWN0aW9uPSJsb2dpbi5waHAiIG1ldGhvZD0icG9zdCI+DQoNCgk8ZmllbGRzZXQ+DQoNCgkJCTxsYWJlbCBmb3I9InVzZXIiPlVzZXJuYW1lPC9sYWJlbD4gPGlucHV0IHR5cGU9InRleHQiIGNsYXNzPSJsb2dpbklucHV0IiBzaXplPSIyMCIgbmFtZT0idXNlcm5hbWUiPjxiciAvPg0KDQoNCgkJCTxsYWJlbCBmb3I9InBhc3MiPlBhc3N3b3JkPC9sYWJlbD4gPGlucHV0IHR5cGU9InBhc3N3b3JkIiBjbGFzcz0ibG9naW5JbnB1dCIgQVVUT0NPTVBMRVRFPSJvZmYiIHNpemU9IjIwIiBuYW1lPSJwYXNzd29yZCI+PGJyIC8+DQoNCgkJCTxiciAvPg0KDQoJCQk8cCBjbGFzcz0ic3VibWl0Ij48aW5wdXQgdHlwZT0ic3VibWl0IiB2YWx1ZT0iTG9naW4iIG5hbWU9IkxvZ2luIj48L3A+DQoNCgk8L2ZpZWxkc2V0Pg0KDQoJPGlucHV0IHR5cGU9J2hpZGRlbicgbmFtZT0ndXNlcl90b2tlbicgdmFsdWU9J2I3ZGQ0M2U2ZjVjMjViMDBlOGY4Zjc1MmFhZmZlYjI0JyAvPg0KDQoJPC9mb3JtPg0KDQoJPGJyIC8+DQoNCgkNCg0KCTxiciAvPg0KCTxiciAvPg0KCTxiciAvPg0KCTxiciAvPg0KCTxiciAvPg0KCTxiciAvPg0KCTxiciAvPg0KCTxiciAvPg0KDQoJPC9kaXYgPiA8IS0tPGRpdiBpZD0iY29udGVudCI+LS0+DQoNCgk8ZGl2IGlkPSJmb290ZXIiPg0KDQoJPHA+PGEgaHJlZj0iaHR0cHM6Ly9naXRodWIuY29tL2RpZ2luaW5qYS9EVldBLyIgdGFyZ2V0PSJfYmxhbmsiPkRhbW4gVnVsbmVyYWJsZSBXZWIgQXBwbGljYXRpb24gKERWV0EpPC9hPjwvcD4NCg0KCTwvZGl2PiA8IS0tPGRpdiBpZD0iZm9vdGVyIj4gLS0+DQoNCgk8L2Rpdj4gPCEtLTxkaXYgaWQ9IndyYXBwZXIiPiAtLT4NCg0KCTwvYm9keT4NCg0KPC9odG1sPg==",
+  "body_length": 1342
+}

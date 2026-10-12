@@ -1,0 +1,93 @@
+{
+  "case_id": "PT_WEB_03",
+  "result_candidate": "失败",
+  "reason": "HTTP响应头和错误页暴露精确组件版本：Server头披露Apache/2.4.68 (Debian)，X-Powered-By头披露PHP/8.5.10，404错误页正文进一步暴露Apache/2.4.68 (Debian) Server at localhost Port 4280（精确版本+主机名+端口）。违反默认安全基线关于禁止披露精确组件版本的要求。",
+  "reviewed": true,
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "正常页面、不存在路径和无害非法输入三类响应均已采集，覆盖攻击面核查",
+      "evidence_refs": [
+        {
+          "operation_id": "normal-before",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/normal-before.json",
+          "sha256": "54665359e5826254f48651705df64cc9b7e3577f257d40d4cd46ea272ac1697d",
+          "role": "surface"
+        },
+        {
+          "operation_id": "not-found",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/not-found.json",
+          "sha256": "5f6f43d84a583703278b6de9b73f81cf832d666721db26d1ee3656d167f024ce",
+          "role": "surface"
+        },
+        {
+          "operation_id": "invalid-input",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/invalid-input.json",
+          "sha256": "b45733fd365e158d80096167c4fcc3f854a4e6519870167a9207ff04858a0a65",
+          "role": "surface"
+        }
+      ]
+    },
+    {
+      "id": "fingerprints",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "正常响应和错误页均暴露精确组件版本：Server头Apache/2.4.68 (Debian)、X-Powered-By头PHP/8.5.10、404正文Apache/2.4.68 (Debian) Server at localhost Port 4280",
+      "evidence_refs": [
+        {
+          "operation_id": "normal-before",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/normal-before.json",
+          "sha256": "54665359e5826254f48651705df64cc9b7e3577f257d40d4cd46ea272ac1697d",
+          "role": "baseline"
+        },
+        {
+          "operation_id": "not-found",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/not-found.json",
+          "sha256": "5f6f43d84a583703278b6de9b73f81cf832d666721db26d1ee3656d167f024ce",
+          "role": "error-response"
+        }
+      ]
+    }
+  ],
+  "confirmed_failure_refs": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/normal-before.json",
+      "sha256": "54665359e5826254f48651705df64cc9b7e3577f257d40d4cd46ea272ac1697d",
+      "role": "baseline"
+    },
+    {
+      "operation_id": "not-found",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/not-found.json",
+      "sha256": "5f6f43d84a583703278b6de9b73f81cf832d666721db26d1ee3656d167f024ce",
+      "role": "error-response"
+    }
+  ],
+  "coverage_gaps": [],
+  "applicability": {
+    "status": "applicable"
+  },
+  "result": "失败",
+  "restoration_pending": false,
+  "artifact_status": "case_complete",
+  "runtime_checks": "mechanical_only",
+  "evidence_refs": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/normal-before.json",
+      "sha256": "54665359e5826254f48651705df64cc9b7e3577f257d40d4cd46ea272ac1697d"
+    },
+    {
+      "operation_id": "not-found",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/not-found.json",
+      "sha256": "5f6f43d84a583703278b6de9b73f81cf832d666721db26d1ee3656d167f024ce"
+    },
+    {
+      "operation_id": "invalid-input",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_03/invalid-input.json",
+      "sha256": "b45733fd365e158d80096167c4fcc3f854a4e6519870167a9207ff04858a0a65"
+    }
+  ]
+}

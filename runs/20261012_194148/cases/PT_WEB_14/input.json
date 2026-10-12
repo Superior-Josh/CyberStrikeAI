@@ -1,0 +1,156 @@
+{
+  "case_id": "PT_WEB_14",
+  "scope": {
+    "origins": [
+      "http://localhost:4280"
+    ],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "limits": {
+    "max_requests": 50,
+    "timeout_seconds": 30
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "sensitive-content",
+      "must_complete": true
+    }
+  ],
+  "inputs": {
+    "request": {
+      "url": "http://localhost:4280/login.php",
+      "method": "GET"
+    },
+    "not_found_url": "http://localhost:4280/nonexistent_random_xyz789.html",
+    "candidates": [
+      {
+        "url": "http://localhost:4280/.git/config",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/.git/HEAD",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/.env",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/config.php",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/config.inc.php",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/wp-config.php",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/backup.sql",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/dump.sql",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/.htaccess",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/.htpasswd",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/server-status",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/phpinfo.php",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/info.php",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/test.php",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/admin/",
+        "reviewed": true,
+        "body_authorized": true
+      },
+      {
+        "url": "http://localhost:4280/phpmyadmin/",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/web.config",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/crossdomain.xml",
+        "reviewed": true,
+        "body_authorized": true
+      },
+      {
+        "url": "http://localhost:4280/sitemap.xml",
+        "reviewed": true,
+        "body_authorized": true
+      },
+      {
+        "url": "http://localhost:4280/.DS_Store",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/Thumbs.db",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/config.yml",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/database.yml",
+        "reviewed": true,
+        "body_authorized": false
+      },
+      {
+        "url": "http://localhost:4280/db.sql",
+        "reviewed": true,
+        "body_authorized": false
+      }
+    ]
+  }
+}

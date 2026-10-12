@@ -22,33 +22,49 @@ func formFields(body string) (url.Values, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	fields := url.Values{}
+	var fields url.Values
 	action := ""
-	password := false
+	matches := 0
+	attrs := func(n *html.Node) map[string]string {
+		out := map[string]string{}
+		for _, a := range n.Attr {
+			out[a.Key] = a.Val
+		}
+		return out
+	}
 	var walk func(*html.Node)
 	walk = func(n *html.Node) {
-		if n.Type == html.ElementNode {
-			attrs := map[string]string{}
-			for _, a := range n.Attr {
-				attrs[a.Key] = a.Val
-			}
-			if n.Data == "form" {
-				action = attrs["action"]
-			}
-			if n.Data == "input" && attrs["name"] != "" {
-				fields.Set(attrs["name"], attrs["value"])
-				if attrs["type"] == "password" {
-					password = true
+		if n.Type == html.ElementNode && n.Data == "form" {
+			candidate := url.Values{}
+			password := false
+			var inputs func(*html.Node)
+			inputs = func(x *html.Node) {
+				if x.Type == html.ElementNode && x.Data == "input" {
+					v := attrs(x)
+					_, disabled := v["disabled"]
+					if !disabled && v["name"] != "" {
+						candidate.Set(v["name"], v["value"])
+						password = password || strings.EqualFold(v["type"], "password")
+					}
+				}
+				for child := x.FirstChild; child != nil; child = child.NextSibling {
+					inputs(child)
 				}
 			}
+			inputs(n)
+			if password && candidate.Has("username") && candidate.Has("password") {
+				matches++
+				fields = candidate
+				action = attrs(n)["action"]
+			}
 		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			walk(c)
+		for child := n.FirstChild; child != nil; child = child.NextSibling {
+			walk(child)
 		}
 	}
 	walk(root)
-	if !password || fields.Get("username") == "" && !fields.Has("username") {
-		return nil, "", fmt.Errorf("login form needs Eino binding")
+	if matches != 1 {
+		return nil, "", fmt.Errorf("login form needs unambiguous Eino binding")
 	}
 	return fields, action, nil
 }

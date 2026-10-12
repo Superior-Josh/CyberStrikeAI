@@ -1,0 +1,39 @@
+{
+  "case_id": "PT_WEB_08",
+  "status": "执行记录已保存",
+  "evidence": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/normal-before.json",
+      "sha256": "e7172302fbd918bb39f475c4b74501ab183404630d11d2f4949031466a220762",
+      "elapsed_seconds": 0.005211
+    },
+    {
+      "operation_id": "xss-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-1.json",
+      "sha256": "8bc4f4be621f3ebd50e9d13397e015e818eea3c4fbfb3d6e9708fed172fb42b0",
+      "elapsed_seconds": 0.003528
+    },
+    {
+      "operation_id": "xss-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-2.json",
+      "sha256": "c0ad9f85ee98d6352824b25ed60185736a015e590c7158646744b31b76a4b5f0",
+      "elapsed_seconds": 0.004237
+    },
+    {
+      "operation_id": "xss-3",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/xss-3.json",
+      "sha256": "d9acf19e2e447fb28f833e71242b5799ea3d1ebffc4711c61ec636b4777cf2c9",
+      "elapsed_seconds": 0.00369
+    },
+    {
+      "operation_id": "browser-observation",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_08/browser-observation.json",
+      "sha256": "73412413f94eb6506f5f63e33ad04ad3285eb1be2e2e460f562fa154011fe792",
+      "elapsed_seconds": 5.2928924560546875e-05
+    }
+  ],
+  "coverage_gaps": [
+    "执行错误: browser-observation"
+  ]
+}

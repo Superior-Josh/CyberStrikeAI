@@ -1,0 +1,49 @@
+{
+  "case_id": "PT_WEB_07",
+  "status": "执行记录已保存",
+  "evidence": [
+    {
+      "operation_id": "normal-before",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/normal-before.json",
+      "sha256": "fd409afec1a3b5819d16a2a4533300457b01d14862feaf7cdadad1e5f3149225",
+      "elapsed_seconds": 0.008334
+    },
+    {
+      "operation_id": "redirect-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-1.json",
+      "sha256": "3a73252d93e8a4ce6b4e63747037969bf1914fa753ae63da272676d51ab12935",
+      "elapsed_seconds": 0.00438
+    },
+    {
+      "operation_id": "redirect-2",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-2.json",
+      "sha256": "aa15f48d78fa1784053d7bd41142730f4c6013da3a1a579f3d350410bda52c68",
+      "elapsed_seconds": 0.004127
+    },
+    {
+      "operation_id": "redirect-3",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-3.json",
+      "sha256": "8541c83dd0f3712594e223a270ecc5b45c85268da269b7000a1262cfa6b5d962",
+      "elapsed_seconds": 0.003643
+    },
+    {
+      "operation_id": "redirect-4",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-4.json",
+      "sha256": "72f0396035d8e70c14299bbb0092a4825ab9eb7ab56c31762c832af6dcb79546",
+      "elapsed_seconds": 0.00363
+    },
+    {
+      "operation_id": "redirect-5",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-5.json",
+      "sha256": "a2da5e06e52a2b65681f06583e51ff9205e880ed2537c708b469418df8d70b8e",
+      "elapsed_seconds": 0.003887
+    },
+    {
+      "operation_id": "redirect-6",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_07/redirect-6.json",
+      "sha256": "b51ac319c3636b2049507c77a2c2b0a3d9020ffd9e11b37769aef64bc5a4da78",
+      "elapsed_seconds": 0.003315
+    }
+  ],
+  "coverage_gaps": []
+}

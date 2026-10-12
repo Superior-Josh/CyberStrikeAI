@@ -1,0 +1,13 @@
+{
+  "case_id": "PT_WEB_02",
+  "status": "执行记录已保存",
+  "evidence": [
+    {
+      "operation_id": "resource-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_02/resource-1.json",
+      "sha256": "a5f267b4ab17339132e72f87ea2ad89e815cedb1db88d1ccf1b42f5e8dff246c",
+      "elapsed_seconds": 0.006026
+    }
+  ],
+  "coverage_gaps": []
+}

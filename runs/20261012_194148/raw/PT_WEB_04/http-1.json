@@ -1,0 +1,94 @@
+{
+  "source": "http-framework-test native response capture",
+  "captured_at_unix": 1791805406.0269482,
+  "method": "GET",
+  "url": "http://localhost:4280",
+  "input_url": "http://localhost:4280",
+  "wire_request_target": "/",
+  "wire_request_target_base64": "Lw==",
+  "request_headers": [
+    [
+      "host",
+      "localhost:4280"
+    ],
+    [
+      "accept",
+      "*/*"
+    ],
+    [
+      "accept-encoding",
+      "gzip, deflate"
+    ],
+    [
+      "connection",
+      "keep-alive"
+    ],
+    [
+      "user-agent",
+      "python-httpx/0.28.1"
+    ]
+  ],
+  "request_body_base64": "",
+  "status_code": 302,
+  "http_version": "HTTP/1.1",
+  "headers": [
+    [
+      "date",
+      "Mon, 12 Oct 2026 11:43:26 GMT"
+    ],
+    [
+      "server",
+      "Apache/2.4.68 (Debian)"
+    ],
+    [
+      "x-powered-by",
+      "PHP/8.5.10"
+    ],
+    [
+      "set-cookie",
+      "security=impossible; path=/; HttpOnly"
+    ],
+    [
+      "set-cookie",
+      "PHPSESSID=e8fdac6b953e363a6e6df81be89341c1; expires=Tue, 13 Oct 2026 11:43:26 GMT; Max-Age=86400; path=/; domain=localhost; HttpOnly; SameSite=Strict"
+    ],
+    [
+      "expires",
+      "Thu, 19 Nov 1981 08:52:00 GMT"
+    ],
+    [
+      "cache-control",
+      "no-store, no-cache, must-revalidate"
+    ],
+    [
+      "pragma",
+      "no-cache"
+    ],
+    [
+      "set-cookie",
+      "PHPSESSID=201af7d16b98a4a381cd6798c0c28bc2; expires=Tue, 13 Oct 2026 11:43:26 GMT; Max-Age=86400; path=/; domain=localhost; HttpOnly; SameSite=Strict"
+    ],
+    [
+      "location",
+      "login.php"
+    ],
+    [
+      "content-length",
+      "0"
+    ],
+    [
+      "keep-alive",
+      "timeout=5, max=100"
+    ],
+    [
+      "connection",
+      "Keep-Alive"
+    ],
+    [
+      "content-type",
+      "text/html; charset=UTF-8"
+    ]
+  ],
+  "body_base64": "",
+  "body_length": 0
+}

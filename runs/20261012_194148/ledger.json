@@ -1,0 +1,610 @@
+{
+  "run_sha256": "f51c41ad5c97f67c7f11123ab58b674d96bcebe2e7f31ded5b9ce6c5e336ffdd",
+  "cases": {
+    "PT_WEB_04": {
+      "attempts": [
+        {
+          "operation_id": "tcp-1",
+          "policy": "read",
+          "started": 1791805405.7626848,
+          "status": "completed",
+          "ended": 1791805405.778908
+        },
+        {
+          "operation_id": "http-1",
+          "policy": "read",
+          "started": 1791805405.78015,
+          "status": "completed",
+          "ended": 1791805406.04762
+        },
+        {
+          "operation_id": "tcp-1-s1",
+          "policy": "read",
+          "started": 1791805603.263788,
+          "status": "completed",
+          "ended": 1791805603.277499
+        },
+        {
+          "operation_id": "http-1-s1",
+          "policy": "read",
+          "started": 1791805603.281753,
+          "status": "completed",
+          "ended": 1791805603.5479622
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_03": {
+      "attempts": [
+        {
+          "operation_id": "normal-before",
+          "policy": "read",
+          "started": 1791805757.97514,
+          "status": "completed",
+          "ended": 1791805758.287682
+        },
+        {
+          "operation_id": "not-found",
+          "policy": "read",
+          "started": 1791805758.289163,
+          "status": "completed",
+          "ended": 1791805758.553812
+        },
+        {
+          "operation_id": "invalid-input",
+          "policy": "active",
+          "started": 1791805758.555118,
+          "status": "completed",
+          "ended": 1791805758.8200629
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_02": {
+      "attempts": [
+        {
+          "operation_id": "resource-1",
+          "policy": "read",
+          "started": 1791805896.517993,
+          "status": "completed",
+          "ended": 1791805896.784966
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_12": {
+      "attempts": [
+        {
+          "operation_id": "normal-before",
+          "policy": "read",
+          "started": 1791806025.836603,
+          "status": "completed",
+          "ended": 1791806026.101705
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_13": {
+      "attempts": [
+        {
+          "operation_id": "requests-1",
+          "policy": "read",
+          "started": 1791806121.674765,
+          "status": "completed",
+          "ended": 1791806121.934496
+        },
+        {
+          "operation_id": "requests-2",
+          "policy": "read",
+          "started": 1791806121.936019,
+          "status": "completed",
+          "ended": 1791806122.192047
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_16": {
+      "attempts": [
+        {
+          "operation_id": "normal-before",
+          "policy": "read",
+          "started": 1791806215.483244,
+          "status": "completed",
+          "ended": 1791806215.74579
+        },
+        {
+          "operation_id": "origin-1",
+          "policy": "active",
+          "started": 1791806215.7472608,
+          "status": "completed",
+          "ended": 1791806216.007055
+        },
+        {
+          "operation_id": "preflight-1",
+          "policy": "active",
+          "started": 1791806216.008607,
+          "status": "completed",
+          "ended": 1791806216.266143
+        },
+        {
+          "operation_id": "origin-2",
+          "policy": "active",
+          "started": 1791806216.26752,
+          "status": "completed",
+          "ended": 1791806216.533053
+        },
+        {
+          "operation_id": "preflight-2",
+          "policy": "active",
+          "started": 1791806216.534646,
+          "status": "completed",
+          "ended": 1791806216.798431
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_18": {
+      "attempts": [
+        {
+          "operation_id": "page-requests-1",
+          "policy": "read",
+          "started": 1791806320.892724,
+          "status": "completed",
+          "ended": 1791806321.1495318
+        },
+        {
+          "operation_id": "resource-requests-1",
+          "policy": "read",
+          "started": 1791806321.151047,
+          "status": "completed",
+          "ended": 1791806321.411131
+        },
+        {
+          "operation_id": "page-requests-1-s1",
+          "policy": "read",
+          "started": 1791806410.296459,
+          "status": "completed",
+          "ended": 1791806410.558987
+        },
+        {
+          "operation_id": "page-requests-2-s1",
+          "policy": "read",
+          "started": 1791806410.5606341,
+          "status": "completed",
+          "ended": 1791806410.820908
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_14": {
+      "attempts": [
+        {
+          "operation_id": "normal-before",
+          "policy": "read",
+          "started": 1791806959.843869,
+          "status": "completed",
+          "ended": 1791806960.1553311
+        },
+        {
+          "operation_id": "not-found",
+          "policy": "read",
+          "started": 1791806960.157166,
+          "status": "completed",
+          "ended": 1791806960.420553
+        },
+        {
+          "operation_id": "candidate-1",
+          "policy": "read",
+          "started": 1791806960.422105,
+          "status": "completed",
+          "ended": 1791806960.6831648
+        },
+        {
+          "operation_id": "candidate-2",
+          "policy": "read",
+          "started": 1791806960.68484,
+          "status": "completed",
+          "ended": 1791806960.9414558
+        },
+        {
+          "operation_id": "candidate-3",
+          "policy": "read",
+          "started": 1791806960.943049,
+          "status": "completed",
+          "ended": 1791806961.20343
+        },
+        {
+          "operation_id": "candidate-4",
+          "policy": "read",
+          "started": 1791806961.205052,
+          "status": "completed",
+          "ended": 1791806961.465204
+        },
+        {
+          "operation_id": "candidate-5",
+          "policy": "read",
+          "started": 1791806961.466797,
+          "status": "completed",
+          "ended": 1791806961.776298
+        },
+        {
+          "operation_id": "candidate-6",
+          "policy": "read",
+          "started": 1791806961.778065,
+          "status": "completed",
+          "ended": 1791806962.0353768
+        },
+        {
+          "operation_id": "candidate-7",
+          "policy": "read",
+          "started": 1791806962.0370119,
+          "status": "completed",
+          "ended": 1791806962.3074
+        },
+        {
+          "operation_id": "candidate-8",
+          "policy": "read",
+          "started": 1791806962.309078,
+          "status": "completed",
+          "ended": 1791806962.615093
+        },
+        {
+          "operation_id": "candidate-9",
+          "policy": "read",
+          "started": 1791806962.616819,
+          "status": "completed",
+          "ended": 1791806962.8760939
+        },
+        {
+          "operation_id": "candidate-10",
+          "policy": "read",
+          "started": 1791806962.877856,
+          "status": "completed",
+          "ended": 1791806963.178578
+        },
+        {
+          "operation_id": "candidate-11",
+          "policy": "read",
+          "started": 1791806963.180346,
+          "status": "completed",
+          "ended": 1791806963.432721
+        },
+        {
+          "operation_id": "candidate-12",
+          "policy": "read",
+          "started": 1791806963.434614,
+          "status": "completed",
+          "ended": 1791806963.694205
+        },
+        {
+          "operation_id": "candidate-13",
+          "policy": "read",
+          "started": 1791806963.696063,
+          "status": "completed",
+          "ended": 1791806963.9566798
+        },
+        {
+          "operation_id": "candidate-14",
+          "policy": "read",
+          "started": 1791806963.9584708,
+          "status": "completed",
+          "ended": 1791806964.216044
+        },
+        {
+          "operation_id": "candidate-15",
+          "policy": "read",
+          "started": 1791806964.217815,
+          "status": "completed",
+          "ended": 1791806964.4733639
+        },
+        {
+          "operation_id": "candidate-16",
+          "policy": "read",
+          "started": 1791806964.475107,
+          "status": "completed",
+          "ended": 1791806964.735075
+        },
+        {
+          "operation_id": "candidate-17",
+          "policy": "read",
+          "started": 1791806964.7368991,
+          "status": "completed",
+          "ended": 1791806964.99474
+        },
+        {
+          "operation_id": "candidate-18",
+          "policy": "read",
+          "started": 1791806964.996572,
+          "status": "completed",
+          "ended": 1791806965.260617
+        },
+        {
+          "operation_id": "candidate-19",
+          "policy": "read",
+          "started": 1791806965.2624488,
+          "status": "completed",
+          "ended": 1791806965.5275478
+        },
+        {
+          "operation_id": "candidate-20",
+          "policy": "read",
+          "started": 1791806965.529363,
+          "status": "completed",
+          "ended": 1791806965.7911081
+        },
+        {
+          "operation_id": "candidate-21",
+          "policy": "read",
+          "started": 1791806965.792874,
+          "status": "completed",
+          "ended": 1791806966.053011
+        },
+        {
+          "operation_id": "candidate-22",
+          "policy": "read",
+          "started": 1791806966.054938,
+          "status": "completed",
+          "ended": 1791806966.316446
+        },
+        {
+          "operation_id": "candidate-23",
+          "policy": "read",
+          "started": 1791806966.3183942,
+          "status": "completed",
+          "ended": 1791806966.5771048
+        },
+        {
+          "operation_id": "candidate-24",
+          "policy": "read",
+          "started": 1791806966.578976,
+          "status": "completed",
+          "ended": 1791806966.843029
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_17": {
+      "attempts": [
+        {
+          "operation_id": "component-requests-1",
+          "policy": "read",
+          "started": 1791807590.882406,
+          "status": "attempted"
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_05": {
+      "attempts": [
+        {
+          "operation_id": "template-1",
+          "policy": "agent_tool",
+          "started": 1791809270.601608,
+          "status": "completed",
+          "ended": 1791809392.095424
+        },
+        {
+          "operation_id": "template-1-budget-1",
+          "policy": "agent_tool",
+          "started": 1791809270.602483,
+          "status": "completed",
+          "ended": 1791809392.096102
+        },
+        {
+          "operation_id": "template-1-budget-2",
+          "policy": "agent_tool",
+          "started": 1791809270.603242,
+          "status": "completed",
+          "ended": 1791809392.09663
+        },
+        {
+          "operation_id": "template-1-budget-3",
+          "policy": "agent_tool",
+          "started": 1791809270.603959,
+          "status": "completed",
+          "ended": 1791809392.097137
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_07": {
+      "attempts": [
+        {
+          "operation_id": "normal-before",
+          "policy": "read",
+          "started": 1791810591.9376798,
+          "status": "completed",
+          "ended": 1791810592.202085
+        },
+        {
+          "operation_id": "redirect-1",
+          "policy": "active",
+          "started": 1791810592.2040691,
+          "status": "completed",
+          "ended": 1791810592.4669042
+        },
+        {
+          "operation_id": "redirect-2",
+          "policy": "active",
+          "started": 1791810592.468828,
+          "status": "completed",
+          "ended": 1791810592.729175
+        },
+        {
+          "operation_id": "redirect-3",
+          "policy": "active",
+          "started": 1791810592.731081,
+          "status": "completed",
+          "ended": 1791810593.00049
+        },
+        {
+          "operation_id": "redirect-4",
+          "policy": "active",
+          "started": 1791810593.0025878,
+          "status": "completed",
+          "ended": 1791810593.26592
+        },
+        {
+          "operation_id": "redirect-5",
+          "policy": "active",
+          "started": 1791810593.268097,
+          "status": "completed",
+          "ended": 1791810593.531693
+        },
+        {
+          "operation_id": "redirect-6",
+          "policy": "active",
+          "started": 1791810593.533716,
+          "status": "completed",
+          "ended": 1791810593.796397
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_08": {
+      "attempts": [
+        {
+          "operation_id": "normal-before",
+          "policy": "read",
+          "started": 1791810752.813053,
+          "status": "completed",
+          "ended": 1791810753.078269
+        },
+        {
+          "operation_id": "xss-1",
+          "policy": "active",
+          "started": 1791810753.080462,
+          "status": "completed",
+          "ended": 1791810753.346692
+        },
+        {
+          "operation_id": "xss-2",
+          "policy": "active",
+          "started": 1791810753.3490171,
+          "status": "completed",
+          "ended": 1791810753.6046
+        },
+        {
+          "operation_id": "xss-3",
+          "policy": "active",
+          "started": 1791810753.6066298,
+          "status": "completed",
+          "ended": 1791810753.87397
+        },
+        {
+          "operation_id": "browser-observation",
+          "policy": "active",
+          "started": 1791810753.876225,
+          "status": "error",
+          "ended": 1791810753.885278
+        }
+      ],
+      "stopped": false
+    },
+    "PT_WEB_09": {
+      "attempts": [
+        {
+          "operation_id": "normal-1-csrf",
+          "policy": "read",
+          "started": 1791814959.0067132,
+          "status": "completed",
+          "ended": 1791814959.318836
+        },
+        {
+          "operation_id": "normal-1",
+          "policy": "active",
+          "started": 1791814959.320415,
+          "status": "completed",
+          "ended": 1791814959.5789099
+        },
+        {
+          "operation_id": "variant-1-1-csrf",
+          "policy": "read",
+          "started": 1791814959.580964,
+          "status": "completed",
+          "ended": 1791814959.8495219
+        },
+        {
+          "operation_id": "variant-1-1",
+          "policy": "active",
+          "started": 1791814959.851291,
+          "status": "completed",
+          "ended": 1791814960.115453
+        },
+        {
+          "operation_id": "variant-1-2-csrf",
+          "policy": "read",
+          "started": 1791814960.118033,
+          "status": "completed",
+          "ended": 1791814960.3823948
+        },
+        {
+          "operation_id": "variant-1-2",
+          "policy": "active",
+          "started": 1791814960.383853,
+          "status": "completed",
+          "ended": 1791814960.646147
+        },
+        {
+          "operation_id": "normal-2-csrf",
+          "policy": "read",
+          "started": 1791814960.6483572,
+          "status": "completed",
+          "ended": 1791814960.917263
+        },
+        {
+          "operation_id": "normal-2",
+          "policy": "active",
+          "started": 1791814960.918751,
+          "status": "completed",
+          "ended": 1791814961.189035
+        },
+        {
+          "operation_id": "variant-2-1-csrf",
+          "policy": "read",
+          "started": 1791814961.191235,
+          "status": "completed",
+          "ended": 1791814961.458118
+        },
+        {
+          "operation_id": "variant-2-1",
+          "policy": "active",
+          "started": 1791814961.459638,
+          "status": "completed",
+          "ended": 1791814961.725327
+        },
+        {
+          "operation_id": "variant-2-2-csrf",
+          "policy": "read",
+          "started": 1791814961.727593,
+          "status": "completed",
+          "ended": 1791814961.9931352
+        },
+        {
+          "operation_id": "variant-2-2",
+          "policy": "active",
+          "started": 1791814961.994603,
+          "status": "completed",
+          "ended": 1791814962.255153
+        },
+        {
+          "operation_id": "normal-after-csrf",
+          "policy": "read",
+          "started": 1791814962.2574668,
+          "status": "completed",
+          "ended": 1791814962.522304
+        },
+        {
+          "operation_id": "normal-after",
+          "policy": "active",
+          "started": 1791814962.523832,
+          "status": "completed",
+          "ended": 1791814962.7889569
+        }
+      ],
+      "stopped": false
+    }
+  },
+  "login_attempts": 0,
+  "login_stopped": false
+}

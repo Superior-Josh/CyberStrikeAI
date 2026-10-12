@@ -1,0 +1,13 @@
+{
+  "case_id": "PT_WEB_17",
+  "status": "执行停止，待核验",
+  "evidence": [],
+  "coverage_gaps": [
+    "已登记尝试，禁止未知副作用重放",
+    "停止后未提交: component-requests-2",
+    "日志路径已存在",
+    "停止后未提交: component-requests-2",
+    "已登记尝试，禁止未知副作用重放",
+    "停止后未提交: component-requests-2"
+  ]
+}

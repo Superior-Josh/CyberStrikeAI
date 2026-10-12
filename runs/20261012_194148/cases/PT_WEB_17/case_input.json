@@ -1,0 +1,60 @@
+{
+  "case_id": "PT_WEB_17",
+  "scope": {
+    "origins": ["http://localhost:4280"],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "limits": {
+    "max_requests": 10,
+    "timeout_seconds": 30
+  },
+  "scope_items": [
+    {"id": "surface", "must_complete": true},
+    {"id": "component-inventory", "must_complete": true}
+  ],
+  "inputs": {
+    "component_requests": [
+      {"url": "http://localhost:4280/login.php", "method": "GET"},
+      {"url": "http://localhost:4280/", "method": "GET"}
+    ],
+    "components": [
+      {
+        "name": "Apache",
+        "version": "2.4.68",
+        "source": "HTTP Server header",
+        "evidence_ref": "will_be_filled_after_execute"
+      },
+      {
+        "name": "PHP",
+        "version": "8.5.10",
+        "source": "HTTP X-Powered-By header",
+        "evidence_ref": "will_be_filled_after_execute"
+      }
+    ],
+    "advisories": [
+      {
+        "id": "CVE-2024-38477",
+        "component": "Apache",
+        "affected_versions": ["2.4.59"],
+        "description": "mod_rewrite encoding issue"
+      },
+      {
+        "id": "CVE-2024-39573",
+        "component": "Apache",
+        "affected_versions": ["2.4.0-2.4.59"],
+        "description": "mod_proxy_uwsgi buffer overflow"
+      },
+      {
+        "id": "CVE-2024-40898",
+        "component": "Apache",
+        "affected_versions": ["2.4.0-2.4.61"],
+        "description": "HTTP response splitting"
+      }
+    ],
+    "inventory_complete": true
+  }
+}

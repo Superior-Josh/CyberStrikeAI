@@ -340,6 +340,11 @@ func (e *Executor) RegisterTools(mcpServer *mcp.Server) {
 		}
 
 		handler := func(ctx context.Context, args map[string]interface{}) (*mcp.ToolResult, error) {
+			if toolName == "http-framework-test" {
+				if probe, ok := args["browser_probe"].(bool); ok && probe {
+					return e.executeBanmaBrowser(ctx, args)
+				}
+			}
 			if toolName == "http-framework-test" && mcp.IsBanmaController(ctx) {
 				return e.executeBanmaHTTP(ctx, args)
 			}

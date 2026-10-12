@@ -1,0 +1,292 @@
+{
+  "version": 1,
+  "created_at": 1791805335.71003,
+  "scope": {
+    "origins": [
+      "http://localhost:4280"
+    ],
+    "network_authorized": true,
+    "active_authorized": true,
+    "write_authorized": true,
+    "load_authorized": true,
+    "forbidden_paths": []
+  },
+  "authorization_ref": "用户明确授权本机4280端口DVWA黑盒测试，允许所有操作，凭据admin:password",
+  "result_profile": "dvwa-local-4280",
+  "run_limits": {
+    "max_requests": 2000,
+    "max_case_requests": 100,
+    "max_supplement_rounds": 3,
+    "login_max_attempts": 30,
+    "login_window_seconds": 60
+  },
+  "execution_order": [
+    "PT_WEB_04",
+    "PT_WEB_03",
+    "PT_WEB_02",
+    "PT_WEB_12",
+    "PT_WEB_13",
+    "PT_WEB_16",
+    "PT_WEB_18",
+    "PT_WEB_14",
+    "PT_WEB_17",
+    "PT_WEB_05",
+    "PT_WEB_07",
+    "PT_WEB_08",
+    "PT_WEB_09",
+    "PT_WEB_10",
+    "PT_WEB_15",
+    "PT_WEB_AUTH_21",
+    "PT_WEB_AUTH_22",
+    "PT_WEB_AUTH_01",
+    "PT_WEB_AUTH_02",
+    "PT_WEB_AUTH_03",
+    "PT_WEB_AUTH_05",
+    "PT_WEB_AUTH_06",
+    "PT_WEB_AUTH_26",
+    "PT_WEB_AUTH_08",
+    "PT_WEB_AUTH_10",
+    "PT_WEB_AUTH_11",
+    "PT_WEB_AUTH_12",
+    "PT_WEB_AUTH_13",
+    "PT_WEB_AUTH_17",
+    "PT_WEB_AUTH_20",
+    "PT_WEB_AUTH_24",
+    "PT_WEB_AUTH_04",
+    "PT_WEB_AUTH_09",
+    "PT_WEB_AUTH_14",
+    "PT_WEB_AUTH_15",
+    "PT_WEB_AUTH_16",
+    "PT_WEB_AUTH_18",
+    "PT_WEB_06",
+    "PT_WEB_AUTH_23",
+    "PT_WEB_AUTH_07",
+    "PT_WEB_01",
+    "PT_WEB_AUTH_25",
+    "PT_WEB_AUTH_19",
+    "PT_WEB_11"
+  ],
+  "selected_cases": [
+    {
+      "case_id": "PT_WEB_04",
+      "execution_order": 1,
+      "case_sha256": "240e56ae18361943ecf22b53f6d187a083cee0d537b12c027db214214013ed41"
+    },
+    {
+      "case_id": "PT_WEB_03",
+      "execution_order": 2,
+      "case_sha256": "4ba5ddc52d40c87279dacdb0c64afdd57de45cd83ff67e74bb4c12ac2b45ec65"
+    },
+    {
+      "case_id": "PT_WEB_02",
+      "execution_order": 3,
+      "case_sha256": "ce68c2d04b106f52e48c6eb1feb18c7f5222e0155a490b4dd4e539d61f220fe2"
+    },
+    {
+      "case_id": "PT_WEB_12",
+      "execution_order": 4,
+      "case_sha256": "4900116335dbd9404ecae487679a336110ec861134f47e7767425f700dc93c80"
+    },
+    {
+      "case_id": "PT_WEB_13",
+      "execution_order": 5,
+      "case_sha256": "b7d4e33e329387f8991dbaa38b4b0a0947c9fb9340b6b7e2b721cbdd36ba7936"
+    },
+    {
+      "case_id": "PT_WEB_16",
+      "execution_order": 6,
+      "case_sha256": "a608eef4e90f359b1553449b5888a0004fdfed302154a90f5889297144a001c6"
+    },
+    {
+      "case_id": "PT_WEB_18",
+      "execution_order": 7,
+      "case_sha256": "a919b40a78e182e29fa5d015621af01b9d1faeaf82d81f9d7b6737ce2f465356"
+    },
+    {
+      "case_id": "PT_WEB_14",
+      "execution_order": 8,
+      "case_sha256": "8d020d2198ac16602e8cec5e5534cd53d2122a614c9cf68729752ed61376ee4d"
+    },
+    {
+      "case_id": "PT_WEB_17",
+      "execution_order": 9,
+      "case_sha256": "49edf1a2569afca27c435589704d6354e7cf3aee4206bf670272adca768117e3"
+    },
+    {
+      "case_id": "PT_WEB_05",
+      "execution_order": 10,
+      "case_sha256": "cba526fb41eeacfa9bf6a26decf73b16e679fbcdc97de810b3ed00aed4b787ee"
+    },
+    {
+      "case_id": "PT_WEB_07",
+      "execution_order": 11,
+      "case_sha256": "7dbd23c16ef7ecc52137cf19a513361282a43e64f74f1a46e7ec6789101fad04"
+    },
+    {
+      "case_id": "PT_WEB_08",
+      "execution_order": 12,
+      "case_sha256": "21c7cbbb71b7401b15f718847a9ca32e3b1f3eea50a8b477dd5a69f2aeb4914e"
+    },
+    {
+      "case_id": "PT_WEB_09",
+      "execution_order": 13,
+      "case_sha256": "4a17ba8a6d5c97b2982ce60769ed9a4f511f417a44c94c66429b1f3401aad945"
+    },
+    {
+      "case_id": "PT_WEB_10",
+      "execution_order": 14,
+      "case_sha256": "a88cd8bc1b538567c8391b736ab11c215291a1a2a58722889757ab81ccaff21e"
+    },
+    {
+      "case_id": "PT_WEB_15",
+      "execution_order": 15,
+      "case_sha256": "df0e4a2f6897f09b701f16081ce0a8552c6c2a79af0c1261aac4c590fb9d2121"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_21",
+      "execution_order": 16,
+      "case_sha256": "7c4ce7738528ae6f0dada311f72f2c6167b81e9066855782c24cf47f51ac4798"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_22",
+      "execution_order": 17,
+      "case_sha256": "9bc51871888dcfcb833d7b9c20d130b7d6c0491031d4318940e23a18bdfd51f8"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_01",
+      "execution_order": 18,
+      "case_sha256": "7aa863304627ec0d82086addb0f49d5a249ee91ed7d78a1fe9a50d34e214aaf9"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_02",
+      "execution_order": 19,
+      "case_sha256": "faeb1fc25ada75a720ab9fb04506c1487cd745fb04fbe9fe290ca1ebc51ce3dd"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_03",
+      "execution_order": 20,
+      "case_sha256": "8410b881102b9be9070a9ddb722c981158d63fd7d61eea38f7f692e4ab7c1fb5"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_05",
+      "execution_order": 21,
+      "case_sha256": "51d64fdd76882f079dbcdc981c7a14445ef98771514278b5d12f852dcdc09462"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_06",
+      "execution_order": 22,
+      "case_sha256": "7d211201d8887fee5d88c2f2bac1a08805f6a7a520dce4bd3877d7c81a7a24aa"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_26",
+      "execution_order": 23,
+      "case_sha256": "0c94de02eb4075885f26fbe6a7547a6a606426a235e1b6936ab25a95fdd3d18e"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_08",
+      "execution_order": 24,
+      "case_sha256": "6051755345ec8137b1b8c528f079db1e6afd9cead11b8a6c04c2e55fd2158eab"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_10",
+      "execution_order": 25,
+      "case_sha256": "c0427c4f4b3a2bb0d30dd9f1610be8f906d0f105afc847894e4264049089e63a"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_11",
+      "execution_order": 26,
+      "case_sha256": "b21a58dabdffdcf198e34ea55c6c13f707b2efe1770ff68937e5ade1fb466266"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_12",
+      "execution_order": 27,
+      "case_sha256": "b8fae764732d87c35b89998585feccefe3dfb4319ebe20f98375a2e4fd386ab8"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_13",
+      "execution_order": 28,
+      "case_sha256": "2ae8385e0a6033171f57a1eda90aa5094c6a70044d1c28e4ee3299bbd485ad4b"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_17",
+      "execution_order": 29,
+      "case_sha256": "8780eb6e43a4b455f2461ebe8b91b210dee3c7871ad91d075976a720fbd1393c"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_20",
+      "execution_order": 30,
+      "case_sha256": "be074e3a3e0adfee57d20d81ba875b155253805bf415823c39c1822859b96f8e"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_24",
+      "execution_order": 31,
+      "case_sha256": "7fabf2109130e2c99fb00fb1201ae4864dac78f4f3c2c1c2e56a77f5cf865e2c"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_04",
+      "execution_order": 32,
+      "case_sha256": "e6f78c92f225b74460c920b1897883e33ba847fb0de802e66c202085f257d06e"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_09",
+      "execution_order": 33,
+      "case_sha256": "d6e8bbd8b3c3f3ebaac456c65b33995eb30abf6eb8fd93ebd7450eebc543e398"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_14",
+      "execution_order": 34,
+      "case_sha256": "c8065a71bfb97cc8820f0cebc47b7184e22f9c44359dddf2abc97c97e3410d54"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_15",
+      "execution_order": 35,
+      "case_sha256": "05c935defc8ed64231ca600058c0a351017b7911b16b3b865efd5a2405daa684"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_16",
+      "execution_order": 36,
+      "case_sha256": "ccad2b9c7afbc6380d4dfe6cb171bb129561ff8cba304a8c74dc44023dd90931"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_18",
+      "execution_order": 37,
+      "case_sha256": "d1e5c6651dc20c1fbae4c755d7ab2f812aed604605f5bbbba9aa7f5e429491a2"
+    },
+    {
+      "case_id": "PT_WEB_06",
+      "execution_order": 38,
+      "case_sha256": "c42e8522e2154a0ff40cc8d9fa4cb64e745d4515a6beb238748e835621efdca5"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_23",
+      "execution_order": 39,
+      "case_sha256": "a34ffbc58baba859c8ae77f5dad6acfd3864bd7263f6d22b07e86f511bdd6d1f"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_07",
+      "execution_order": 40,
+      "case_sha256": "004772c5ad4f720c8e8f545c4e63ac7490d1b00740fafaf78c8457dcc371267c"
+    },
+    {
+      "case_id": "PT_WEB_01",
+      "execution_order": 41,
+      "case_sha256": "ef419cb9ab5914e45c9ea4c72ccbc77b1289ae020c7357aa2ab3bd1acc0d7213"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_25",
+      "execution_order": 42,
+      "case_sha256": "f9d28421c81e9710ef305e6b5b43ada28f61b76ed87b3cbc25a1e283c881675f"
+    },
+    {
+      "case_id": "PT_WEB_AUTH_19",
+      "execution_order": 43,
+      "case_sha256": "92af96fb9cb64f6b72e34cafc2f0e25760e91503e36ae2e0939d08db8013dbf4"
+    },
+    {
+      "case_id": "PT_WEB_11",
+      "execution_order": 44,
+      "case_sha256": "8e74f4cf98e14e269dd7202c25a2ec491f329ef61adb73c1caf1b5ea20cef29f"
+    }
+  ],
+  "context_sha256": "0c8859bc08734d0fccf660724fd80ddfc6828b4d1becc586808f0a363d9074b4"
+}

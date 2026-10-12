@@ -1,0 +1,105 @@
+{
+  "case_id": "PT_WEB_04",
+  "facts": {
+    "ports": [
+      {
+        "operation_id": "tcp-1",
+        "connect_result": "open",
+        "error_type": null,
+        "service_identified": false
+      },
+      {
+        "operation_id": "http-1",
+        "connect_result": null,
+        "error_type": null,
+        "service_identified": null
+      },
+      {
+        "operation_id": "tcp-1-s1",
+        "connect_result": "open",
+        "error_type": null,
+        "service_identified": false
+      },
+      {
+        "operation_id": "http-1-s1",
+        "connect_result": null,
+        "error_type": null,
+        "service_identified": null
+      }
+    ],
+    "http": {
+      "samples": [
+        {
+          "operation_id": "tcp-1",
+          "status": null,
+          "length": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "elapsed": 0.0038750171661376953,
+          "error": false
+        },
+        {
+          "operation_id": "http-1",
+          "status": 302,
+          "length": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "elapsed": 0.003531,
+          "error": false
+        },
+        {
+          "operation_id": "tcp-1-s1",
+          "status": null,
+          "length": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "elapsed": 0.004241943359375,
+          "error": false
+        },
+        {
+          "operation_id": "http-1-s1",
+          "status": 302,
+          "length": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "elapsed": 0.004298,
+          "error": false
+        }
+      ],
+      "baseline_samples": 0,
+      "distinct_bodies": 1,
+      "valid_business_requires_ai_review": true
+    }
+  },
+  "coverage_gaps": [
+    "TCP连接不能独立证明完整服务识别，须AI复核HTTP/Banner适用范围"
+  ],
+  "evidence_refs": [
+    {
+      "operation_id": "tcp-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/tcp-1.json",
+      "sha256": "d2119d5b5779d4bee8f92d3a548645c275f220dbd672fbf75961271fdd653483"
+    },
+    {
+      "operation_id": "http-1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/http-1.json",
+      "sha256": "518a2434226a6be642f2b2e13d003313c9e0f68802ac1973b2ac2d1b4ffdb89a"
+    },
+    {
+      "operation_id": "tcp-1-s1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/tcp-1-s1.json",
+      "sha256": "d2bc99f0a708c4fb6d22e03d7ec9b25a356dfce060a73040775accb052e6b46f"
+    },
+    {
+      "operation_id": "http-1-s1",
+      "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_04/http-1-s1.json",
+      "sha256": "96754428ffe6b6da2a051f99bbeb1b5c924af9273146f5c78f5db5c77dc40546"
+    }
+  ],
+  "sample_count": 4,
+  "status": "待AI核验",
+  "result": null,
+  "required": "目标范围与攻击面实际核查；存在适用入口时完成：约定 TCP 范围扫描及开放服务核对",
+  "conditional": "（本共同要求优先：可选机制不存在时完成攻击面核查并停止以下仅适用分支；此后的策略/规则取本项默认基线和实际网络观察，不向用户索要未必存在的文档）UDP 仅在授权且具备权限时纳入；1-65535 仅在全端口授权时扫描",
+  "expected_results": {
+    "通过": "必测及已触发条件项完成，约定范围扫描完成，已确认开放服务符合业务基线；未测范围不推断关闭；依据本项默认安全基线及真实观察判定，范围限于本轮已完整核查内容",
+    "失败": "复核证实存在基线禁止的开放服务；不需要另行用户策略文档才能确认违反本项默认安全基线",
+    "中断": "仅在未证实失败且实际工具/执行环境故障经修正或等效工具重试仍阻止必要验证时中断，记录失败调用、原文及补救；缺策略文档、目标没有该功能、未提供可选凭据或首次采集不足不是中断理由。未知仍须继续核查，不得凭空判通过/失败"
+  }
+}

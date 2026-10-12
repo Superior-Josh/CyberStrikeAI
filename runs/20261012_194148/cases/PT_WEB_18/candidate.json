@@ -1,0 +1,182 @@
+{
+  "case_id": "PT_WEB_18",
+  "result_candidate": "中断",
+  "interruption_kind": "用例不适用",
+  "reason": "完整攻击面核查：login.php（200）、/（302→login.php）、不存在页面（404）及login.css均仅引用同源资源。login.php HTML中唯一外部引用为 dvwa/css/login.css（同源），无script标签引用外部资源，无CDN/第三方脚本或样式。根据用例定义'同源本地资源不强制SRI'，本项检查目标为第三方资源SRI校验，目标无适用入口。DVWA本地靶场不适用此项检查。",
+  "reviewed": true,
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true,
+      "status": "completed",
+      "reason": "攻击面核查已完成：核查login.php、/、不存在页面及404错误页，确认无第三方脚本/样式引用",
+      "evidence_refs": [
+        {
+          "operation_id": "page-requests-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+          "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b",
+          "role": "surface"
+        },
+        {
+          "operation_id": "resource-requests-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/resource-requests-1.json",
+          "sha256": "d9317875639662f074fdd8b0519a2fbf0ca31cb7b4a04886d430b1f172a89505",
+          "role": "surface"
+        },
+        {
+          "operation_id": "page-requests-1-s1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1-s1.json",
+          "sha256": "41c170536c18cb7d871935689084399633be8057ad01a10e146806848caa14b2",
+          "role": "surface"
+        },
+        {
+          "operation_id": "page-requests-2-s1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-2-s1.json",
+          "sha256": "587e563251c484c19a7d23ea3142d7315f23996fcd5b04f4ad00bbf57b00c568",
+          "role": "not-found-control"
+        }
+      ]
+    },
+    {
+      "id": "sri",
+      "must_complete": true,
+      "status": "not_applicable",
+      "reason": "无第三方资源需要SRI保护，同源资源不在SRI强制范围内",
+      "evidence_refs": [
+        {
+          "operation_id": "page-requests-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+          "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b",
+          "role": "page"
+        },
+        {
+          "operation_id": "resource-requests-1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/resource-requests-1.json",
+          "sha256": "d9317875639662f074fdd8b0519a2fbf0ca31cb7b4a04886d430b1f172a89505",
+          "role": "resource"
+        },
+        {
+          "operation_id": "page-requests-1-s1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1-s1.json",
+          "sha256": "41c170536c18cb7d871935689084399633be8057ad01a10e146806848caa14b2",
+          "role": "page"
+        },
+        {
+          "operation_id": "page-requests-2-s1",
+          "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-2-s1.json",
+          "sha256": "587e563251c484c19a7d23ea3142d7315f23996fcd5b04f4ad00bbf57b00c568",
+          "role": "page"
+        }
+      ]
+    }
+  ],
+  "coverage_gaps": [],
+  "applicability": {
+    "status": "not_applicable",
+    "reason": "完整攻击面核查确认无第三方脚本/样式需要SRI保护，DVWA本地靶场不适用此项检查",
+    "evidence_refs": [
+      {
+        "operation_id": "page-requests-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+        "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b",
+        "role": "page"
+      },
+      {
+        "operation_id": "resource-requests-1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/resource-requests-1.json",
+        "sha256": "d9317875639662f074fdd8b0519a2fbf0ca31cb7b4a04886d430b1f172a89505",
+        "role": "resource"
+      },
+      {
+        "operation_id": "page-requests-1-s1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1-s1.json",
+        "sha256": "41c170536c18cb7d871935689084399633be8057ad01a10e146806848caa14b2",
+        "role": "page"
+      },
+      {
+        "operation_id": "page-requests-2-s1",
+        "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-2-s1.json",
+        "sha256": "587e563251c484c19a7d23ea3142d7315f23996fcd5b04f4ad00bbf57b00c568",
+        "role": "not-found-control"
+      }
+    ],
+    "checked_surfaces": [
+      "pages",
+      "forms",
+      "scripts",
+      "network",
+      "candidate_endpoints",
+      "not_found_control"
+    ],
+    "surface_review": [
+      {
+        "kind": "pages",
+        "reason": "login.php和/页面HTML分析显示无第三方脚本引用",
+        "evidence_refs": [
+          {
+            "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+            "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b"
+          },
+          {
+            "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1-s1.json",
+            "sha256": "41c170536c18cb7d871935689084399633be8057ad01a10e146806848caa14b2"
+          }
+        ]
+      },
+      {
+        "kind": "forms",
+        "reason": "login.php包含登录表单但无外部资源引用",
+        "evidence_refs": [
+          {
+            "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+            "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b"
+          }
+        ]
+      },
+      {
+        "kind": "scripts",
+        "reason": "所有页面均无script标签引用外部资源，仅同源CSS",
+        "evidence_refs": [
+          {
+            "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+            "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b"
+          }
+        ]
+      },
+      {
+        "kind": "network",
+        "reason": "所有HTTP请求均指向localhost:4280，无外部域名或CDN请求",
+        "evidence_refs": [
+          {
+            "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+            "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b"
+          },
+          {
+            "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/resource-requests-1.json",
+            "sha256": "d9317875639662f074fdd8b0519a2fbf0ca31cb7b4a04886d430b1f172a89505"
+          }
+        ]
+      },
+      {
+        "kind": "candidate_endpoints",
+        "reason": "未发现任何CDN或第三方资源端点",
+        "evidence_refs": [
+          {
+            "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-1.json",
+            "sha256": "ee2a6be5683d7615ecfe33ebb62943e63cc626c8a4ed834c7e3796d8bd94b75b"
+          }
+        ]
+      },
+      {
+        "kind": "not_found_control",
+        "reason": "不存在页面返回404，错误页为Apache默认模板无外部资源",
+        "evidence_refs": [
+          {
+            "path": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_18/page-requests-2-s1.json",
+            "sha256": "587e563251c484c19a7d23ea3142d7315f23996fcd5b04f4ad00bbf57b00c568"
+          }
+        ]
+      }
+    ]
+  }
+}

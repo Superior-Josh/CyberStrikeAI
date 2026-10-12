@@ -1,0 +1,483 @@
+{
+  "case_id": "PT_WEB_14",
+  "execution_order": 8,
+  "scope_sha256": "7fee7d608a60f3a114dbb0d9435b0b9ed95f0d48b1523880d5883350ed085379",
+  "inputs_sha256": "577e58e58ee772828e3f0eaf28bba2b73103615860030456d4d6ff1f9cb4445d",
+  "limits_sha256": "ef1e3036a8b2e10e66982c23ed58f3efda83fb9a103e1402cd9b4d86fa61849b",
+  "source_hashes": {
+    "cases/anonymous/PT_WEB_14.yaml": "8d020d2198ac16602e8cec5e5534cd53d2122a614c9cf68729752ed61376ee4d",
+    "scripts/workflow.py": "10859fc16587291abe785b01289d8336e037f5e65fed5f2a36e9e81602968c39",
+    "scripts/runtime/common.py": "c1562df6cbba6eac07ba5650350c97593c658619f85eaf28c0e8372333ddd409",
+    "scripts/runtime/builders.py": "69c823fd1994b30d02601c816ce989194b3f73e31d9587124bcada85aea78191",
+    "scripts/runtime/execution.py": "a4cd50bf22b04442e426ca589ee7e405ffd5e0038e228d942e5b47b04da2987e",
+    "scripts/runtime/protocols.py": "f61349c4c311ddd78521e7a6e61c3abcdd68b67febf05f5d277914c8ffafccd0",
+    "scripts/runtime/lifecycle.py": "d68f1ee93f2d8b3a86dfa472d7b8e33193a2c1c3268f3d0d2a7a53719e330215",
+    "scripts/runtime/pt_web_14.py": "bda8bbcd4b44291222fc9b8e7c6d7ce095d1740d0d6be0a7a8bad21863423ff6"
+  },
+  "scope_items": [
+    {
+      "id": "surface",
+      "must_complete": true
+    },
+    {
+      "id": "sensitive-content",
+      "must_complete": true
+    }
+  ],
+  "expected_requests": 26,
+  "operations": [
+    {
+      "operation_id": "normal-before",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/login.php",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/normal-before.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "not-found",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/nonexistent_random_xyz789.html",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/not-found.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-1",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/.git/config",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-1.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-2",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/.git/HEAD",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-2.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-3",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/.env",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-3.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-4",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/config.php",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-4.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-5",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/config.inc.php",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-5.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-6",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/wp-config.php",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-6.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-7",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/backup.sql",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-7.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-8",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/dump.sql",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-8.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-9",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/.htaccess",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-9.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-10",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/.htpasswd",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-10.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-11",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/server-status",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-11.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-12",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/phpinfo.php",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-12.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-13",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/info.php",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-13.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-14",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/test.php",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-14.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-15",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/admin/",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-15.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-16",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/phpmyadmin/",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-16.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-17",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/web.config",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-17.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-18",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/crossdomain.xml",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-18.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-19",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/sitemap.xml",
+        "method": "GET",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-19.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-20",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/.DS_Store",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-20.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-21",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/Thumbs.db",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-21.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-22",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/config.yml",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-22.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-23",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/database.yml",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-23.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    },
+    {
+      "operation_id": "candidate-24",
+      "tool": "http-framework-test",
+      "parameters": {
+        "url": "http://localhost:4280/db.sql",
+        "method": "HEAD",
+        "repeat": 1,
+        "follow_redirects": false,
+        "allow_insecure": false,
+        "httpx_options": "trust_env=false",
+        "include_headers": true,
+        "capture_file": "/Users/banma-josh/project/CyberStrikeAI/runs/20261012_194148/raw/PT_WEB_14/candidate-24.json",
+        "timeout": "5.0"
+      },
+      "policy": "read",
+      "session": "anonymous"
+    }
+  ],
+  "coverage_gaps": [],
+  "details": {
+    "head_only_is_access_hint": true
+  },
+  "limits": {
+    "max_requests": 50,
+    "timeout_seconds": 30
+  },
+  "result": null,
+  "status": "计划已构造",
+  "supplement_round": 0
+}

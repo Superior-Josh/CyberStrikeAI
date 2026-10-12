@@ -1,0 +1,8 @@
+{
+  "source": "web-pentesting runtime tcp",
+  "url": "http://localhost:4280",
+  "started": 1791805603.272547,
+  "connect_result": "open",
+  "service_identified": false,
+  "elapsed_seconds": 0.004241943359375
+}

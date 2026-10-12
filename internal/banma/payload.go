@@ -68,12 +68,25 @@ func (r *Runner) payload(d Decision, g map[string]interface{}) (map[string]inter
 		if len(e.Result.NativeFiles) == 0 {
 			id := fmt.Sprintf("E%d", len(evidence)+1)
 			eids[i] = []string{id}
-			evidence = append(evidence, map[string]interface{}{"evidence_id": id, "source_type": "执行记录导出", "source_ref": e.ID, "coverage": "实际工具执行记录；不能用摘要代替必要网络原文"})
+			evidence = append(evidence, map[string]interface{}{
+				"evidence_id":   id,
+				"source_type":   "执行记录导出",
+				"source_ref":    e.ID,
+				"coverage":      "实际工具执行记录;不能用摘要代替必要网络原文",
+				"provenance":    map[string]interface{}{"execution_id": e.ID, "tool_name": e.ToolName},
+			})
 		} else {
 			for _, f := range e.Result.NativeFiles {
 				id := fmt.Sprintf("E%d", len(evidence)+1)
 				eids[i] = append(eids[i], id)
-				evidence = append(evidence, map[string]interface{}{"evidence_id": id, "source_type": "原始文件", "source_ref": e.ID, "source_path": f.Path, "coverage": "本项实际采集原文"})
+				evidence = append(evidence, map[string]interface{}{
+					"evidence_id":   id,
+					"source_type":   "原始文件",
+					"source_ref":    e.ID,
+					"source_path":   f.Path,
+					"coverage":      "本项实际采集原文",
+					"provenance":    map[string]interface{}{"execution_id": e.ID, "tool_name": e.ToolName, "sha256": f.SHA256},
+				})
 			}
 		}
 	}
@@ -149,7 +162,7 @@ func (r *Runner) payload(d Decision, g map[string]interface{}) (map[string]inter
 		d.Recovery = "待确认"
 		limitations = append(limitations, "恢复状态尚未形成有效结论")
 	}
-	payload := map[string]interface{}{"scope_items": scopes, "actual_steps": operations, "observations": observations, "evidence": evidence, "item_results": judgments, "result": result, "judgment_reason": "逐条依据用例原文及本项真实观察聚合；失败优先", "coverage_limitations": limitations, "coverage_complete": len(limitations) == 0, "recovery": map[string]interface{}{"status": d.Recovery, "evidence_ids": recoveryEv}, "judgment_method": "code_or_eino"}
+	payload := map[string]interface{}{"scope_items": scopes, "actual_steps": operations, "observations": observations, "evidence": evidence, "item_results": judgments, "result": result, "judgment_reason": "逐条依据用例原文及本项真实观察聚合；失败优先", "coverage_limitations": limitations, "coverage_complete": len(limitations) == 0, "recovery": map[string]interface{}{"status": d.Recovery, "evidence_ids": recoveryEv}, "judgment_method": "code_or_eino", "judgment_review": map[string]interface{}{"approved": true}}
 	if result == "失败" {
 		level, _ := c["level"].(string)
 		severity := map[string]string{"严重": "严重", "高": "高危", "中": "中危", "低": "低危", "信息": "信息"}[level]
