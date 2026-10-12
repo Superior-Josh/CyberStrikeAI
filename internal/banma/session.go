@@ -14,6 +14,12 @@ func (r *Runner) prepareAuthenticatedSession(ctx context.Context, cid string, in
 	if len(input.Targets) != 1 || input.Username == "" || input.Password == "" {
 		return nil, nil
 	}
+	r.budget.mu.Lock()
+	stopped := r.budget.NormalStopped
+	r.budget.mu.Unlock()
+	if stopped {
+		return map[string]interface{}{"status": "unavailable", "reason": "本轮提供凭据验证已停止；不重复提交"}, nil
+	}
 	jar := map[string]string{}
 	target := input.Targets[0]
 	var capture Capture
@@ -32,6 +38,7 @@ func (r *Runner) prepareAuthenticatedSession(ctx context.Context, cid string, in
 		}
 		cookies(capture, jar)
 		if capture.Status == 429 {
+			r.stopNormalCredentials()
 			return nil, fmt.Errorf("login discovery received 429; no credential submission")
 		}
 		if capture.Status < 300 || capture.Status >= 400 {
@@ -80,6 +87,7 @@ func (r *Runner) prepareAuthenticatedSession(ctx context.Context, cid string, in
 	}
 	cookies(capture, jar)
 	if capture.Status == 429 {
+		r.stopNormalCredentials()
 		return nil, fmt.Errorf("normal login received 429; do not resubmit credentials")
 	}
 	for hop := 0; capture.Status >= 300 && capture.Status < 400 && hop < 4; hop++ {
@@ -99,9 +107,17 @@ func (r *Runner) prepareAuthenticatedSession(ctx context.Context, cid string, in
 	}
 	body, _ = base64.StdEncoding.DecodeString(capture.Body)
 	if capture.Status != 200 || !observedIdentity(string(body), input.Username) || !strings.Contains(string(body), "logout.php") {
-		return nil, nil
+		r.stopNormalCredentials()
+		return map[string]interface{}{"status": "unavailable", "reason": "真实提交未建立已验证身份；不得另取凭据或重复未知提交"}, nil
 	}
 	return map[string]interface{}{"status": "identity_verified", "username": input.Username, "headers": map[string]string{"Cookie": cookieHeader(jar)}, "authenticated_url": capture.URL, "source": "this case native login and identity records; runtime-only session"}, nil
+}
+
+func (r *Runner) stopNormalCredentials() {
+	r.budget.mu.Lock()
+	defer r.budget.mu.Unlock()
+	r.budget.NormalStopped = true
+	r.budget.Stopped = true
 }
 
 func cookieHeader(jar map[string]string) string {

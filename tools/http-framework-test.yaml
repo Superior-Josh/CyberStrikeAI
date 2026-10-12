@@ -588,6 +588,7 @@ args:
             meta["length"] = len(payload)
             return payload, meta
         stripped = data.strip()
+        explicit_content_type = bool(headers.get("Content-Type"))
         content_type = headers.get("Content-Type")
         if not content_type:
             guessed = ""
@@ -617,7 +618,7 @@ args:
                 meta["mode"] = "raw"
         content_type = headers.get("Content-Type")
         charset = extract_charset_from_content_type(content_type) if content_type else ""
-        if not charset and meta["mode"] in ("json", "text", "form-urlencoded"):
+        if not charset and not explicit_content_type and meta["mode"] in ("json", "text", "form-urlencoded"):
             charset = "utf-8"
             base = (content_type or "text/plain").split(";")[0].strip()
             headers["Content-Type"] = f"{base}; charset={charset}"

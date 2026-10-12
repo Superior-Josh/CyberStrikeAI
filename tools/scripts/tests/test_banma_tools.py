@@ -19,6 +19,11 @@ sys.modules["banma_report"] = report
 
 
 class CaseTests(unittest.TestCase):
+    def test_spaced_default_credentials_are_redacted(self):
+        value = tool.redact("默认凭据 admin // password； root : letmein")
+        self.assertNotIn("password", value)
+        self.assertNotIn("letmein", value)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

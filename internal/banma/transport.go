@@ -70,15 +70,30 @@ func PlaintextCredentialDecision(guide map[string]interface{}, records []*mcp.To
 			if len(issued) == 0 {
 				issued = old
 			}
-			preIndex, postIndex := -1, -1
+			preIndex, issuedIndex, postIndex := -1, -1, -1
 			for _, other := range frames {
 				u, _ := url.Parse(other.capture.URL)
 				if u == nil || u.Host != target.Host {
 					continue
 				}
 				body, _ := base64.StdEncoding.DecodeString(other.capture.Body)
-				if other.capture.Time < capture.Time && len(sessionCookies(other.capture.RequestHeaders, false)) == 0 && matchingSession(sessionCookies(other.capture.Headers, true), old) && loginFormWithoutIdentity(other.capture.Body, username) {
-					preIndex = other.index
+				if other.capture.Time < capture.Time && loginFormWithoutIdentity(other.capture.Body, username) {
+					fresh := len(sessionCookies(other.capture.RequestHeaders, false)) == 0 && matchingSession(sessionCookies(other.capture.Headers, true), old)
+					anchor := other.index
+					if !fresh && matchingSession(sessionCookies(other.capture.RequestHeaders, false), old) {
+						for _, issuedFrame := range frames {
+							issuedURL, _ := url.Parse(issuedFrame.capture.URL)
+							if issuedURL != nil && issuedURL.Host == target.Host && issuedFrame.capture.Time < other.capture.Time && len(sessionCookies(issuedFrame.capture.RequestHeaders, false)) == 0 && matchingSession(sessionCookies(issuedFrame.capture.Headers, true), old) {
+								issuedBody, _ := base64.StdEncoding.DecodeString(issuedFrame.capture.Body)
+								fresh = !observedIdentity(string(issuedBody), username)
+								anchor = issuedFrame.index
+							}
+						}
+					}
+					if fresh {
+						preIndex = other.index
+						issuedIndex = anchor
+					}
 				}
 				if other.capture.Time > capture.Time && other.capture.Status == 200 && matchingSession(sessionCookies(other.capture.RequestHeaders, false), issued) && observedIdentity(string(body), username) && strings.Contains(string(body), "logout.php") {
 					postIndex = other.index
@@ -87,7 +102,11 @@ func PlaintextCredentialDecision(guide map[string]interface{}, records []*mcp.To
 			if preIndex < 0 || postIndex < 0 {
 				continue
 			}
-			return Decision{Method: "code", Checks: []Check{{Ref: "steps[0]", Result: "失败", Reason: "同轮真实原生请求使用HTTP并提交用户提供的口令，不满足本项敏感请求HTTPS基线；秘密值不展示", Evidence: []int{preIndex, index, postIndex}}}, Gaps: []string{"其余传输/TLS/Cookie条款及原会话清理尚待核验"}, Recovery: "待确认"}, true, nil
+			evidence := []int{preIndex, index, postIndex}
+			if issuedIndex != preIndex {
+				evidence = append([]int{issuedIndex}, evidence...)
+			}
+			return Decision{Method: "code", Checks: []Check{{Ref: "steps[0]", Result: "失败", Reason: "同轮真实原生请求使用HTTP并提交用户提供的口令，不满足本项敏感请求HTTPS基线；秘密值不展示", Evidence: evidence}}, Gaps: []string{"其余传输/TLS/Cookie条款及原会话清理尚待核验"}, Recovery: "待确认"}, true, nil
 		}
 	}
 	return Decision{}, false, nil

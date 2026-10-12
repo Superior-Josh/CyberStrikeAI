@@ -269,7 +269,7 @@ def render(run, definitions, context, template):
     header = "<!-- banma-render: " + json.dumps({"artifact_status": artifact, "counts": counts}, ensure_ascii=False) + " -->\n\n"
     if gaps:
         header += "> 草稿：存在未执行或资料缺口，不能作为完整测试交付。\n\n" + "\n".join("- " + cell(g) for g in gaps) + "\n\n"
-    return header + result, {"artifact_status": artifact, "counts": counts, "gaps": gaps, "source_fingerprint": fingerprint}
+    return helper.redact(header + result), {"artifact_status": artifact, "counts": counts, "gaps": gaps, "source_fingerprint": fingerprint}
 
 
 def dispatch(mode, run_dir, cases_dir=None, template_file=None, output_name=None, payload=None, report_file=None):

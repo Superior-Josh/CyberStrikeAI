@@ -13,15 +13,16 @@ import (
 )
 
 type Budget struct {
-	mu       sync.Mutex
-	Attempts int
-	Max      int
-	Window   time.Duration
-	Started  time.Time
-	Stopped  bool
-	CodeLoop bool
-	Handoff  bool
-	NMapUsed bool
+	mu            sync.Mutex
+	Attempts      int
+	Max           int
+	Window        time.Duration
+	Started       time.Time
+	Stopped       bool
+	CodeLoop      bool
+	Handoff       bool
+	NMapUsed      bool
+	NormalStopped bool
 }
 
 func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.ToolResult {
@@ -150,7 +151,16 @@ func (r *Runner) checkOperation(name string, args map[string]interface{}) *mcp.T
 	if !body.Has("password") {
 		return nil
 	}
+	r.budget.mu.Lock()
+	handoff, normalStopped := r.budget.Handoff, r.budget.NormalStopped
+	r.budget.mu.Unlock()
+	if handoff && strings.HasPrefix(r.currentCase, "PT_WEB_") && !strings.Contains(r.currentCase, "_AUTH_") {
+		return deny("匿名用例不得通过Eino提交凭据进入认证状态；候选验证由代码处理")
+	}
 	if body.Get("password") == r.input.Password && r.input.Password != "" && body.Get("username") == r.input.Username && r.input.Username != "" {
+		if normalStopped {
+			return deny("本轮提供凭据未能建立身份或收到429；不再次提交，保留认证缺口")
+		}
 		return nil
 	}
 	r.budget.mu.Lock()

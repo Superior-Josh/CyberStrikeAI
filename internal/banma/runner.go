@@ -330,7 +330,17 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 					guideErr = fmt.Errorf("Eino handoff unavailable")
 				} else {
 					// Secrets stay in the running context; never persist them in run metadata.
-					material := map[string]interface{}{"guidance": guide, "existing_operations": r.captures, "username": input.Username, "password": input.Password, "authenticated_session": authenticatedSession}
+					material := map[string]interface{}{"guidance": guide, "existing_operations": r.captures}
+					if strings.Contains(cid, "_AUTH_") {
+						r.budget.mu.Lock()
+						credentialStopped := r.budget.NormalStopped
+						r.budget.mu.Unlock()
+						if !credentialStopped {
+							material["username"] = input.Username
+							material["password"] = input.Password
+						}
+						material["authenticated_session"] = authenticatedSession
+					}
 					var records []*mcp.ToolExecution
 					r.budget.mu.Lock()
 					r.budget.Handoff = true

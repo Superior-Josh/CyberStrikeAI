@@ -72,3 +72,19 @@ func TestMissingCredentialsDoNotTriggerRequests(t *testing.T) {
 		t.Fatal("missing optional input invented session")
 	}
 }
+
+func TestStoppedCredentialsAreNotRetriedByNextCaseOrHandoff(t *testing.T) {
+	r := &Runner{input: Input{Username: "fixture", Password: "provided"}}
+	r.stopNormalCredentials()
+	r.Call = func(context.Context, string, map[string]interface{}) (*mcp.ToolExecution, error) {
+		t.Fatal("next case retried stopped credentials")
+		return nil, nil
+	}
+	session, err := r.prepareAuthenticatedSession(context.Background(), "PT_WEB_AUTH_07", Input{Targets: []string{"http://fixture.invalid/"}, Username: "fixture", Password: "provided"})
+	if err != nil || session["status"] != "unavailable" {
+		t.Fatal("credential gap was not preserved")
+	}
+	if r.checkOperation("http-framework-test", map[string]interface{}{"url": "http://fixture.invalid/login.php", "method": "POST", "data": "username=fixture&password=provided"}) == nil {
+		t.Fatal("handoff repeated rejected supplied credential")
+	}
+}

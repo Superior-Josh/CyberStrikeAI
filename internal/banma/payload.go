@@ -9,6 +9,15 @@ import (
 // payload binds the handoff's small judgment to platform-owned execution data.
 // The model never creates UUIDs, native paths, tool statuses or provenance.
 func (r *Runner) payload(d Decision, g map[string]interface{}) (map[string]interface{}, error) {
+	checks := make([]Check, 0, len(d.Checks))
+	for _, check := range d.Checks {
+		if check.Result == "中断" && d.Interruption == "" {
+			d.Gaps = append(d.Gaps, "未完成且无真实环境故障依据："+check.Ref)
+			continue
+		}
+		checks = append(checks, check)
+	}
+	d.Checks = checks
 	limitations := d.Gaps
 	if limitations == nil {
 		limitations = []string{}

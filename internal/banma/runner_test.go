@@ -257,6 +257,23 @@ func TestConfirmedFailureSurvivesMissingChecksAndRecovery(t *testing.T) {
 	}
 }
 
+func TestUnknownCheckDoesNotBecomeEnvironmentInterruption(t *testing.T) {
+	r := &Runner{captures: []*mcp.ToolExecution{fixtureExecution("offline-fixture", nil)}}
+	g := map[string]interface{}{"case": map[string]interface{}{"id": "PT_WEB_AUTH_22", "steps": []interface{}{"disclosure", "storage"}}}
+	d := Decision{Checks: []Check{{Ref: "steps[0]", Result: "失败", Reason: "OFFLINE observed failure", Evidence: []int{0}}, {Ref: "steps[1]", Result: "中断", Reason: "unknown storage", Evidence: []int{0}}}, Recovery: "未涉及"}
+	p, err := r.payload(d, g)
+	if err != nil || p["result"] != "失败" || p["coverage_complete"] != false || len(p["item_results"].([]interface{})) != 1 {
+		t.Fatalf("unknown storage became interruption or erased failure: %+v %v", p, err)
+	}
+}
+
+func TestAnonymousHandoffCannotAuthenticateWithSuppliedCredentials(t *testing.T) {
+	r := &Runner{currentCase: "PT_WEB_18", input: Input{Username: "fixture", Password: "known"}, budget: Budget{Handoff: true}}
+	if r.checkOperation("http-framework-test", map[string]interface{}{"url": "http://127.0.0.1:4280/login.php", "method": "POST", "data": "username=fixture&password=known"}) == nil {
+		t.Fatal("anonymous Eino authenticated")
+	}
+}
+
 func TestGETPasswordCandidateCannotBypassSharedBudget(t *testing.T) {
 	r := &Runner{input: Input{Targets: []string{"http://127.0.0.1:4280"}, Password: "known"}, budget: Budget{Max: 1, Window: time.Minute, CodeLoop: true}}
 	a := map[string]interface{}{"url": "http://127.0.0.1:4280/vulnerabilities/brute/?username=fixture&password=wrong", "method": "GET"}

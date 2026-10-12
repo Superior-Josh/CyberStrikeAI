@@ -26,6 +26,24 @@ func TestHTTPPayloadCannotTriggerUnapprovedDestinations(t *testing.T) {
 	}
 }
 
+func TestBareHostPayloadDoesNotInheritHTTPPortAuthorization(t *testing.T) {
+	r := &Runner{input: Input{Targets: []string{"http://127.0.0.1:4280"}}}
+	for _, data := range []string{"ip=8.8.8.8", "ip=127.0.0.1", "ip=127.0.0.1%3Becho+marker", `{"host":"::1"}`} {
+		if r.checkOperation("http-framework-test", map[string]interface{}{"url": "http://127.0.0.1:4280/vulnerabilities/exec/", "method": "POST", "data": data}) == nil {
+			t.Fatal("bare network target accepted", data)
+		}
+	}
+}
+
+func TestRelativeExternalURLAndInternalFileProbesAreRejected(t *testing.T) {
+	r := &Runner{input: Input{Targets: []string{"http://127.0.0.1:4280"}}}
+	for _, data := range []string{"redirect=%2F%2Fevil.example", "page=..%2F..%2Fetc%2Fpasswd", "page=..%2F..%2Fvar%2Fwww%2Fhtml%2Fconfig.php"} {
+		if r.checkOperation("http-framework-test", map[string]interface{}{"url": "http://127.0.0.1:4280/", "method": "POST", "data": data}) == nil {
+			t.Fatal("out-of-scope probe accepted", data)
+		}
+	}
+}
+
 func TestHistoricalForbiddenPayloadCannotValidateOldPass(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "raw.json")

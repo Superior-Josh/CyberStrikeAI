@@ -38,6 +38,20 @@ class Handler(BaseHTTPRequestHandler):
 
 
 class NativeCaptureTest(unittest.TestCase):
+    def test_explicit_content_type_is_preserved_on_the_wire(self):
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.addCleanup(server.server_close)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.shutdown)
+        config = yaml.safe_load((ROOT / "tools/http-framework-test.yaml").read_text())
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "json.json"
+            completed = subprocess.run([sys.executable, *config["args"], "--url", f"http://127.0.0.1:{server.server_port}/fixture", "--method", "POST", "--headers", '{"Content-Type":"application/json"}', "--data", '{"fixture":true}', "--capture-file", str(path)], capture_output=True, text=True, timeout=20)
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            data = json.loads(path.read_text())
+            headers = dict(data["request_headers"])
+            self.assertEqual(next(value for key, value in headers.items() if key.lower() == "content-type"), "application/json")
+
     def test_actual_post_body_matches_server_observation(self):
         server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.addCleanup(server.server_close)

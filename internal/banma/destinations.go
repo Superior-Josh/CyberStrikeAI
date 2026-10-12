@@ -6,20 +6,61 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"net"
 	"net/url"
 	"regexp"
 	"strings"
 )
 
-var payloadURL = regexp.MustCompile(`(?i)https?://[^\s"'<>?&]+`)
+var payloadURL = regexp.MustCompile(`(?i)(?:https?:)?//[a-z0-9\[\]][^\s"'<>?&]*`)
+var networkIP = regexp.MustCompile(`\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b`)
+var internalFile = regexp.MustCompile(`(?i)(?:/|\.\./)etc/(?:passwd|shadow)(?:\b|%)|(?:\.\./)+var/www/`)
+
+// A host alone does not authorize the server to ping it or probe other ports.
+func checkNetworkFields(fields url.Values) error {
+	for key, values := range fields {
+		switch strings.ToLower(key) {
+		case "ip", "host", "hostname", "destination":
+			for _, value := range values {
+				if strings.Contains(value, "://") {
+					continue // URL destinations are checked against the frozen port below.
+				}
+				if net.ParseIP(strings.TrimSpace(value)) != nil || len(networkIP.FindAllString(value, -1)) > 0 {
+					return fmt.Errorf("载荷含仅主机的网络操作目的地；冻结HTTP端口不授权ICMP或其他端口")
+				}
+			}
+		}
+	}
+	return nil
+}
 
 // Check URL-valued inputs as well as the primary target. Sending an SSRF or
 // redirect payload can cause the target to access an unapproved destination.
 // Origin/Referer control headers are not themselves fetch instructions.
 func (r *Runner) checkPayloadDestinations(target *url.URL, data string) error {
+	form, _ := url.ParseQuery(data)
+	if err := checkNetworkFields(form); err != nil {
+		return err
+	}
+	if target != nil {
+		if err := checkNetworkFields(target.Query()); err != nil {
+			return err
+		}
+	}
 	values := []string{data}
 	var object interface{}
 	if json.Unmarshal([]byte(data), &object) == nil {
+		if fields, ok := object.(map[string]interface{}); ok {
+			query := url.Values{}
+			for key, value := range fields {
+				if text, ok := value.(string); ok {
+					query.Add(key, text)
+				}
+			}
+			if err := checkNetworkFields(query); err != nil {
+				return err
+			}
+		}
 		var collect func(interface{})
 		collect = func(v interface{}) {
 			switch x := v.(type) {
@@ -52,7 +93,7 @@ func (r *Runner) checkPayloadDestinations(target *url.URL, data string) error {
 		}
 		value = html.UnescapeString(value)
 		lower := strings.ToLower(value)
-		if strings.Contains(lower, "file://") || strings.Contains(lower, "php://filter") {
+		if strings.Contains(lower, "file://") || strings.Contains(lower, "php://filter") || internalFile.MatchString(value) {
 			return fmt.Errorf("禁止以载荷读取靶机内部文件/源码")
 		}
 		for _, candidate := range payloadURL.FindAllString(value, -1) {
