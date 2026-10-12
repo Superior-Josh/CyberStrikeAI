@@ -46,17 +46,19 @@ type Decision struct {
 	Interruption     string   `json:"interruption"`
 }
 type Runner struct {
-	History     func(context.Context, string, string) ([]*mcp.ToolExecution, error)
-	Call        Call
-	Handoff     Handoff
-	Progress    func(string, map[string]interface{})
-	RunDir      string
-	IDs         []string
-	captures    []*mcp.ToolExecution
-	sequence    int
-	budget      Budget
-	input       Input
-	currentCase string
+	History      func(context.Context, string, string) ([]*mcp.ToolExecution, error)
+	Call         Call
+	Handoff      Handoff
+	Progress     func(string, map[string]interface{})
+	RunDir       string
+	IDs          []string
+	captures     []*mcp.ToolExecution
+	sequence     int
+	budget       Budget
+	input        Input
+	currentCase  string
+	session      map[string]interface{}
+	preparedOnly bool
 }
 type Summary struct {
 	Attempted        []string               `json:"attempted"`
@@ -287,6 +289,8 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 			return sum, err
 		}
 		r.currentCase = cid
+		r.session = nil
+		r.preparedOnly = false
 		r.emit("执行 "+cid, map[string]interface{}{"case_id": cid, "position": n + 1, "total": len(order), "saved": len(sum.Saved)})
 		guide, guideErr := r.helper(ctx, "show", cid, nil)
 		r.captures = nil
@@ -317,6 +321,7 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 		var authenticatedSession map[string]interface{}
 		if guideErr == nil && strings.Contains(cid, "_AUTH_") {
 			authenticatedSession, guideErr = r.prepareAuthenticatedSession(ctx, cid, input)
+			r.session = authenticatedSession
 		}
 		var d Decision
 		method := "code"
@@ -330,7 +335,7 @@ func (r *Runner) Run(ctx context.Context, input Input) (Summary, error) {
 					guideErr = fmt.Errorf("Eino handoff unavailable")
 				} else {
 					// Secrets stay in the running context; never persist them in run metadata.
-					material := map[string]interface{}{"guidance": guide, "existing_operations": r.captures}
+					material := map[string]interface{}{"guidance": guide, "existing_operations": r.captures, "review_only": r.preparedOnly}
 					if strings.Contains(cid, "_AUTH_") {
 						r.budget.mu.Lock()
 						credentialStopped := r.budget.NormalStopped
@@ -547,6 +552,9 @@ var versionDisclosure = regexp.MustCompile(`(?i)\b(?:apache|nginx|php|tomcat|iis
 var pathDisclosure = regexp.MustCompile(`(?i)(?:/var/www/|/home/[a-z0-9_.-]+/|[a-z]:\\(?:inetpub|users)\\|stack trace:|traceback \(most recent call last\))`)
 
 func (r *Runner) executeCode(ctx context.Context, cid string, in Input, g map[string]interface{}) (Decision, bool, error) {
+	if cid == "PT_WEB_AUTH_08" {
+		return r.prepareQueryChecks(ctx, g)
+	}
 	if cid == "PT_WEB_01" {
 		return r.login(ctx, in, g)
 	}
